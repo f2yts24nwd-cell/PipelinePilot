@@ -64,7 +64,10 @@ button{font-family:inherit;cursor:pointer}
 <a href="Leitstand_C.dc.html" style="text-decoration:none;height:34px;padding:0 12px;border-radius:999px;color:#272d3a;font-size:12px;font-weight:800;display:flex;align-items:center">Head of Sales</a>
 </div>
 </div>
-<div style="font-size:40px;font-weight:800;line-height:.98;letter-spacing:-.035em;margin-top:16px;animation:{{headAnim}}">{{headA}}<br>{{headB}}</div>
+<div style="position:relative;margin-top:16px">
+<div style="font-size:40px;font-weight:800;line-height:.98;letter-spacing:-.035em;animation:{{headAnim}}">{{headA}}<br>{{headB}}</div>
+<button onClick="{{au.openSheet}}" aria-label="Audio-Briefing hören" style="position:absolute;right:0;top:-3px;height:44px;border:0;border-radius:999px;background:#272d3a;color:#ffffff;padding:0 15px 0 11px;display:flex;align-items:center;gap:7px;font-size:14px;font-weight:800;box-shadow:0 6px 14px rgba(0,0,0,.18)"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:#7fd35f;stroke-width:2.4px;stroke-linecap:round;stroke-linejoin:round"><path d="M4 17v-5a8 8 0 0 1 16 0v5"></path><path d="M20 18a2 2 0 0 1-2 2h-1v-6h3zM4 18a2 2 0 0 0 2 2h1v-6H4z"></path></svg>Briefing</button>
+</div>
 
 <div class="c-scroll" style="display:flex;gap:8px;margin:16px -20px 0;padding:4px 20px;overflow-x:auto;flex:none">
 <sc-for list="{{days}}" as="d" hint-placeholder-count="4">
@@ -258,6 +261,7 @@ button{font-family:inherit;cursor:pointer}
 <div style="font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1.02;margin-top:14px">{{brief.name}}</div>
 <div style="font-size:40px;font-weight:800;letter-spacing:-.03em;color:#272d3a;margin-top:4px">{{brief.offer.wert}}</div>
 <div style="font-size:13px;color:rgba(39,45,58,.7);font-weight:600">{{brief.last}}</div>
+<button onClick="{{brief.listen}}" style="margin-top:14px;background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:7px 16px 7px 7px;min-height:44px;display:inline-flex;align-items:center;gap:10px;font-size:14px;font-weight:800"><span style="width:32px;height:32px;border-radius:50%;background:#52ae32;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="fill:#10210a;margin-left:2px"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"></path></svg></span>Vorlesen · {{brief.listenDur}}</button>
 </div>
 
 <div class="c-up" style="font-size:28px;font-weight:800;letter-spacing:-.03em;margin-top:10px;animation-delay:.12s">Darauf kommt's an.</div>
@@ -390,6 +394,68 @@ button{font-family:inherit;cursor:pointer}
 </div>
 </sc-if>
 
+<sc-if value="{{showAudio}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;flex:1">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+<span style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border-radius:999px;padding:7px 14px 7px 10px;font-size:13px;font-weight:600;white-space:nowrap"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:#7fd35f;stroke-width:2.4px;stroke-linecap:round;stroke-linejoin:round"><path d="M4 17v-5a8 8 0 0 1 16 0v5"></path><path d="M20 18a2 2 0 0 1-2 2h-1v-6h3zM4 18a2 2 0 0 0 2 2h1v-6H4z"></path></svg>{{au.kicker}}</span>
+<span style="display:flex;align-items:center;gap:10px;flex:none">
+<span style="font-size:15px;font-weight:700;color:#7fd35f;font-variant-numeric:tabular-nums">{{au.left}}</span>
+<button onClick="{{au.close}}" aria-label="Briefing schließen" style="width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.1);color:#ffffff;font-size:18px;padding:0">✕</button>
+</span>
+</div>
+<div class="c-up" style="font-size:38px;font-weight:800;letter-spacing:-.035em;line-height:1;margin-top:18px">{{au.title}}</div>
+<div style="font-size:15px;font-weight:600;color:#b8bec9;margin-top:6px">{{au.sub}}</div>
+
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:20px">
+<span style="font-size:14px;font-weight:800;color:#ffffff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">{{au.chLabel}}</span>
+<span style="font-size:13px;font-weight:700;color:#b8bec9;flex:none">{{au.chPos}}</span>
+</div>
+<div style="display:flex;gap:4px;margin-top:2px">
+<sc-for list="{{au.chs}}" as="c" hint-placeholder-count="5"><button onClick="{{c.go}}" aria-label="{{c.aria}}" aria-current="{{c.cur}}" style="flex:{{c.grow}} 1 0;min-width:10px;height:26px;border:0;background:none;padding:0;display:flex;align-items:center"><span style="display:block;width:100%;height:8px;border-radius:4px;background:rgba(255,255,255,.14);overflow:hidden"><span style="display:block;height:100%;width:{{c.fill}}%;background:{{c.color}};border-radius:4px;transition:width .4s"></span></span></button></sc-for>
+</div>
+
+<sc-if value="{{au.notDone}}" hint-placeholder-val="{{true}}">
+<div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{au.lines}}" as="l" hint-placeholder-count="3"><button onClick="{{l.go}}" aria-current="{{l.cur}}" style="background:none;border:0;padding:0 0 0 {{l.pad}}px;border-left:{{l.bar}};text-align:left;color:{{l.c}};font-size:{{l.fs}}px;font-weight:{{l.fw}};line-height:1.22;letter-spacing:-.01em;transition:color .3s,font-size .3s">{{l.t}}</button></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{au.done}}" hint-placeholder-val="{{false}}">
+<div style="margin-top:26px">
+<div class="c-pop" style="font-size:72px;font-weight:800;letter-spacing:-.05em;line-height:.9">{{au.doneTitle}}</div>
+<div class="c-up" style="font-size:20px;font-weight:600;color:#b8bec9;line-height:1.35;margin-top:16px">{{au.doneText}}</div>
+</div>
+</sc-if>
+
+<div style="margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:18px">
+<sc-if value="{{au.silent}}" hint-placeholder-val="{{false}}"><span style="font-size:13px;font-weight:700;color:#ffc85c;text-align:center">Keine Sprachausgabe auf diesem Gerät. Der Text läuft trotzdem mit.</span></sc-if>
+<sc-if value="{{au.notDone}}" hint-placeholder-val="{{true}}">
+<div aria-hidden="true" style="display:flex;align-items:center;justify-content:center;gap:4px;height:34px">
+<sc-for list="{{au.bars}}" as="b" hint-placeholder-count="24"><span style="width:4px;height:{{b.h}}px;border-radius:2px;background:{{b.c}};animation:{{b.anim}};transition:height .3s"></span></sc-for>
+</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:26px;width:100%">
+<button onClick="{{au.prev}}" aria-label="{{au.prevAria}}" style="width:60px;height:60px;border-radius:50%;border:0;background:rgba(255,255,255,.1);padding:0;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="fill:#ffffff"><path d="M6 5h2.5v14H6zM20 5.9v12.2a.9.9 0 0 1-1.4.75L10 12.75a.9.9 0 0 1 0-1.5l8.6-6.1a.9.9 0 0 1 1.4.75z"></path></svg></button>
+<button onClick="{{au.toggle}}" aria-label="{{au.toggleAria}}" style="width:96px;height:96px;border-radius:50%;background:#52ae32;border:0;display:flex;align-items:center;justify-content:center;padding:0;animation:{{au.ring}}">
+<sc-if value="{{au.playing}}" hint-placeholder-val="{{true}}"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="fill:#10210a"><rect x="5.5" y="4" width="4.5" height="16" rx="1.4"></rect><rect x="14" y="4" width="4.5" height="16" rx="1.4"></rect></svg></sc-if>
+<sc-if value="{{au.paused}}" hint-placeholder-val="{{false}}"><svg width="38" height="38" viewBox="0 0 24 24" aria-hidden="true" style="fill:#10210a;margin-left:4px"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"></path></svg></sc-if>
+</button>
+<button onClick="{{au.next}}" aria-label="{{au.nextAria}}" style="width:60px;height:60px;border-radius:50%;border:0;background:rgba(255,255,255,.1);padding:0;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="fill:#ffffff"><path d="M18 5h-2.5v14H18zM4 5.9v12.2a.9.9 0 0 0 1.4.75L14 12.75a.9.9 0 0 0 0-1.5L5.4 5.15A.9.9 0 0 0 4 5.9z"></path></svg></button>
+</div>
+<div style="display:flex;align-items:center;gap:8px">
+<button onClick="{{au.rate}}" aria-label="Sprechtempo ändern" style="background:rgba(255,255,255,.1);color:#ffffff;border:0;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;min-height:40px">Tempo {{au.rateLabel}}</button>
+<span style="font-size:12px;font-weight:600;color:#8a93a3">Kein Ton? Stummschalter aus.</span>
+</div>
+</sc-if>
+<sc-if value="{{au.done}}" hint-placeholder-val="{{false}}">
+<button onClick="{{au.primary}}" class="c-up" style="width:100%;background:#52ae32;color:#10210a;border:0;border-radius:999px;padding:18px;font-size:18px;font-weight:800;min-height:60px">{{au.primaryLabel}}</button>
+<div style="display:flex;gap:10px;width:100%">
+<button onClick="{{au.again}}" style="flex:1;background:rgba(255,255,255,.1);color:#ffffff;border:0;border-radius:999px;padding:14px;font-size:15px;font-weight:700;min-height:52px">↺ Nochmal</button>
+<button onClick="{{au.secondary}}" style="flex:1;background:rgba(255,255,255,.1);color:#ffffff;border:0;border-radius:999px;padding:14px;font-size:15px;font-weight:700;min-height:52px">{{au.secondaryLabel}}</button>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
 </div>
 
 <sc-if value="{{showEditor}}" hint-placeholder-val="{{false}}">
@@ -421,6 +487,26 @@ button{font-family:inherit;cursor:pointer}
 <div class="c-pop" role="status" style="position:absolute;left:20px;right:20px;top:14px;z-index:6;background:#272d3a;color:#ffffff;border-radius:999px;padding:8px 8px 8px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 10px 24px rgba(0,0,0,.25)">
 <span style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;line-height:1.25;padding:4px 0"><span style="width:14px;height:14px;flex:none;border-radius:4px;background:{{toastColor}};border:2px solid #ffffff"></span>{{toastText}}</span>
 <sc-if value="{{toastUndo}}" hint-placeholder-val="{{true}}"><button onClick="{{undo}}" style="flex:none;background:#52ae32;color:#10210a;border:0;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;min-height:36px">Rückgängig</button></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{au.sheet}}" hint-placeholder-val="{{false}}">
+<div onClick="{{au.backdrop}}" style="position:absolute;inset:0;z-index:8;background:rgba(10,12,16,.5);display:flex;align-items:flex-end;animation:c-chipA .2s ease both">
+<div role="dialog" aria-label="Audio-Briefing" style="width:100%;background:#272d3a;color:#ffffff;border-radius:32px 32px 0 0;padding:20px 20px 26px;box-sizing:border-box;animation:c-up .35s cubic-bezier(.2,.9,.3,1.2) both">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+<span style="font-size:24px;font-weight:800;letter-spacing:-.02em">Briefing hören</span>
+<button onClick="{{au.closeSheet}}" style="background:none;border:0;color:#b8bec9;font-size:14px;font-weight:700;min-height:40px">Abbrechen</button>
+</div>
+<div style="font-size:13px;color:#b8bec9;margin-top:2px">Vorlesen lassen, während du zum Auto gehst.</div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+<sc-for list="{{au.options}}" as="o" hint-placeholder-count="2">
+<button onClick="{{o.go}}" style="display:flex;align-items:center;gap:14px;background:{{o.bg}};color:#272d3a;border:0;border-radius:24px;padding:14px 16px;text-align:left;min-height:88px">
+<span style="width:54px;height:54px;flex:none;border-radius:50%;background:#272d3a;display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="fill:#7fd35f;margin-left:3px"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"></path></svg></span>
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:11px;font-weight:800;letter-spacing:.06em;opacity:.7">{{o.kicker}}</span><span style="font-size:20px;font-weight:800;letter-spacing:-.01em;line-height:1.1">{{o.title}}</span><span style="font-size:13px;font-weight:600;opacity:.75">{{o.sub}}</span></span>
+</button>
+</sc-for>
+</div>
+</div>
 </div>
 </sc-if>
 
@@ -465,10 +551,13 @@ class Component extends DCLogic {
     this.state = this.initial();
   }
   initial() {
-    return { screen: 'heute', back: 'heute', brief: null, front: null, rec: 'idle', n: 0, acc: { a: true, b: true, c: true, d: true }, sent: false, filter: 'alle', open: null, swap: 0, ghost: null, cnt: null, dragX: 0, dragY: 0, dragging: false, celebrated: false, day: 'heute', moves: {}, dock: false, hover: -1, toast: null, landed: null, gone: {}, calling: null, enter: 'stack', end: false, legend: false, coach: true, edits: this.defaultEdits(), edited: {}, editing: null, draft: null, pressing: null, capSent: false, capFor: 'brandt', doneIds: {}, captures: {}, seq: 0 };
+    return { screen: 'heute', back: 'heute', brief: null, front: null, rec: 'idle', n: 0, acc: { a: true, b: true, c: true, d: true }, sent: false, filter: 'alle', open: null, swap: 0, ghost: null, cnt: null, dragX: 0, dragY: 0, dragging: false, celebrated: false, day: 'heute', moves: {}, dock: false, hover: -1, toast: null, landed: null, gone: {}, calling: null, enter: 'stack', end: false, legend: false, coach: true, edits: this.defaultEdits(), edited: {}, editing: null, draft: null, pressing: null, capSent: false, capFor: 'brandt', doneIds: {}, captures: {}, seq: 0, aud: null, audSheet: false, audRate: 0 };
   }
   componentDidMount() {
-    this._alive = true;
+    this._alive = true; this._audTok = 0;
+    try { if (window.speechSynthesis) { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = () => { this._voice = undefined; }; } } catch (e) {}
+    this._vis = () => { const a = this.state.aud; if (document.visibilityState === 'visible' && a && a.playing && !this._audSilent) { let sp = false; try { sp = window.speechSynthesis.speaking; } catch (e) {} if (!sp) { this._audTok++; this.audClear(); this.audPatch({ playing: false }); } } };
+    try { document.addEventListener('visibilitychange', this._vis); } catch (e) {}
     this.countTo(this.openList()[0]);
     this._ct = setTimeout(() => { if (this._alive) this.setState({ coach: false }); }, 3200);
     try { this._bc = new BroadcastChannel('pp-live'); this._bc.onmessage = (e) => { if (e && e.data) this.applyLive(e.data); }; } catch (e) {}
@@ -486,6 +575,7 @@ class Component extends DCLogic {
   }
   componentWillUnmount() {
     this._alive = false; this.stop();
+    try { document.removeEventListener('visibilitychange', this._vis); } catch (e) {}
     if (this._raf) cancelAnimationFrame(this._raf);
     if (this._gt) clearTimeout(this._gt);
     if (this._lt) clearTimeout(this._lt);
@@ -628,6 +718,7 @@ class Component extends DCLogic {
     }
   }
   stop() {
+    this.audHalt();
     if (this.timer) { clearInterval(this.timer); this.timer = null; }
     if (this.t2) { clearTimeout(this.t2); this.t2 = null; }
   }
@@ -693,6 +784,253 @@ class Component extends DCLogic {
     if (id === 'brandt') upd.sent = true; else upd.doneIds = { ...this.state.doneIds, [id]: true };
     this.setState(upd);
     this.pushLive({ erfasst: id === 'brandt' || !!this.state.sent, ts, acc: this.state.acc, edits: this.state.edits, captures, seq });
+  }
+  /* ---------- Audio-Briefing: Vorlesen per Sprachausgabe des Geräts ---------- */
+  sayable(t) {
+    const MON = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+    return String(t)
+      .replace(/(\d+(?:,\d+)?) Mio €/g, '$1 Millionen Euro')
+      .replace(/(\d[\d.]*) T€/g, (_, n) => { const v = parseInt(n.replace(/\./g, ''), 10); if (v >= 1000) { const m = String(Math.round(v / 10) / 100).replace('.', ','); return (m === '1' ? 'eine Million' : m + ' Millionen') + ' Euro'; } return v + ' Tausend Euro'; })
+      .replace(/\b(\d{1,2}):(\d{2})\b/g, (_, h, m) => (+h) + ' Uhr' + (m === '00' ? '' : ' ' + (+m)))
+      .replace(/\b(\d{1,2})\.(\d{1,2})\.(?!\d)/g, (_, d, m) => (+d) + '. ' + MON[+m - 1])
+      .replace(/\b(\d{2})\/(\d{2})\b/g, (_, m, y) => MON[+m - 1] + ' 20' + y)
+      .replace(/ANG-(\d{2})(\d{2})/g, 'Angebot $1 $2')
+      .replace(/\bKW (\d+)/g, 'Kalenderwoche $1')
+      .replace(/\bQ([1-4])\b/g, (_, q) => ['erstes', 'zweites', 'drittes', 'viertes'][q - 1] + ' Quartal')
+      .replace(/(\d+) J\./g, '$1 Jahre')
+      .replace(/(\d)× /g, '$1 mal ')
+      .replace(/\bDr\. /g, 'Doktor ')
+      .replace(/\b[A-ZÄÖÜ]\. (?=[A-ZÄÖÜ][a-zäöüß])/g, '')
+      .replace(/(\d) km\b/g, '$1 Kilometer')
+      .replace(/ · /g, ', ')
+      .replace(/ – /g, ', ');
+  }
+  audShow(x) { return String(x).replace(/(\d) (T€|Mio €|km|J\.)/g, '$1\u00a0$2'); }
+  audIsCall(id) { const st = this.data().st[id]; return !!(st && (st.call || st.ort === 'Anruf')); }
+  audJoin(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' und ' + a[a.length - 1]; }
+  audPot(ids) { return ids.reduce((acc, id) => acc + (parseInt((this.data().st[id].wert || '').replace(/\./g, ''), 10) || 0), 0); }
+  audT(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' T€'; }
+  audRates() { return [{ r: 1, l: '1×' }, { r: 1.2, l: '1,2×' }, { r: 0.85, l: '0,85×' }]; }
+  audMs(say, rate) { const w = String(say).split(/\s+/).filter(Boolean).length; return Math.max(1400, Math.round(w / (2.2 * (rate || 1)) * 1000) + 350); }
+  audDur(segs) { const sec = segs.reduce((a, g) => a + this.audMs(g.say, 1), 0) / 1000; return sec < 40 ? 'unter 1 Min' : 'ca. ' + Math.max(1, Math.round(sec / 60)) + ' Min'; }
+  audApScript(id, kind) {
+    const D = this.data(), st = D.st[id], b = D.briefs[id], t = this.apTime(id), call = this.audIsCall(id), day = this.apDay(id);
+    const name = st.name2.replace('\n', ' '), short = st.short.split(' ')[0];
+    const segs = [], chs = [];
+    const ch = (label) => chs.push({ label, start: segs.length });
+    const add = (x) => segs.push({ t: this.audShow(x), say: this.sayable(x) });
+    const when = !t ? '' : ({ fr: 'Morgen um ', mo: 'Am Montag um ' }[day] || 'Um ') + t + ' ';
+    ch(call ? 'Telefonat' : 'Termin');
+    const lead = kind === 'next' ? 'Dein nächster Termin: ' : '';
+    if (call) add(lead + (when || 'Noch ohne Uhrzeit: ') + 'Telefonat mit ' + name + '.');
+    else if (when) add(lead + when + 'bei ' + name + ' in ' + st.ort + (/km/.test(st.km) ? ', ' + st.km + ' Fahrt' : '') + '.');
+    else add(lead + name + ' in ' + st.ort + ', noch ohne festen Termin.');
+    if (b && b.klasse) {
+      const l = b.last || '';
+      const last = /^zuletzt vor /.test(l) ? 'letzter Besuch ' + l.replace(/^zuletzt /, '') : /^Telefonat /.test(l) ? 'zuletzt telefoniert am ' + l.replace(/^Telefonat /, '') : l;
+      add(short + ' ist ' + b.klasse + (last ? ', ' + last : '') + '.');
+    }
+    ch('Lage');
+    if (b) {
+      if (/^Noch kein Angebot/.test(b.offer.title)) add('Noch kein Angebot. ' + b.offer.info + ': ' + b.offer.wert + '.');
+      else { add('Im Spiel: ' + b.offer.title.replace(' · ', ', ') + ' über ' + b.offer.wert + '.'); add(b.offer.info + '.'); }
+    } else add('Im Feuer: ' + st.wert + '.');
+    if (st.chips.length) add('Auf dem Radar: ' + this.audJoin(st.chips.map((c) => c.t)) + '.');
+    const known = b ? b.contacts.filter((c) => c.ini !== '?') : [], gaps = b ? b.contacts.filter((c) => c.ini === '?' && c.s === 'Lücke') : [];
+    if (known.length || gaps.length) {
+      ch('Personen');
+      const word = { 'Dafür': 'auf deiner Seite', 'Neutral': 'neutral', 'Kritisch': 'kritisch' };
+      known.forEach((c) => add(c.n + ', ' + c.r + ': ' + (word[c.s] || c.s) + '.'));
+      if (gaps.length) add('Lücke im Buying Center: ' + this.audJoin(gaps.map((g) => g.n)) + '. Genau da ansetzen.');
+    }
+    if (b && b.machines.length) {
+      ch('Maschinen');
+      b.machines.forEach((m) => add(m.typ + ', Baujahr ' + m.bj + ': ' + m.note + '.'));
+    }
+    ch("Darauf kommt's an");
+    const pts = b ? b.points : [{ t: 'Bedarf und Zeitplan klären' }, { t: 'Entscheider identifizieren' }, { t: 'Nächsten Schritt mit Datum vereinbaren' }];
+    pts.forEach((p, i) => add(['Erstens', 'Zweitens', 'Drittens', 'Viertens'][i] + ': ' + p.t + '.'));
+    ch('Los');
+    add(call ? 'Viel Erfolg am Telefon. Danach einfach erzählen.' : 'Gute Fahrt. Nach dem Termin einfach erzählen.');
+    const color = this.colorOf(id);
+    chs.forEach((c) => { c.color = color; });
+    return { segs, chs, title: name, sub: (kind === 'next' ? 'Nächster Termin' : 'Rüstblatt') + (t ? ' · ' + t : '') + ' · ' + (call ? 'Telefon' : st.ort),
+      doneTitle: call ? 'Viel Erfolg.' : 'Gute Fahrt.', doneText: 'Briefing für ' + short + ' durch. Nach dem Termin einfach erzählen.' };
+  }
+  audDayScript(day) {
+    const D = this.data(), ids = this.openList(day);
+    const done = this.dayList(day, true).filter((id) => this.isDone(id));
+    const date = { heute: 'Donnerstag, 26. November', fr: 'Freitag, 27. November', mo: 'Montag, 30. November' }[day];
+    const word = { heute: 'heute', fr: 'morgen', mo: 'Montag' }[day];
+    const segs = [], chs = [];
+    const ch = (label, color) => chs.push({ label, start: segs.length, color: color || '#7fd35f' });
+    const add = (x) => segs.push({ t: this.audShow(x), say: this.sayable(x) });
+    const h = new Date().getHours();
+    ch('Überblick');
+    add((h < 11 ? 'Guten Morgen, Jonas.' : h < 18 ? 'Hallo Jonas.' : 'Guten Abend, Jonas.') + ' Dein Briefing für ' + (day === 'heute' ? 'heute, ' : '') + date + '.');
+    const nCalls = ids.filter((id) => this.audIsCall(id)).length;
+    if (ids.length) add(ids.length + (ids.length === 1 ? ' Station' : ' Stationen') + (nCalls ? ', davon ' + nCalls + (nCalls === 1 ? ' Telefonat' : ' Telefonate') : '') + '. Zusammen ' + this.audT(this.audPot(ids)) + ' im Feuer.');
+    else add('Für ' + word + ' steht noch kein offener Termin.');
+    if (done.length) add(this.audJoin(done.map((id) => D.st[id].short.split(' ')[0])) + (done.length === 1 ? ' ist' : ' sind') + ' schon erledigt.');
+    if (day === 'heute') add('Wochenziel: ' + this.weekCount() + ' von 12 Terminen stehen.');
+    ids.forEach((id, k) => {
+      const st = D.st[id], b = D.briefs[id], t = this.apTime(id), call = this.audIsCall(id);
+      const name = st.name2.replace('\n', ' ');
+      ch(st.short.split(' ')[0] + (t ? ' ' + t : ''), this.colorOf(id));
+      const lead = ids.length === 1 ? 'Einziger Termin' : k === 0 ? 'Zuerst' : k === ids.length - 1 ? 'Zum Schluss' : 'Dann';
+      add(lead + (t ? ', um ' + t : '') + ': ' + (call ? 'Telefonat mit ' + name : name + ' in ' + st.ort) + ', ' + st.wert + '.');
+      if (st.chips.length) add('Auf dem Radar: ' + this.audJoin(st.chips.map((c) => c.t)) + '.');
+      add(b ? 'Wichtigster Punkt: ' + b.points[0].t + '.' : 'Ziel: den nächsten Schritt mit Datum vereinbaren.');
+    });
+    ch('Abschluss');
+    const calls = this.openList('anrufe');
+    if (day === 'heute' && calls.length) add('Wenn Luft ist: ' + calls.length + ' Kontakte in deiner Anrufliste, ' + this.audT(this.audPot(calls)) + ' Potenzial.');
+    const f = ids[0];
+    add(f ? 'Als Erstes: ' + D.st[f].short.split(' ')[0] + (this.apTime(f) ? ' um ' + this.apTime(f) : '') + '. Gute Fahrt.' : 'Zeit fürs Telefon. Viel Erfolg.');
+    const dl = { heute: 'Dein Donnerstag.', fr: 'Dein Freitag.', mo: 'Dein Montag.' }[day];
+    return { segs, chs, title: dl, sub: (ids.length ? ids.length + (ids.length === 1 ? ' Station · ' : ' Stationen · ') + this.audT(this.audPot(ids)) : 'Keine offenen Termine') + ' · ' + this.audDur(segs),
+      doneTitle: 'Gute Fahrt.', doneText: 'Tagesbriefing durch.' + (f ? ' Als Erstes: ' + D.st[f].short.split(' ')[0] + (this.apTime(f) ? ' um ' + this.apTime(f) : '') + '.' : '') };
+  }
+  audVoice() {
+    if (this._voice !== undefined) return this._voice;
+    let vs = [];
+    try { vs = (window.speechSynthesis.getVoices() || []).filter((v) => /^de([-_]|$)/i.test(v.lang)); } catch (e) {}
+    const score = (v) => (/premium|enhanced|natural|neural/i.test(v.name) ? 4 : 0) + (/anna|helena|petra|katja|markus|google deutsch/i.test(v.name) ? 2 : 0) + (v.localService ? 1 : 0);
+    const best = vs.sort((a, b) => score(b) - score(a))[0] || null;
+    if (vs.length) this._voice = best;
+    return best;
+  }
+  audLock(on) {
+    try {
+      if (on && !this._wl && navigator.wakeLock) navigator.wakeLock.request('screen').then((l) => { if (this.state.screen === 'audio') this._wl = l; else l.release(); }).catch(() => {});
+      if (!on && this._wl) { this._wl.release().catch(() => {}); this._wl = null; }
+    } catch (e) {}
+  }
+  audClear() {
+    if (this._audT) { clearTimeout(this._audT); this._audT = null; }
+    if (this._audW) { clearTimeout(this._audW); this._audW = null; }
+  }
+  audHalt() {
+    this._audTok = (this._audTok || 0) + 1; this.audClear();
+    try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
+    this.audLock(false);
+  }
+  audPatch(o) { if (this.state.aud) this.setState({ aud: { ...this.state.aud, ...o } }); }
+  audOpen(kind, id) {
+    const sc = kind === 'day' ? this.audDayScript(id) : this.audApScript(id, kind);
+    const cur = this.state.screen;
+    const back = cur === 'audio' ? ((this.state.aud && this.state.aud.back) || 'heute') : cur;
+    this.audHalt();
+    this._audSilent = !(window.speechSynthesis && typeof SpeechSynthesisUtterance !== 'undefined');
+    this.setState({ screen: 'audio', audSheet: false, dock: false, legend: false, coach: false, aud: { kind, id, back, ...sc, i: 0, playing: false, done: false, silent: this._audSilent } });
+    this.audLock(true);
+    this.audPlay(0);
+  }
+  audPlay(i) {
+    const a = this.state.aud; if (!a) return;
+    const tok = ++this._audTok; this.audClear();
+    if (i >= a.segs.length) { this.audPatch({ i: a.segs.length, playing: false, done: true }); this.audLock(false); return; }
+    i = Math.max(0, i);
+    this.audPatch({ i, playing: true, done: false, silent: !!this._audSilent });
+    this.audLock(true);
+    const seg = a.segs[i], rate = this.audRates()[this.state.audRate || 0].r;
+    const est = this.audMs(seg.say, rate);
+    const next = () => { if (tok === this._audTok && this._alive) this.audPlay(i + 1); };
+    const ss = window.speechSynthesis;
+    if (this._audSilent || !ss) { this._audT = setTimeout(next, est); return; }
+    try { ss.cancel(); } catch (e) {}
+    let started = false;
+    const u = new SpeechSynthesisUtterance(seg.say);
+    u.lang = 'de-DE'; u.rate = rate;
+    const v = this.audVoice(); if (v) u.voice = v;
+    u.onstart = () => { started = true; };
+    u.onend = next;
+    u.onerror = (e) => {
+      if (tok !== this._audTok) return;
+      const er = e && e.error;
+      if (er === 'interrupted' || er === 'canceled') return;
+      if (!started) { this._audSilent = true; this.audPlay(i); return; }
+      next();
+    };
+    this._audU = u;
+    try { ss.speak(u); } catch (e) { this._audSilent = true; this._audT = setTimeout(() => { if (tok === this._audTok) this.audPlay(i); }, 0); return; }
+    this._audW = setTimeout(() => { if (tok !== this._audTok || started) return; let busy = false; try { busy = ss.speaking || ss.pending; } catch (e) {} if (!busy) { this._audSilent = true; this.audPlay(i); } }, 2500);
+    this._audT = setTimeout(() => { let busy = false; try { busy = ss.speaking; } catch (e) {} if (tok === this._audTok && !busy) next(); }, est * 3 + 4000);
+  }
+  audPause() { this._audTok++; this.audClear(); try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {} this.audPatch({ playing: false }); }
+  audChapter(i) { const chs = (this.state.aud || { chs: [] }).chs; let k = 0; chs.forEach((c, j) => { if (c.start <= i) k = j; }); return k; }
+  audSkip(dir) {
+    const a = this.state.aud; if (!a) return;
+    if (a.done) { if (dir < 0) this.audPlay(a.chs[a.chs.length - 1].start); return; }
+    const k = this.audChapter(a.i), c = a.chs[k];
+    if (dir > 0) this.audPlay(k + 1 < a.chs.length ? a.chs[k + 1].start : a.segs.length);
+    else this.audPlay(a.i > c.start || k === 0 ? c.start : a.chs[k - 1].start);
+  }
+  audClose(to) {
+    const a = this.state.aud;
+    this.audHalt();
+    const bk = to || (a && a.back) || 'heute';
+    this.setState({ screen: bk === 'audio' ? 'heute' : bk, aud: null, swap: 1 - this.state.swap });
+    if (bk === 'heute') { const f = this.frontId(); if (f) this.countTo(f); }
+  }
+  audVals() {
+    const s = this.state, A = s.aud, D = this.data();
+    const rates = this.audRates(), rt = rates[s.audRate || 0];
+    const nextId = this.openList('heute')[0];
+    const dayKey = s.day === 'fr' || s.day === 'mo' ? s.day : 'heute';
+    let options = [];
+    if (s.audSheet) {
+      if (nextId) {
+        const sc = this.audApScript(nextId, 'next'), st = D.st[nextId];
+        options.push({ kicker: 'NÄCHSTER TERMIN', title: st.short + (this.apTime(nextId) ? ' · ' + this.apTime(nextId) : ''), sub: (this.audIsCall(nextId) ? 'Telefonat' : 'Rüstblatt') + ' zum Hören · ' + this.audDur(sc.segs), bg: this.colorOf(nextId), go: () => this.audOpen('next', nextId) });
+      }
+      const dsc = this.audDayScript(dayKey), n = this.openList(dayKey).length;
+      options.push({ kicker: 'TAGESBRIEFING', title: { heute: 'Ganzer Tag', fr: 'Ganzer Freitag', mo: 'Ganzer Montag' }[dayKey], sub: n + (n === 1 ? ' Station' : ' Stationen') + ' im Überblick · ' + this.audDur(dsc.segs), bg: '#cde7c4', go: () => this.audOpen('day', dayKey) });
+    }
+    const base = { sheet: !!s.audSheet, options,
+      openSheet: () => this.setState({ audSheet: true, legend: false, coach: false, dock: false }),
+      closeSheet: () => this.setState({ audSheet: false }),
+      backdrop: (e) => { if (e && e.target === e.currentTarget) this.setState({ audSheet: false }); } };
+    if (!A) return { ...base, kicker: '', title: '', sub: '', left: '', chs: [], lines: [], bars: [], notDone: false, done: false, playing: false, paused: false, silent: false };
+    const n = A.segs.length, i = Math.min(A.i, n), k = A.done ? A.chs.length - 1 : this.audChapter(i), c = A.chs[k];
+    const cEnd = k + 1 < A.chs.length ? A.chs[k + 1].start : n;
+    const remMs = A.segs.slice(i).reduce((acc, g) => acc + this.audMs(g.say, rt.r), 0);
+    const rs = Math.round(remMs / 1000);
+    const lines = A.segs.slice(c.start, cEnd).map((g, j) => {
+      const at = c.start + j, cur = at === i, past = at < i;
+      return { t: g.t, cur: cur ? 'true' : 'false', c: cur ? '#ffffff' : past ? '#6f7787' : '#b8bec9', fs: cur ? 26 : 18, fw: cur ? 800 : 600,
+        bar: cur ? '4px solid ' + (c.color || '#7fd35f') : '4px solid transparent', pad: 14, go: () => this.audPlay(at) };
+    });
+    const bars = [];
+    for (let j = 0; j < 24; j++) {
+      const v = Math.abs(Math.sin(j * 0.7) * 0.65 + Math.sin(j * 1.9) * 0.35);
+      bars.push({ h: A.playing ? 8 + Math.round(26 * v) : 4 + Math.round(6 * v), c: j % 6 === 2 ? '#cde7c4' : '#52ae32', anim: A.playing ? 'c-bar ' + (0.55 + (j % 5) * 0.13).toFixed(2) + 's ease-in-out infinite' : 'none' });
+    }
+    const day = A.kind === 'day';
+    return { ...base,
+      kicker: day ? 'Tagesbriefing' : A.kind === 'next' ? 'Nächster Termin' : 'Vorlesen',
+      title: A.title, sub: A.sub, left: A.done ? 'fertig' : 'noch ' + Math.floor(rs / 60) + ':' + String(rs % 60).padStart(2, '0'),
+      chLabel: A.done ? 'Fertig' : c.label, chPos: (k + 1) + ' / ' + A.chs.length,
+      chs: A.chs.map((x, j) => {
+        const e = j + 1 < A.chs.length ? A.chs[j + 1].start : n, len = Math.max(1, e - x.start);
+        const fill = A.done || j < k ? 100 : j > k ? 0 : Math.round((i - x.start + (A.playing ? 0.5 : 0)) / len * 100);
+        return { grow: len, fill, color: x.color || '#7fd35f', cur: j === k ? 'true' : 'false', aria: 'Springen zu: ' + x.label, go: () => this.audPlay(x.start) };
+      }),
+      lines, bars, notDone: !A.done, done: !!A.done, playing: !!A.playing && !A.done, paused: !A.playing && !A.done, silent: !!A.silent,
+      ring: A.playing ? 'c-ring 1.4s infinite' : 'none',
+      toggle: () => { const a = this.state.aud; if (!a) return; if (a.playing) this.audPause(); else this.audPlay(a.done ? 0 : a.i); },
+      toggleAria: A.playing ? 'Pause' : 'Abspielen',
+      prev: () => this.audSkip(-1), next: () => this.audSkip(1),
+      prevAria: day ? 'Vorherige Station' : 'Vorheriger Abschnitt', nextAria: day ? 'Nächste Station' : 'Nächster Abschnitt',
+      rate: () => { const r = ((this.state.audRate || 0) + 1) % rates.length; this.setState({ audRate: r }); const a = this.state.aud; if (a && a.playing) this.audPlay(a.i); },
+      rateLabel: rt.l,
+      close: () => this.audClose(),
+      doneTitle: A.doneTitle, doneText: A.doneText,
+      again: () => this.audPlay(0),
+      primaryLabel: day && nextId ? 'Nächsten Termin im Detail →' : 'Zum Stapel →',
+      primary: () => { if (day && nextId) this.audOpen('next', nextId); else this.audClose('heute'); },
+      secondaryLabel: day ? 'Zum Stapel' : 'Rüstblatt',
+      secondary: () => { if (day) this.audClose('heute'); else { const id = A.id; this.audHalt(); this.setState({ screen: 'brief', brief: id, back: 'heute', aud: null }); } } };
   }
   reset() {
     this.stop();
@@ -976,12 +1314,13 @@ class Component extends DCLogic {
     const showCapture = scr === 'capture' && !s.capSent;
     const capName = (D.st[s.capFor] || D.st.brandt).short.split(' ')[0];
     const nextAfter = this.openList('heute').filter((id) => id !== s.capFor && !D.st[id].call)[0];
-    const bg = showCapture ? '#272d3a' : '#52ae32';
-    const fg = showCapture ? '#ffffff' : '#272d3a';
+    const showAudio = scr === 'audio' && !!s.aud;
+    const bg = showCapture || showAudio ? '#272d3a' : '#52ae32';
+    const fg = showCapture || showAudio ? '#ffffff' : '#272d3a';
     const briefId = s.brief || 'brandt';
     return {
       bg, fg,
-      showHeute: scr === 'heute', showDeals: scr === 'deals', showBrief: scr === 'brief', showCapture, showSent,
+      showHeute: scr === 'heute', showDeals: scr === 'deals', showBrief: scr === 'brief', showCapture, showSent, showAudio, au: this.audVals(),
       showNav: (scr === 'heute' || scr === 'deals') && !s.dock,
       headA, headB, days, band, hasBand: s.day !== 'offen' && s.day !== 'anrufe' && (hasFront || isEnd), noBand: s.day === 'offen' || s.day === 'anrufe',
       showNow: s.day === 'heute', nowX: toX('10:12').toFixed(1),
@@ -1062,7 +1401,9 @@ class Component extends DCLogic {
         return { ...b, color: this.colorOf(briefId), time: this.apTime(briefId) || 'Zeit offen', hasContacts: b.contacts.length > 0, hasMachines: b.machines.length > 0,
           points: b.points.map((x, i) => ({ ...x, delay: (0.16 + i * 0.06).toFixed(2) + 's' })),
           contacts: b.contacts.map((x, i) => ({ ...x, delay: (0.44 + i * 0.07).toFixed(2) + 's' })),
-          machines: b.machines.map((x, i) => ({ ...x, delay: (0.54 + i * 0.07).toFixed(2) + 's' })) }; })(),
+          machines: b.machines.map((x, i) => ({ ...x, delay: (0.54 + i * 0.07).toFixed(2) + 's' })),
+          listen: () => this.audOpen(briefId === this.openList('heute')[0] ? 'next' : 'one', briefId),
+          listenDur: s.screen === 'brief' && D.st[briefId] ? this.audDur(this.audApScript(briefId, 'one').segs) : '' }; })(),
       closeBrief: () => { const bk = this.state.back || 'heute'; set({ screen: bk, swap: 1 - this.state.swap }); if (bk === 'heute') { const f = this.frontId(); if (f) this.countTo(f); } },
       toCapture: () => this.toCapture(), capName, nextLabel2: nextAfter ? 'Nächste Station: ' + D.st[nextAfter].short.split(' ')[0] + ' →' : 'Zurück zum Stapel →', sentNote: s.capFor === 'brandt' ? 'Ist schon im Leitstand zu sehen.' : 'Landet im Leitstand bei der nächsten Synchronisierung.',
       closeCapture: () => { this.stop(); set({ screen: 'heute', rec: 'idle', n: 0 }); },
