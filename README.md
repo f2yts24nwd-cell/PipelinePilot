@@ -11,7 +11,7 @@ Oben rechts auf „Heute“ sitzt der Knopf **Briefing**. Er bietet zwei Variant
 
 Jedes Rüstblatt hat zusätzlich einen Knopf **Vorlesen**. Die Sprachausgabe läuft über die eingebaute Stimme des Geräts, also offline und ohne Zusatzdienst. Der Ton kommt aus dem Lautsprecher oder über Bluetooth im Auto. Die Vor- und Zurück-Tasten springen von Station zu Station, und ein Antippen eines Satzes springt direkt dorthin. Solange das Briefing läuft, bleibt der Bildschirm an. Hat ein Gerät keine Sprachausgabe, läuft der Text trotzdem mit.
 
-**Stimme:** Im Player öffnet **Stimme** eine Auswahl aller deutschen Stimmen mit Hörprobe. Die App merkt sich die Wahl und nimmt sonst automatisch die beste vorhandene Stimme (Premium vor Erweitert vor Standard). Hinweis: iOS gibt Web-Apps nur die einfachen Stimmen frei; Premium-Stimmen sind dort nicht nutzbar.
+**Stimme:** Die App nimmt automatisch die deutsche Stimme des Geräts. Auf dem iPhone ist das die einfache Standard-Stimme, weil iOS Web-Apps keine Premium-Stimmen freigibt.
 
 ## Auf dem iPhone installieren
 
@@ -41,6 +41,6 @@ cd quelle/build
 python3 build.py
 ```
 
-Danach in `build.py` den Cache-Namen hochzählen (aktuell `pipeline-pilot-v6`, dazu `PP_VERSION`) und neu bauen, damit installierte Apps die neue Version laden.
+Danach in `build.py` den Cache-Namen hochzählen (aktuell `pipeline-pilot-v7`, dazu `PP_VERSION`) und neu bauen, damit installierte Apps die neue Version laden.
 
 Alle Kunden, Zahlen und Personen sind erfunden. Die Daten bleiben lokal auf dem jeweiligen Gerät.

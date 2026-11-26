@@ -442,7 +442,7 @@ button{font-family:inherit;cursor:pointer}
 </div>
 <div style="display:flex;align-items:center;gap:8px">
 <button onClick="{{au.rate}}" aria-label="Sprechtempo ändern" style="background:rgba(255,255,255,.1);color:#ffffff;border:0;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;min-height:40px">Tempo {{au.rateLabel}}</button>
-<button onClick="{{au.openVoice}}" aria-label="Stimme wählen" style="background:rgba(255,255,255,.1);color:#ffffff;border:0;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;min-height:40px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Stimme: {{au.voiceLabel}}</button>
+<span style="font-size:12px;font-weight:600;color:#8a93a3">Kein Ton? Stummschalter aus.</span>
 </div>
 </sc-if>
 <sc-if value="{{au.done}}" hint-placeholder-val="{{false}}">
@@ -457,28 +457,6 @@ button{font-family:inherit;cursor:pointer}
 </sc-if>
 
 </div>
-
-<sc-if value="{{au.voiceSheet}}" hint-placeholder-val="{{false}}">
-<div onClick="{{au.voiceBackdrop}}" style="position:absolute;inset:0;z-index:8;background:rgba(10,12,16,.55);display:flex;align-items:flex-end;animation:c-chipA .2s ease both">
-<div role="dialog" aria-label="Stimme wählen" style="width:100%;max-height:86%;overflow-y:auto;background:#ffffff;color:#272d3a;border-radius:32px 32px 0 0;padding:20px 20px 26px;box-sizing:border-box;animation:c-up .35s cubic-bezier(.2,.9,.3,1.2) both">
-<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-<span style="font-size:24px;font-weight:800;letter-spacing:-.02em">Stimme wählen</span>
-<button onClick="{{au.closeVoice}}" style="background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:9px 16px;font-size:14px;font-weight:800;min-height:40px">Fertig</button>
-</div>
-<div style="font-size:13px;color:#575756;margin-top:2px">Antippen für eine Hörprobe. Die App merkt sich deine Wahl.</div>
-<div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
-<sc-for list="{{au.voices}}" as="v" hint-placeholder-count="4">
-<button onClick="{{v.pick}}" aria-pressed="{{v.on}}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;border:{{v.border}};background:{{v.bg}};color:#272d3a;border-radius:18px;padding:12px 14px;min-height:56px;text-align:left">
-<span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:16px;font-weight:800">{{v.name}}</span><span style="font-size:12px;font-weight:600;color:#575756;word-break:break-all">{{v.lang}}</span></span>
-<span style="display:flex;align-items:center;gap:8px;flex:none"><span style="background:{{v.tagBg}};color:{{v.tagFg}};border-radius:999px;padding:4px 10px;font-size:11px;font-weight:800">{{v.tag}}</span><span style="width:22px;font-size:18px;font-weight:800;color:#2f7a17">{{v.check}}</span></span>
-</button>
-</sc-for>
-<sc-if value="{{au.noVoices}}" hint-placeholder-val="{{false}}"><div style="background:#eef3ea;border-radius:18px;padding:14px;font-size:14px;font-weight:600">Auf diesem Gerät ist keine deutsche Stimme verfügbar.</div></sc-if>
-</div>
-<div style="font-size:13px;font-weight:600;color:#575756;margin-top:14px">Kein Ton? Stummschalter am iPhone ausschalten.</div>
-</div>
-</div>
-</sc-if>
 
 <sc-if value="{{showEditor}}" hint-placeholder-val="{{false}}">
 <div onClick="{{editor.backdrop}}" style="position:absolute;inset:0;z-index:9;background:rgba(10,12,16,.55);display:flex;align-items:flex-end;animation:c-chipA .2s ease both">
@@ -571,14 +549,13 @@ class Component extends DCLogic {
   constructor(props) {
     super(props);
     this.state = this.initial();
-    try { this._voiceUri = window.localStorage.getItem('pp-voice') || null; } catch (e) { this._voiceUri = null; }
   }
   initial() {
-    return { screen: 'heute', back: 'heute', brief: null, front: null, rec: 'idle', n: 0, acc: { a: true, b: true, c: true, d: true }, sent: false, filter: 'alle', open: null, swap: 0, ghost: null, cnt: null, dragX: 0, dragY: 0, dragging: false, celebrated: false, day: 'heute', moves: {}, dock: false, hover: -1, toast: null, landed: null, gone: {}, calling: null, enter: 'stack', end: false, legend: false, coach: true, edits: this.defaultEdits(), edited: {}, editing: null, draft: null, pressing: null, capSent: false, capFor: 'brandt', doneIds: {}, captures: {}, seq: 0, aud: null, audSheet: false, audRate: 0, audVoiceSheet: false, voicesRev: 0 };
+    return { screen: 'heute', back: 'heute', brief: null, front: null, rec: 'idle', n: 0, acc: { a: true, b: true, c: true, d: true }, sent: false, filter: 'alle', open: null, swap: 0, ghost: null, cnt: null, dragX: 0, dragY: 0, dragging: false, celebrated: false, day: 'heute', moves: {}, dock: false, hover: -1, toast: null, landed: null, gone: {}, calling: null, enter: 'stack', end: false, legend: false, coach: true, edits: this.defaultEdits(), edited: {}, editing: null, draft: null, pressing: null, capSent: false, capFor: 'brandt', doneIds: {}, captures: {}, seq: 0, aud: null, audSheet: false, audRate: 0, };
   }
   componentDidMount() {
     this._alive = true; this._audTok = 0;
-    try { if (window.speechSynthesis) { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = () => { this._voice = undefined; if (this._alive) this.setState({ voicesRev: (this.state.voicesRev || 0) + 1 }); }; } } catch (e) {}
+    try { if (window.speechSynthesis) { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = () => { this._voice = undefined; }; } } catch (e) {}
     this._vis = () => { const a = this.state.aud; if (document.visibilityState === 'visible' && a && a.playing && !this._audSilent) { let sp = false; try { sp = window.speechSynthesis.speaking; } catch (e) {} if (!sp) { this._audTok++; this.audClear(); this.audPatch({ playing: false }); } } };
     try { document.addEventListener('visibilitychange', this._vis); } catch (e) {}
     this.countTo(this.openList()[0]);
@@ -933,21 +910,9 @@ class Component extends DCLogic {
   audVoice() {
     if (this._voice !== undefined) return this._voice;
     const vs = this.audVoices();
-    const mine = this._voiceUri ? vs.find((v) => (v.voiceURI || v.name) === this._voiceUri) : null;
-    const best = mine || vs[0] || null;
+    const best = vs[0] || null;
     if (vs.length) this._voice = best;
     return best;
-  }
-  audVoiceName(v) { return v ? String(v.name).replace(/\s*\((premium|enhanced|erweitert|compact|kompakt)\)\s*/i, '').replace(/^Microsoft\s+/i, '').replace(/\s+Online.*$/i, '').replace(/\s*-\s*German.*$/i, '') : 'Standard'; }
-  audPickVoice(v) {
-    const a = this.state.aud;
-    if (a && a.playing) this.audPause();
-    this._voiceUri = v.voiceURI || v.name; this._voice = v;
-    try { window.localStorage.setItem('pp-voice', this._voiceUri); } catch (e) {}
-    this.setState({ voicesRev: (this.state.voicesRev || 0) + 1 });
-    const ss = window.speechSynthesis; if (!ss) return;
-    this._audTok++;
-    try { ss.cancel(); const u = new SpeechSynthesisUtterance('Hallo Jonas. So klinge ich im Auto. Dein nächster Termin ist um 11 Uhr bei Brandt in Augsburg.'); u.lang = 'de-DE'; u.voice = v; u.rate = this.audRates()[this.state.audRate || 0].r; this._audU = u; ss.speak(u); } catch (e) {}
   }
   audLock(on) {
     try {
@@ -1019,7 +984,7 @@ class Component extends DCLogic {
     const a = this.state.aud;
     this.audHalt();
     const bk = to || (a && a.back) || 'heute';
-    this.setState({ screen: bk === 'audio' ? 'heute' : bk, aud: null, audVoiceSheet: false, swap: 1 - this.state.swap });
+    this.setState({ screen: bk === 'audio' ? 'heute' : bk, aud: null, swap: 1 - this.state.swap });
     if (bk === 'heute') { const f = this.frontId(); if (f) this.countTo(f); }
   }
   audVals() {
@@ -1036,17 +1001,7 @@ class Component extends DCLogic {
       const dsc = this.audDayScript(dayKey), n = this.openList(dayKey).length;
       options.push({ kicker: 'TAGESBRIEFING', title: { heute: 'Ganzer Tag', fr: 'Ganzer Freitag', mo: 'Ganzer Montag' }[dayKey], sub: n + (n === 1 ? ' Station' : ' Stationen') + ' im Überblick · ' + this.audDur(dsc.segs), bg: '#cde7c4', go: () => this.audOpen('day', dayKey) });
     }
-    const cv = this.audVoice(), vlist = s.audVoiceSheet ? this.audVoices() : [];
-    const tagOf = (t) => t >= 4 ? ['Premium', '#52ae32', '#10210a'] : t === 3 ? ['Erweitert', '#cde7c4', '#1d3315'] : ['Standard', '#ffe58f', '#2e2000'];
     const base = { sheet: !!s.audSheet, options,
-      voiceLabel: this.audVoiceName(cv), voiceSheet: !!s.audVoiceSheet, noVoices: !!s.audVoiceSheet && !vlist.length,
-      voices: vlist.map((v, vi) => {
-        const nm = this.audVoiceName(v), same = vlist.filter((w) => this.audVoiceName(w) === nm), nr = same.length > 1 ? ' ' + (same.indexOf(v) + 1) : ''; const on = cv && (v.voiceURI || v.name) === (cv.voiceURI || cv.name); const tg = tagOf(this.audTier(v));
-        return { name: nm + nr, lang: (v.voiceURI && v.voiceURI !== v.name ? v.voiceURI : v.lang) + (v.localService === false ? ' · braucht Internet' : ''), tag: tg[0], tagBg: tg[1], tagFg: tg[2],
-          on: on ? 'true' : 'false', check: on ? '✓' : '', bg: on ? '#eef8ea' : '#f6f8f4', border: on ? '2px solid #52ae32' : '2px solid transparent', pick: () => this.audPickVoice(v) }; }),
-      openVoice: () => this.setState({ audVoiceSheet: true }),
-      closeVoice: () => { this._audTok++; try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {} this.setState({ audVoiceSheet: false }); },
-      voiceBackdrop: (e) => { if (e && e.target === e.currentTarget) { this._audTok++; try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (x) {} this.setState({ audVoiceSheet: false }); } },
       openSheet: () => this.setState({ audSheet: true, legend: false, coach: false, dock: false }),
       closeSheet: () => this.setState({ audSheet: false }),
       backdrop: (e) => { if (e && e.target === e.currentTarget) this.setState({ audSheet: false }); } };
