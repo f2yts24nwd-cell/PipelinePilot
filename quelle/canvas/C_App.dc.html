@@ -469,7 +469,7 @@ button{font-family:inherit;cursor:pointer}
 <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
 <sc-for list="{{au.voices}}" as="v" hint-placeholder-count="4">
 <button onClick="{{v.pick}}" aria-pressed="{{v.on}}" style="display:flex;align-items:center;justify-content:space-between;gap:10px;border:{{v.border}};background:{{v.bg}};color:#272d3a;border-radius:18px;padding:12px 14px;min-height:56px;text-align:left">
-<span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:16px;font-weight:800">{{v.name}}</span><span style="font-size:12px;font-weight:600;color:#575756">{{v.lang}}</span></span>
+<span style="display:flex;flex-direction:column;gap:1px;min-width:0"><span style="font-size:16px;font-weight:800">{{v.name}}</span><span style="font-size:12px;font-weight:600;color:#575756;word-break:break-all">{{v.lang}}</span></span>
 <span style="display:flex;align-items:center;gap:8px;flex:none"><span style="background:{{v.tagBg}};color:{{v.tagFg}};border-radius:999px;padding:4px 10px;font-size:11px;font-weight:800">{{v.tag}}</span><span style="width:22px;font-size:18px;font-weight:800;color:#2f7a17">{{v.check}}</span></span>
 </button>
 </sc-for>
@@ -1040,8 +1040,9 @@ class Component extends DCLogic {
     const tagOf = (t) => t >= 4 ? ['Premium', '#52ae32', '#10210a'] : t === 3 ? ['Erweitert', '#cde7c4', '#1d3315'] : ['Standard', '#ffe58f', '#2e2000'];
     const base = { sheet: !!s.audSheet, options,
       voiceLabel: this.audVoiceName(cv), voiceSheet: !!s.audVoiceSheet, noVoices: !!s.audVoiceSheet && !vlist.length,
-      voices: vlist.map((v) => { const on = cv && (v.voiceURI || v.name) === (cv.voiceURI || cv.name); const tg = tagOf(this.audTier(v));
-        return { name: this.audVoiceName(v), lang: v.lang + (v.localService === false ? ' · braucht Internet' : ''), tag: tg[0], tagBg: tg[1], tagFg: tg[2],
+      voices: vlist.map((v, vi) => {
+        const nm = this.audVoiceName(v), same = vlist.filter((w) => this.audVoiceName(w) === nm), nr = same.length > 1 ? ' ' + (same.indexOf(v) + 1) : ''; const on = cv && (v.voiceURI || v.name) === (cv.voiceURI || cv.name); const tg = tagOf(this.audTier(v));
+        return { name: nm + nr, lang: (v.voiceURI && v.voiceURI !== v.name ? v.voiceURI : v.lang) + (v.localService === false ? ' · braucht Internet' : ''), tag: tg[0], tagBg: tg[1], tagFg: tg[2],
           on: on ? 'true' : 'false', check: on ? '✓' : '', bg: on ? '#eef8ea' : '#f6f8f4', border: on ? '2px solid #52ae32' : '2px solid transparent', pick: () => this.audPickVoice(v) }; }),
       openVoice: () => this.setState({ audVoiceSheet: true }),
       closeVoice: () => { this._audTok++; try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {} this.setState({ audVoiceSheet: false }); },
