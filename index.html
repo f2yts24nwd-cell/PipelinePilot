@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pipeline Pilot</title>
+<meta name="theme-color" content="#52ae32">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pipeline">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+/* VOICE: selbstbewusst, verspielt, Werkstatt statt Büro
+   IDEA: Kartenstapel wie ein Stapel Auftragskarten am Band
+   PICTURE: der Stapel selbst
+   COLOUR and TYPE: itmX-Grün #52ae32, Navy #272d3a, Hellgrün #cde7c4 · Outfit
+   LAYOUT: App als Handy-Spalte, Leitstand als Seite, Umschalter oben */
+*{box-sizing:border-box}
+html,body{margin:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Outfit',system-ui,sans-serif;background:#52ae32;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);overscroll-behavior:none}
+body.view-hos{background:#52ae32}
+.view[hidden]{display:none}
+#view-hos{background:#eef3ea;min-height:100dvh}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+
+
+a{color:#272d3a}a:hover{color:#000000}
+button{font-family:inherit;cursor:pointer}
+@keyframes c-bar{50%{transform:scaleY(.45)}}
+@keyframes c-pop{from{opacity:0;transform:translateY(24px) scale(.7)}}
+@keyframes c-up{from{opacity:0;transform:translateY(40px)}}
+@keyframes c-ring{0%{box-shadow:0 0 0 0 rgba(82,174,50,.55)}100%{box-shadow:0 0 0 26px rgba(82,174,50,0)}}
+.c-up{animation:c-up .45s cubic-bezier(.2,.9,.3,1.2) both}
+.c-pop{animation:c-pop .5s cubic-bezier(.2,.9,.3,1.4) both}
+@keyframes c-inA{0%{transform:translateY(-112px) scale(.9);opacity:.3;filter:blur(3px)}60%{transform:translateY(10px) scale(1.015);opacity:1;filter:blur(0)}100%{transform:none}}
+@keyframes c-inB{0%{transform:translateY(-112px) scale(.9);opacity:.3;filter:blur(3px)}60%{transform:translateY(10px) scale(1.015);opacity:1;filter:blur(0)}100%{transform:none}}
+@keyframes c-backA{to{transform:translateY(-116px) scale(.86);opacity:0}}
+@keyframes c-backB{to{transform:translateY(-116px) scale(.86);opacity:0}}
+@keyframes c-outA{to{transform:translate(calc(var(--dir,1)*135%),-40px) rotate(calc(var(--dir,1)*22deg));opacity:0}}
+@keyframes c-outB{to{transform:translate(calc(var(--dir,1)*135%),-40px) rotate(calc(var(--dir,1)*22deg));opacity:0}}
+@keyframes c-chipA{from{opacity:0;transform:scale(.4) translateY(12px)}}
+@keyframes c-chipB{from{opacity:0;transform:scale(.4) translateY(12px)}}
+@keyframes c-bumpA{40%{transform:translateY(-9px)}}
+@keyframes c-bumpB{40%{transform:translateY(-9px)}}
+@keyframes c-headA{from{opacity:0;transform:translateY(18px)}}
+@keyframes c-headB{from{opacity:0;transform:translateY(18px)}}
+@keyframes c-stamp{0%{transform:scale(2.6) rotate(-16deg);opacity:0}60%{transform:scale(.92) rotate(-8deg);opacity:1}100%{transform:scale(1) rotate(-8deg);opacity:1}}
+@keyframes c-dropA{to{transform:translate(var(--tx,0),var(--ty,430px)) scale(.16) rotate(10deg);opacity:.15}}
+@keyframes c-dropB{to{transform:translate(var(--tx,0),var(--ty,430px)) scale(.16) rotate(10deg);opacity:.15}}
+@keyframes c-prevA{0%{transform:translateX(-115%) rotate(-12deg);opacity:.4}60%{transform:translateX(8px) rotate(1deg);opacity:1}100%{transform:none}}
+@keyframes c-prevB{0%{transform:translateX(-115%) rotate(-12deg);opacity:.4}60%{transform:translateX(8px) rotate(1deg);opacity:1}100%{transform:none}}
+@keyframes c-shakeA{20%{transform:translateX(-12px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(3px)}}
+@keyframes c-shakeB{20%{transform:translateX(-12px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(3px)}}
+@keyframes c-pileA{to{transform:translate(-20px,90px) scale(.86) rotate(-4deg);opacity:0}}
+@keyframes c-pileB{to{transform:translate(-20px,90px) scale(.86) rotate(-4deg);opacity:0}}
+@keyframes c-unpileA{0%{transform:translateY(80px) scale(.88);opacity:.2}60%{transform:translateY(-8px) scale(1.01);opacity:1}100%{transform:none}}
+@keyframes c-unpileB{0%{transform:translateY(80px) scale(.88);opacity:.2}60%{transform:translateY(-8px) scale(1.01);opacity:1}100%{transform:none}}
+@keyframes c-slotA{to{transform:translateY(var(--by,-120px)) scale(.9);opacity:0}}
+@keyframes c-slotB{to{transform:translateY(var(--by,-120px)) scale(.9);opacity:0}}
+@keyframes c-liftA{0%{transform:translateY(var(--fy,-120px)) scale(.9);opacity:.35}60%{transform:translateY(8px) scale(1.01);opacity:1}100%{transform:none}}
+@keyframes c-liftB{0%{transform:translateY(var(--fy,-120px)) scale(.9);opacity:.35}60%{transform:translateY(8px) scale(1.01);opacity:1}100%{transform:none}}
+@keyframes c-land{30%{transform:scale(1.2)}60%{transform:scale(.94)}100%{transform:none}}
+@keyframes c-hero{from{opacity:0;transform:translateY(-60px) scale(.94)}}
+.c-scroll{scrollbar-width:none}.c-scroll::-webkit-scrollbar{display:none}
+
+
+
+a{color:#272d3a}a:hover{color:#000000}
+button{font-family:inherit;cursor:pointer}
+@keyframes l-pop{from{opacity:0;transform:translateY(-16px) scale(.97)}}
+@keyframes l-in{from{opacity:0;transform:translateY(10px)}}
+@keyframes l-blink{50%{opacity:.3}}
+.l-pop{animation:l-pop .5s cubic-bezier(.2,.9,.3,1.3) both}
+.l-in{animation:l-in .35s ease both}
+
+</style>
+</head>
+<body>
+<div id="view-app" class="view"></div>
+<div id="view-hos" class="view" hidden></div>
+<template id="tpl-app"><div style="width:100%;max-width:520px;margin:0 auto;height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));box-sizing:border-box;background:{{bg}};color:{{fg}};font-family:'Outfit',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden;position:relative;transition:background .35s">
+
+<div class="c-scroll" style="flex:1;min-height:0;overflow-y:auto;padding:22px 20px 20px;box-sizing:border-box;display:flex;flex-direction:column">
+
+<sc-if value="{{showHeute}}" hint-placeholder-val="{{true}}">
+<div style="display:flex;flex-direction:column;flex:1">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span style="font-size:14px;font-weight:700;line-height:1.2;white-space:nowrap">Do, 26.11.<br><span style="display:inline-block;font-weight:600;opacity:.8;animation:{{weekAnim}}">Woche {{weekCount}}/12</span></span>
+<div role="group" aria-label="Ansicht wechseln" style="display:flex;background:rgba(39,45,58,.14);border-radius:999px;padding:3px;gap:2px;white-space:nowrap;flex:none">
+<span style="height:34px;padding:0 12px;border-radius:999px;background:#272d3a;color:#ffffff;font-size:12px;font-weight:800;display:flex;align-items:center">Außendienst</span>
+<a href="Leitstand_C.dc.html" style="text-decoration:none;height:34px;padding:0 12px;border-radius:999px;color:#272d3a;font-size:12px;font-weight:800;display:flex;align-items:center">Head of Sales</a>
+</div>
+</div>
+<div style="font-size:40px;font-weight:800;line-height:.98;letter-spacing:-.035em;margin-top:16px;animation:{{headAnim}}">{{headA}}<br>{{headB}}</div>
+
+<div class="c-scroll" style="display:flex;gap:8px;margin:16px -20px 0;padding:4px 20px;overflow-x:auto;flex:none">
+<sc-for list="{{days}}" as="d" hint-placeholder-count="4">
+<button onClick="{{d.pick}}" aria-pressed="{{d.pressed}}" style="flex:none;display:flex;align-items:center;gap:9px;border-radius:999px;padding:8px 14px 8px 10px;border:{{d.border}};background:{{d.bg}};color:{{d.fg}};font-size:14px;font-weight:700;min-height:44px;animation:{{d.anim}};transition:background .25s,color .25s">
+<span aria-hidden="true" style="position:relative;width:20px;height:18px;flex:none">
+<span style="position:absolute;left:4px;right:4px;top:0;height:10px;border-radius:3px;background:{{d.glyph}};opacity:.35"></span>
+<span style="position:absolute;left:2px;right:2px;top:3px;height:11px;border-radius:3px;background:{{d.glyph}};opacity:.6"></span>
+<span style="position:absolute;left:0;right:0;top:7px;height:11px;border-radius:3px;background:{{d.glyph}}"></span>
+</span>
+{{d.label}}<span style="background:{{d.cntBg}};color:{{d.cntFg}};border-radius:999px;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">{{d.count}}</span>
+</button>
+</sc-for>
+</div>
+
+<sc-if value="{{hasBand}}" hint-placeholder-val="{{true}}">
+<div style="position:relative;height:40px;margin-top:12px;flex:none">
+<div aria-hidden="true" style="position:absolute;left:0;right:0;top:24px;height:4px;border-radius:2px;background:rgba(39,45,58,.18)"></div>
+<span aria-hidden="true" style="position:absolute;left:0;top:32px;font-size:10px;font-weight:700;opacity:.6">7 Uhr</span>
+<span aria-hidden="true" style="position:absolute;right:0;top:32px;font-size:10px;font-weight:700;opacity:.6">19 Uhr</span>
+<sc-if value="{{showNow}}" hint-placeholder-val="{{true}}"><span aria-hidden="true" style="position:absolute;left:{{nowX}}%;top:14px;width:2px;height:24px;margin-left:-1px;background:#ffffff;border-radius:1px"></span></sc-if>
+<sc-for list="{{band}}" as="t" hint-placeholder-count="6">
+<button onClick="{{t.pick}}" aria-label="{{t.aria}}" style="position:absolute;left:{{t.x}}%;top:10px;width:28px;height:32px;margin-left:-14px;background:none;border:0;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">
+<sc-if value="{{t.isFront}}" hint-placeholder-val="{{false}}"><span style="position:absolute;top:-12px;background:#272d3a;color:#ffffff;border-radius:999px;padding:2px 7px;font-size:10px;font-weight:800;white-space:nowrap;animation:{{t.anim}}">{{t.time}}</span></sc-if>
+<span style="width:{{t.size}}px;height:{{t.size}}px;border-radius:50%;box-sizing:border-box;background:{{t.fill}};border:3px solid {{t.bd}};box-shadow:0 2px 6px rgba(0,0,0,.18);margin-bottom:{{t.mb}}px;transition:all .3s cubic-bezier(.2,.9,.3,1.4)"></span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{noBand}}" hint-placeholder-val="{{false}}">
+<div style="margin-top:14px;font-size:14px;font-weight:600;opacity:.85;flex:none">{{bandText}}</div>
+</sc-if>
+
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;min-height:36px;flex:none">
+<span style="display:flex;align-items:center;gap:10px;min-width:0">
+<span style="font-size:14px;font-weight:800;white-space:nowrap">{{posLabel}}</span>
+<span style="display:flex;align-items:center;gap:4px">
+<sc-for list="{{dots}}" as="d" hint-placeholder-count="6"><button onClick="{{d.go}}" aria-label="{{d.aria}}" style="width:{{d.w}}px;height:10px;border-radius:5px;border:2px solid {{d.bd}};background:{{d.bg}};padding:0;box-sizing:border-box;transition:width .3s cubic-bezier(.2,.9,.3,1.4),background .3s"></button></sc-for>
+</span>
+</span>
+<sc-if value="{{showBackToStart}}" hint-placeholder-val="{{false}}">
+<button onClick="{{backToStart}}" class="c-pop" style="background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:8px 13px;font-size:13px;font-weight:700;min-height:36px">↺ {{backToStartLabel}}</button>
+</sc-if>
+<sc-if value="{{showLast}}" hint-placeholder-val="{{false}}"><span style="font-size:12px;font-weight:700;opacity:.7">Letzte Karte</span></sc-if>
+</div>
+<div style="position:relative;height:392px;margin-top:4px;flex:none">
+<sc-for list="{{backs}}" as="b" hint-placeholder-count="5">
+<button onClick="{{b.pick}}" aria-label="{{b.aria}}" aria-current="{{b.current}}" style="position:absolute;left:{{b.inset}}px;right:{{b.inset}}px;top:{{b.top}}px;height:120px;border-radius:22px;background:{{b.bg}};color:{{b.fg}};border:{{b.border}};padding:{{b.pad}} 18px 0;box-sizing:border-box;display:flex;justify-content:space-between;align-items:flex-start;text-align:left;line-height:17px;box-shadow:0 -4px 14px rgba(0,0,0,.10);transition:top .4s cubic-bezier(.2,.9,.3,1.2),left .4s,right .4s,background .3s">
+<span style="flex:1;min-width:0;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span style="opacity:.75;margin-right:8px">{{b.time}}</span>{{b.short}}</span>
+<span style="flex:none;margin-left:10px;font-size:14px;font-weight:800;white-space:nowrap">{{b.right}}</span>
+</button>
+</sc-for>
+<sc-for list="{{pile}}" as="q" hint-placeholder-count="2"><div aria-hidden="true" style="position:absolute;left:{{q.inset}}px;right:{{q.inset}}px;top:{{q.top}}px;height:40px;border-radius:0 0 22px 22px;background:{{q.bg}};filter:brightness(.82);z-index:1;transition:all .35s"></div></sc-for>
+<sc-if value="{{hasGhost}}" hint-placeholder-val="{{false}}">
+<div aria-hidden="true" style="position:absolute;left:0;right:0;top:{{frontTop}}px;bottom:0;z-index:3;pointer-events:none;--dir:{{ghost.dir}};--tx:{{ghost.tx}};--by:{{ghost.by}};animation:{{ghost.anim}}">
+<div style="width:100%;height:100%;border-radius:30px;background:{{ghost.color}};color:#272d3a;padding:20px 22px;box-sizing:border-box;position:relative;box-shadow:0 20px 40px rgba(0,0,0,.25)">
+<div style="font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:40px;line-height:1.1;white-space:pre-line">{{ghost.name2}}</div>
+<div style="font-size:34px;font-weight:800;letter-spacing:-.03em;margin-top:4px;color:#272d3a">{{ghost.wert}}</div>
+<sc-if value="{{ghost.stamp}}" hint-placeholder-val="{{false}}"><span style="position:absolute;right:20px;top:34px;border:4px solid #2f7a17;color:#2f7a17;border-radius:14px;padding:6px 14px;font-size:24px;font-weight:800;letter-spacing:.04em;animation:c-stamp .45s cubic-bezier(.2,.9,.3,1.3) both">ERLEDIGT</span></sc-if>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{hasFront}}" hint-placeholder-val="{{true}}">
+<div onPointerDown="{{onDown}}" onPointerMove="{{onMove}}" onPointerUp="{{onUp}}" onPointerCancel="{{onUp}}" style="position:absolute;left:0;right:0;top:{{frontTop}}px;bottom:0;z-index:{{frontZ}};touch-action:none;transform:translate({{dragX}}px,{{dragY}}px) rotate({{dragRot}}deg) scale({{dragScale}});transition:{{dragTrans}}">
+<div style="width:100%;height:100%;border-radius:30px;background:{{front.color}};color:#272d3a;padding:18px 20px;box-sizing:border-box;display:flex;flex-direction:column;position:relative;transition:background .3s;--fy:{{fy}};box-shadow:0 -10px 30px rgba(0,0,0,.18);animation:{{frontAnim}}">
+<sc-if value="{{cross.show}}" hint-placeholder-val="{{false}}">
+<div onClick="{{cross.close}}" style="position:absolute;inset:0;z-index:8;border-radius:30px;background:{{cross.tint}};pointer-events:{{cross.pe}};animation:c-chipA .25s ease both">
+<div aria-hidden="true" style="position:absolute;left:50%;top:50%;width:3px;height:56%;margin:-28% 0 0 -1.5px;background:rgba(255,255,255,.18);border-radius:2px"></div>
+<div aria-hidden="true" style="position:absolute;left:50%;top:50%;height:3px;width:56%;margin:-1.5px 0 0 -28%;background:rgba(255,255,255,.18);border-radius:2px"></div>
+<span aria-hidden="true" style="position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:#ffffff;color:#272d3a;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;box-shadow:0 6px 16px rgba(0,0,0,.3)">{{cross.center}}</span>
+<sc-for list="{{cross.arms}}" as="a" hint-placeholder-count="4">
+<button onClick="{{a.go}}" aria-label="{{a.aria}}" style="position:absolute;{{a.pos}};background:{{a.bg}};color:{{a.fg}};border:0;border-radius:16px;padding:8px 12px;min-height:44px;max-width:132px;text-align:center;opacity:{{a.op}};transform:{{a.tf}};transition:all .18s cubic-bezier(.2,.9,.3,1.5);box-shadow:0 8px 18px rgba(0,0,0,.28)">
+<span style="display:block;font-size:14px;font-weight:800;white-space:nowrap">{{a.text}}</span>
+<span style="display:block;font-size:11px;font-weight:700;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{a.sub}}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span style="background:{{front.chipBg}};color:#10210a;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800">{{front.label}}</span>
+<span style="font-size:13px;color:rgba(39,45,58,.65);font-weight:600">{{front.ort}} · {{front.km}}</span>
+</div>
+<div style="font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:12px;line-height:1.1;white-space:pre-line">{{front.name2}}</div>
+<sc-if value="{{showWert}}" hint-placeholder-val="{{true}}">
+<div style="font-size:34px;font-weight:800;letter-spacing:-.03em;margin-top:2px;color:#272d3a;font-variant-numeric:tabular-nums">{{front.wertAnim}}<sc-if value="{{isCall}}" hint-placeholder-val="{{false}}"><span style="font-size:14px;font-weight:600;color:rgba(39,45,58,.65);margin-left:8px;letter-spacing:0">Potenzial</span></sc-if></div>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">
+<sc-for list="{{front.chips}}" as="c" hint-placeholder-count="3"><span style="background:{{c.bg}};color:{{c.fg}};border-radius:999px;padding:6px 11px;font-size:12px;font-weight:700;animation:{{c.anim}}">{{c.t}}</span></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{isCall}}" hint-placeholder-val="{{false}}">
+<div style="font-size:14px;color:rgba(39,45,58,.8);margin-top:10px;font-weight:600">{{front.person}}</div>
+</sc-if>
+<sc-if value="{{isCalling}}" hint-placeholder-val="{{false}}">
+<div class="c-pop" style="margin-top:10px"><span style="font-size:12px;font-weight:700;color:#2f7a17">● Wählt …</span><br><a href="tel:{{front.telRaw}}" style="color:#272d3a;text-decoration:none;font-size:24px;font-weight:800;letter-spacing:.01em">{{front.tel}}</a></div>
+</sc-if>
+<div style="margin-top:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<sc-if value="{{isAppt}}" hint-placeholder-val="{{true}}">
+<button onClick="{{openFront}}" style="background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:12px 16px;font-size:15px;font-weight:700;min-height:44px">Rüstblatt →</button>
+<button onClick="{{openDock}}" style="background:rgba(39,45,58,.1);color:#272d3a;border:0;border-radius:999px;padding:12px 16px;font-size:15px;font-weight:700;min-height:44px">↓ Schieben</button>
+<button onClick="{{showLegend}}" aria-label="Steuerkreuz anzeigen" style="margin-left:auto;width:44px;height:44px;flex:none;border-radius:50%;border:0;background:rgba(39,45,58,.1);padding:0;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:#272d3a;stroke-width:2.2px;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"></path></svg></button>
+</sc-if>
+<sc-if value="{{isCallIdle}}" hint-placeholder-val="{{false}}">
+<button onClick="{{startCall}}" style="background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:12px 18px;font-size:15px;font-weight:800;min-height:44px;display:flex;align-items:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:#ffffff;stroke-width:2.4px;stroke-linecap:round;stroke-linejoin:round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"></path></svg>Anrufen</button>
+<button onClick="{{laterCall}}" style="background:rgba(39,45,58,.1);color:#272d3a;border:0;border-radius:999px;padding:12px 16px;font-size:15px;font-weight:700;min-height:44px">Später →</button>
+<button onClick="{{showLegend}}" aria-label="Steuerkreuz anzeigen" style="margin-left:auto;width:44px;height:44px;flex:none;border-radius:50%;border:0;background:rgba(39,45,58,.1);padding:0;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:#272d3a;stroke-width:2.2px;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"></path></svg></button>
+</sc-if>
+<sc-if value="{{isCalling}}" hint-placeholder-val="{{false}}">
+<button onClick="{{callWon}}" style="background:#52ae32;color:#10210a;border:0;border-radius:999px;padding:11px 14px;font-size:14px;font-weight:800;min-height:44px">✓ Termin</button>
+<button onClick="{{callMissed}}" style="background:rgba(39,45,58,.1);color:#272d3a;border:0;border-radius:999px;padding:11px 12px;font-size:13px;font-weight:700;min-height:44px">Nicht da</button>
+<button onClick="{{callNo}}" style="background:rgba(39,45,58,.1);color:#272d3a;border:0;border-radius:999px;padding:11px 12px;font-size:13px;font-weight:700;min-height:44px">Kein Bedarf</button>
+</sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{isEnd}}" hint-placeholder-val="{{false}}">
+<div style="position:absolute;left:0;right:0;top:{{frontTop}}px;bottom:0;z-index:2;border-radius:30px;background:#272d3a;color:#ffffff;padding:22px;box-sizing:border-box;display:flex;flex-direction:column;box-shadow:0 -10px 30px rgba(0,0,0,.18);animation:{{frontAnim}}">
+<span style="align-self:flex-start;background:#52ae32;color:#10210a;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800">STAPEL DURCH</span>
+<div style="font-size:52px;font-weight:800;letter-spacing:-.04em;line-height:.95;margin-top:16px">{{endCard.title}}</div>
+<div style="font-size:16px;color:#c9ced8;line-height:1.45;margin-top:12px">{{endCard.text}}</div>
+<div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">
+<button onClick="{{endCard.restart}}" style="background:#ffffff;color:#272d3a;border:0;border-radius:999px;padding:13px 18px;font-size:16px;font-weight:800;min-height:48px">↺ Von vorn</button>
+<div style="display:flex;gap:8px">
+<button onClick="{{endCard.back}}" style="flex:1;background:rgba(255,255,255,.12);color:#ffffff;border:0;border-radius:999px;padding:12px;font-size:14px;font-weight:700;min-height:44px">‹ Letzte Karte</button>
+<button onClick="{{endCard.go}}" style="flex:1;background:#52ae32;color:#10210a;border:0;border-radius:999px;padding:12px;font-size:14px;font-weight:800;min-height:44px">{{endCard.goLabel}}</button>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{noFront}}" hint-placeholder-val="{{false}}">
+<div class="c-up" style="position:absolute;left:0;right:0;top:0;bottom:0;border-radius:30px;background:#272d3a;color:#ffffff;padding:24px 22px;box-sizing:border-box;display:flex;flex-direction:column;box-shadow:0 -10px 30px rgba(0,0,0,.18)">
+<span style="align-self:flex-start;background:#ffc85c;color:#2e2000;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800">{{empty.chip}}</span>
+<div style="font-size:52px;font-weight:800;letter-spacing:-.04em;line-height:.95;margin-top:18px">{{empty.title}}</div>
+<div style="font-size:16px;color:#c9ced8;line-height:1.45;margin-top:14px">{{empty.text}}</div>
+<div style="margin-top:22px">
+<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:#b8bec9;margin-bottom:5px"><span>Wochenziel Termine</span><span style="color:#ffffff">{{weekCount}} / 12</span></div>
+<div style="height:8px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden"><div style="height:100%;width:{{weekPct}}%;background:#52ae32;border-radius:4px;transition:width .6s"></div></div>
+</div>
+<button onClick="{{empty.go}}" style="margin-top:auto;background:#52ae32;color:#10210a;border:0;border-radius:999px;padding:14px 18px;font-size:16px;font-weight:800;min-height:52px">{{empty.cta}}</button>
+</div>
+</sc-if>
+</div>
+<div style="height:96px;flex:none"></div>
+</div>
+</sc-if>
+
+<sc-if value="{{showDeals}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div class="c-up" style="font-size:42px;font-weight:800;line-height:.98;letter-spacing:-.035em;margin-top:4px">6 Deals.<br>2,93 Mio €.</div>
+<div style="display:flex;gap:8px;margin:6px 0 4px">
+<button onClick="{{fAll}}" style="border:0;border-radius:999px;padding:10px 16px;font-size:14px;font-weight:700;background:{{fAllBg}};color:{{fAllFg}};min-height:40px">Alle</button>
+<button onClick="{{fHot}}" style="border:0;border-radius:999px;padding:10px 16px;font-size:14px;font-weight:700;background:{{fHotBg}};color:{{fHotFg}};min-height:40px">Brennt</button>
+</div>
+<sc-for list="{{deals}}" as="d" hint-placeholder-count="5">
+<div class="c-up" style="background:#ffffff;border-radius:24px;overflow:hidden;animation-delay:{{d.delay}}">
+<button onClick="{{d.toggle}}" style="width:100%;background:none;border:0;color:#272d3a;text-align:left;padding:16px 18px;display:flex;flex-direction:column;gap:6px">
+<span style="display:flex;justify-content:space-between;align-items:center">
+<span style="background:{{d.chipBg}};color:{{d.chipFg}};border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700">{{d.chip}}</span>
+<span style="font-size:22px;font-weight:800;letter-spacing:-.02em">{{d.wert}}</span>
+</span>
+<span style="font-size:18px;font-weight:700;margin-top:2px">{{d.kunde}}</span>
+<span style="font-size:13px;color:#575756">{{d.titel}}</span>
+<span style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin-top:4px">
+<sc-for list="{{d.segs}}" as="g" hint-placeholder-count="5"><span style="height:6px;border-radius:3px;background:{{g.bg}}"></span></sc-for>
+</span>
+<span style="display:flex;justify-content:space-between;font-size:12px;color:#575756;font-weight:600"><span>{{d.phase}}</span><span>{{d.next}}</span></span>
+</button>
+<sc-if value="{{d.isOpen}}" hint-placeholder-val="{{false}}">
+<div style="padding:0 18px 16px;display:flex;flex-direction:column;gap:10px">
+<div style="background:#f1f5ee;border-radius:14px;padding:10px 12px;font-size:14px">{{d.grund}}</div>
+<sc-if value="{{d.hasBrief}}" hint-placeholder-val="{{true}}"><button onClick="{{d.openBrief}}" style="align-self:flex-start;background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:11px 16px;font-size:14px;font-weight:700;min-height:44px">Rüstblatt öffnen →</button></sc-if>
+</div>
+</sc-if>
+</div>
+</sc-for>
+<div style="height:96px;flex:none"></div>
+</div>
+</sc-if>
+
+<sc-if value="{{showBrief}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<button onClick="{{closeBrief}}" style="background:rgba(39,45,58,.12);color:#272d3a;border:0;border-radius:999px;padding:9px 14px;font-size:14px;font-weight:700;min-height:40px">← Zurück</button>
+<span style="font-size:15px;font-weight:600">Rüstblatt</span>
+</div>
+
+<div style="background:{{brief.color}};color:#272d3a;border-radius:30px;padding:20px 22px;box-shadow:0 14px 30px rgba(0,0,0,.18);animation:c-hero .55s cubic-bezier(.2,.9,.3,1.2) both">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+<span style="background:#52ae32;color:#10210a;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700">{{brief.time}} · {{brief.ort}}</span>
+<span style="background:rgba(39,45,58,.1);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700">{{brief.klasse}}</span>
+</div>
+<div style="font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1.02;margin-top:14px">{{brief.name}}</div>
+<div style="font-size:40px;font-weight:800;letter-spacing:-.03em;color:#272d3a;margin-top:4px">{{brief.offer.wert}}</div>
+<div style="font-size:13px;color:rgba(39,45,58,.7);font-weight:600">{{brief.last}}</div>
+</div>
+
+<div class="c-up" style="font-size:28px;font-weight:800;letter-spacing:-.03em;margin-top:10px;animation-delay:.12s">Darauf kommt's an.</div>
+<sc-for list="{{brief.points}}" as="pt" hint-placeholder-count="3">
+<div class="c-up" style="background:#ffffff;border-radius:24px;padding:14px 16px;display:flex;gap:14px;align-items:center;animation-delay:{{pt.delay}}">
+<span style="width:40px;height:40px;flex:none;border-radius:50%;background:#cde7c4;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800">{{pt.nr}}</span>
+<span style="font-size:16px;font-weight:600;line-height:1.3">{{pt.t}}</span>
+</div>
+</sc-for>
+
+<div class="c-up" style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:10px;animation-delay:.3s">Das Angebot.</div>
+<div class="c-up" style="background:#ffffff;border-radius:24px;padding:16px 18px;animation-delay:.34s">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+<span style="font-size:17px;font-weight:700">{{brief.offer.title}}</span>
+<span style="font-size:22px;font-weight:800">{{brief.offer.wert}}</span>
+</div>
+<span style="display:inline-block;margin-top:8px;background:{{brief.offer.bg}};color:{{brief.offer.fg}};border-radius:999px;padding:6px 11px;font-size:12px;font-weight:700">{{brief.offer.info}}</span>
+</div>
+
+<sc-if value="{{brief.hasContacts}}" hint-placeholder-val="{{true}}">
+<div class="c-up" style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:10px;margin-bottom:12px;animation-delay:.4s">Wer entscheidet.</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+<sc-for list="{{brief.contacts}}" as="p" hint-placeholder-count="3">
+<div class="c-pop" style="background:#ffffff;border-radius:22px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;animation-delay:{{p.delay}}">
+<span style="width:48px;height:48px;border-radius:50%;box-sizing:border-box;border:4px solid {{p.ring}};background:#272d3a;color:#ffffff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800">{{p.ini}}</span>
+<span style="font-size:13px;font-weight:700;line-height:1.15">{{p.n}}</span>
+<span style="font-size:11px;color:#575756;line-height:1.2">{{p.r}}</span>
+<span style="background:{{p.ring}};color:#272d3a;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:800">{{p.s}}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{brief.hasMachines}}" hint-placeholder-val="{{true}}">
+<div class="c-up" style="font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:10px;margin-bottom:12px;animation-delay:.5s">Maschinen beim Kunden.</div>
+<div class="c-scroll" style="display:flex;gap:10px;overflow-x:auto;margin:0 -20px;padding:2px 20px 6px">
+<sc-for list="{{brief.machines}}" as="m" hint-placeholder-count="2">
+<div class="c-pop" style="flex:none;width:200px;background:#cde7c4;border-radius:24px;padding:16px;box-sizing:border-box;animation-delay:{{m.delay}}">
+<div style="font-size:12px;font-weight:600;opacity:.7">Bj. {{m.bj}} · {{m.sn}}</div>
+<div style="font-size:18px;font-weight:800;margin-top:2px">{{m.typ}}</div>
+<span style="display:inline-block;margin-top:10px;background:{{m.bg}};color:{{m.fg}};border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700">{{m.note}}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<button onClick="{{toCapture}}" class="c-up" style="margin-top:12px;background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:14px 14px 14px 22px;font-size:17px;font-weight:800;min-height:64px;display:flex;align-items:center;justify-content:space-between;animation-delay:.6s">Termin vorbei? Erzählen
+<span style="width:44px;height:44px;border-radius:50%;background:#52ae32;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:#10210a;stroke-width:2.4px;stroke-linecap:round;stroke-linejoin:round"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></span></button>
+<div style="height:8px"></div>
+</div>
+</sc-if>
+
+<sc-if value="{{showCapture}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;flex:1">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span style="background:rgba(255,255,255,.1);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600">{{capName}} · nach dem Termin</span>
+<span style="display:flex;align-items:center;gap:10px">
+<span style="font-size:15px;font-weight:700;color:#7fd35f">{{clock}}</span>
+<button onClick="{{closeCapture}}" aria-label="Schließen" style="width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.1);color:#ffffff;font-size:18px;padding:0">✕</button>
+</span>
+</div>
+
+<div aria-hidden="true" style="display:flex;align-items:center;justify-content:center;gap:4px;height:{{barsH}}px;margin-top:18px;flex:none;transition:height .4s">
+<sc-for list="{{bars}}" as="b" hint-placeholder-count="34"><span style="width:5px;height:{{b.h}}px;border-radius:3px;background:{{b.c}};animation:{{b.anim}};transition:height .4s"></span></sc-for>
+</div>
+
+<sc-if value="{{isIdle}}" hint-placeholder-val="{{true}}">
+<div class="c-up" style="margin-top:20px">
+<div style="font-size:42px;font-weight:800;letter-spacing:-.035em;line-height:1">Erzähl einfach.</div>
+<div style="font-size:20px;font-weight:500;color:#b8bec9;line-height:1.45;margin-top:14px">Wer war dabei?<br>Was ist passiert?<br>Was kommt als Nächstes?</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isRec}}" hint-placeholder-val="{{false}}">
+<div style="font-size:26px;font-weight:700;line-height:1.2;letter-spacing:-.02em;margin-top:20px">„<sc-for list="{{tokens}}" as="w" hint-placeholder-count="12"><span style="color:{{w.c}}">{{w.t}} </span></sc-for>“</div>
+</sc-if>
+
+<sc-if value="{{isProc}}" hint-placeholder-val="{{false}}">
+<div class="c-up" style="margin-top:20px">
+<div style="font-size:42px;font-weight:800;letter-spacing:-.035em;line-height:1">Sortiere …</div>
+<div style="font-size:18px;color:#b8bec9;margin-top:12px">Kontakte, Termin, Deal, Bericht</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+<div style="margin-top:14px">
+<div style="font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.1">4 Sachen erkannt.</div>
+<div style="font-size:13px;color:#b8bec9;margin-top:4px;line-height:1.4">Antippen = nicht übernehmen · Lang drücken = anpassen</div>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+<sc-for list="{{stickers}}" as="s" hint-placeholder-count="4">
+<button onClick="{{s.tap}}" onPointerDown="{{s.down}}" onPointerUp="{{s.up}}" onPointerLeave="{{s.up}}" onPointerCancel="{{s.up}}" onContextMenu="{{s.ctx}}" class="c-pop" aria-pressed="{{s.pressed}}" aria-label="{{s.aria}}" style="align-self:{{s.align}};max-width:310px;transform:rotate({{s.rot}}deg) scale({{s.scale}});background:{{s.bg}};color:{{s.fg}};border:0;border-radius:18px;padding:11px 14px;text-align:left;box-shadow:{{s.shadow}};opacity:{{s.op}};animation-delay:{{s.delay}};transition:opacity .25s,filter .25s,transform .45s cubic-bezier(.2,.9,.3,1.3),box-shadow .45s;filter:{{s.filter}};-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation">
+<span style="display:flex;justify-content:space-between;gap:12px;font-size:11px;font-weight:800;opacity:.7"><span>{{s.label}}</span><span>{{s.status}}</span></span>
+<span style="display:block;font-size:15px;font-weight:700;margin-top:2px">{{s.text}}</span>
+<sc-if value="{{s.hasSub}}" hint-placeholder-val="{{true}}"><span style="display:block;font-size:12px;font-weight:600;opacity:.75;margin-top:2px">{{s.sub}}</span></sc-if>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<div style="margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:12px">
+<sc-if value="{{showMic}}" hint-placeholder-val="{{true}}">
+<button onClick="{{press}}" aria-label="{{micAria}}" style="width:92px;height:92px;border-radius:50%;background:#52ae32;border:0;display:flex;align-items:center;justify-content:center;padding:0;animation:{{micAnim}}">
+<sc-if value="{{isRec}}" hint-placeholder-val="{{false}}"><span style="width:26px;height:26px;border-radius:7px;background:#ffffff"></span></sc-if>
+<sc-if value="{{isIdle}}" hint-placeholder-val="{{true}}"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:#10210a;stroke-width:2.4px;stroke-linecap:round;stroke-linejoin:round"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></sc-if>
+</button>
+<span style="font-size:14px;font-weight:600;color:#b8bec9">{{micHint}}</span>
+</sc-if>
+<sc-if value="{{isDone}}" hint-placeholder-val="{{false}}">
+<button onClick="{{send}}" class="c-up" style="width:100%;background:#52ae32;color:#10210a;border:0;border-radius:999px;padding:18px;font-size:18px;font-weight:800;min-height:60px">Ab in den Leitstand →</button>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showSent}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;flex:1">
+<div class="c-pop" style="font-size:96px;font-weight:800;letter-spacing:-.05em;line-height:.9;margin-top:40px">Drin.</div>
+<div class="c-up" style="font-size:22px;font-weight:700;line-height:1.2;margin-top:16px">0:48 Min. erzählt,<br>statt 15 Min. getippt.</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:24px">
+<sc-for list="{{summary}}" as="x" hint-placeholder-count="4"><span class="c-pop" style="background:#ffffff;border-radius:999px;padding:10px 14px;font-size:14px;font-weight:700;animation-delay:{{x.delay}}">✓ {{x.t}}</span></sc-for>
+</div>
+<div class="c-up" style="background:#272d3a;color:#ffffff;border-radius:24px;padding:18px 20px;margin-top:24px">
+<div style="font-size:13px;font-weight:600;color:#b8bec9">Gewichtete Pipeline</div>
+<div style="font-size:34px;font-weight:800;letter-spacing:-.03em;color:#7fd35f">{{pipeDelta}}</div>
+<div style="font-size:13px;color:#b8bec9;margin-top:2px">{{sentNote}}</div>
+</div>
+<button onClick="{{goHeute}}" style="margin-top:auto;background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:18px;font-size:17px;font-weight:800;min-height:60px">{{nextLabel2}}</button>
+<button onClick="{{reset}}" style="margin-top:10px;background:none;border:0;color:#272d3a;font-size:14px;font-weight:600;text-decoration:underline;min-height:44px">Demo zurücksetzen</button>
+</div>
+</sc-if>
+
+</div>
+
+<sc-if value="{{showEditor}}" hint-placeholder-val="{{false}}">
+<div onClick="{{editor.backdrop}}" style="position:absolute;inset:0;z-index:9;background:rgba(10,12,16,.55);display:flex;align-items:flex-end;animation:c-chipA .2s ease both">
+<div role="dialog" aria-label="{{editor.title}}" style="width:100%;max-height:82%;overflow-y:auto;background:#ffffff;color:#272d3a;border-radius:28px 28px 0 0;padding:20px 20px 24px;box-sizing:border-box;animation:c-up .35s cubic-bezier(.2,.9,.3,1.2) both">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+<span style="background:{{editor.chipBg}};color:{{editor.chipFg}};border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800">{{editor.label}}</span>
+<button onClick="{{editor.cancel}}" aria-label="Schließen" style="width:40px;height:40px;border-radius:50%;border:0;background:#eef3ea;color:#272d3a;font-size:16px;font-weight:800;padding:0">✕</button>
+</div>
+<div style="font-size:24px;font-weight:800;letter-spacing:-.02em;margin-top:10px">{{editor.title}}</div>
+<sc-for list="{{editor.fields}}" as="f" hint-placeholder-count="3">
+<div style="margin-top:14px">
+<div style="font-size:12px;font-weight:800;color:#575756;margin-bottom:6px">{{f.label}}<span style="color:#2f7a17">{{f.extra}}</span></div>
+<sc-if value="{{f.isInput}}" hint-placeholder-val="{{true}}"><input type="{{f.itype}}" value="{{f.value}}" onChange="{{f.set}}" aria-label="{{f.label}}" style="width:100%;box-sizing:border-box;height:48px;border-radius:14px;border:2px solid #dfe8da;background:#f6f8f4;padding:0 14px;font:600 16px 'Outfit',system-ui,sans-serif;color:#272d3a"></sc-if>
+<sc-if value="{{f.isArea}}" hint-placeholder-val="{{false}}"><textarea value="{{f.value}}" onChange="{{f.set}}" aria-label="{{f.label}}" rows="6" style="width:100%;box-sizing:border-box;border-radius:14px;border:2px solid #dfe8da;background:#f6f8f4;padding:12px 14px;font:500 16px/1.4 'Outfit',system-ui,sans-serif;color:#272d3a;resize:none"></textarea></sc-if>
+<sc-if value="{{f.isRange}}" hint-placeholder-val="{{false}}"><input type="range" min="0" max="100" step="10" value="{{f.value}}" onChange="{{f.set}}" aria-label="{{f.label}}" style="width:100%;height:32px;accent-color:#52ae32"></sc-if>
+<sc-if value="{{f.isSeg}}" hint-placeholder-val="{{false}}"><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{f.opts}}" as="o" hint-placeholder-count="3"><button onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="border:0;border-radius:999px;padding:10px 14px;font-size:14px;font-weight:700;background:{{o.bg}};color:{{o.fg}};min-height:42px">{{o.t}}</button></sc-for></div></sc-if>
+</div>
+</sc-for>
+<div style="display:flex;gap:8px;margin-top:20px">
+<button onClick="{{editor.cancel}}" style="flex:1;background:#eef3ea;color:#272d3a;border:0;border-radius:999px;padding:14px;font-size:15px;font-weight:700;min-height:50px">Abbrechen</button>
+<button onClick="{{editor.save}}" style="flex:1.4;background:#52ae32;color:#10210a;border:0;border-radius:999px;padding:14px;font-size:15px;font-weight:800;min-height:50px">Speichern</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+<div class="c-pop" role="status" style="position:absolute;left:20px;right:20px;top:14px;z-index:6;background:#272d3a;color:#ffffff;border-radius:999px;padding:8px 8px 8px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 10px 24px rgba(0,0,0,.25)">
+<span style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;line-height:1.25;padding:4px 0"><span style="width:14px;height:14px;flex:none;border-radius:4px;background:{{toastColor}};border:2px solid #ffffff"></span>{{toastText}}</span>
+<sc-if value="{{toastUndo}}" hint-placeholder-val="{{true}}"><button onClick="{{undo}}" style="flex:none;background:#52ae32;color:#10210a;border:0;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:800;min-height:36px">Rückgängig</button></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{showDock}}" hint-placeholder-val="{{false}}">
+<div class="c-up" style="position:absolute;left:0;right:0;bottom:0;z-index:4;background:#272d3a;color:#ffffff;border-radius:32px 32px 0 0;padding:20px 20px 26px;box-shadow:0 -14px 34px rgba(0,0,0,.25)">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+<span style="font-size:22px;font-weight:800;letter-spacing:-.02em">{{dockTitle}}</span>
+<button onClick="{{closeDock}}" style="background:none;border:0;color:#b8bec9;font-size:14px;font-weight:700;min-height:40px">Abbrechen</button>
+</div>
+<div style="font-size:13px;color:#b8bec9;margin-top:2px">Antippen oder die Karte draufziehen</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px">
+<sc-for list="{{targets}}" as="t" hint-placeholder-count="3">
+<button onClick="{{t.pick}}" style="position:relative;height:112px;background:none;border:0;padding:0;color:#272d3a;transform:{{t.tf}};transition:transform .2s cubic-bezier(.2,.9,.3,1.5)">
+<span aria-hidden="true" style="position:absolute;left:12px;right:12px;top:0;height:40px;border-radius:16px;background:{{t.plate}};opacity:.35"></span>
+<span aria-hidden="true" style="position:absolute;left:6px;right:6px;top:8px;height:40px;border-radius:18px;background:{{t.plate}};opacity:.6"></span>
+<span style="position:absolute;left:0;right:0;top:16px;bottom:0;border-radius:20px;background:{{t.bg}};border:{{t.border}};box-shadow:{{t.ring}};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:{{t.fg}}">
+<span style="font-size:16px;font-weight:800;letter-spacing:-.01em">{{t.label}}</span>
+<span style="font-size:12px;font-weight:700;opacity:.75">{{t.sub}}</span>
+</span>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showNav}}" hint-placeholder-val="{{true}}">
+<div style="position:absolute;left:20px;right:20px;bottom:20px;height:72px;border-radius:36px;background:#ffffff;color:#272d3a;display:flex;align-items:center;justify-content:space-between;padding:0 18px;box-shadow:0 10px 30px rgba(0,0,0,.18)">
+<button onClick="{{goHeute}}" style="background:none;border:0;color:#272d3a;font-size:15px;font-weight:{{navHeuteW}};opacity:{{navHeuteOp}};min-width:80px;min-height:44px">Heute</button>
+<button onClick="{{toCapture}}" aria-label="Erzählen" style="position:absolute;left:50%;top:-18px;margin-left:-40px;width:80px;height:80px;border-radius:50%;background:#272d3a;border:6px solid #52ae32;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 8px 20px rgba(0,0,0,.25)">
+<svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:#7fd35f;stroke-width:2.4px;stroke-linecap:round;stroke-linejoin:round"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg>
+</button>
+<button onClick="{{goDeals}}" style="background:none;border:0;color:#272d3a;font-size:15px;font-weight:{{navDealsW}};opacity:{{navDealsOp}};min-width:80px;min-height:44px">Deals</button>
+</div>
+</sc-if>
+
+</div></template>
+<template id="tpl-hos"><div style="width:100%;min-height:100dvh;background:#eef3ea;color:#272d3a;font-family:'Outfit',system-ui,sans-serif;box-sizing:border-box">
+
+<div style="background:#52ae32">
+<div style="max-width:1360px;margin:0 auto;padding:22px 28px 26px;box-sizing:border-box">
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px">
+<span style="font-size:15px;font-weight:600">Leitstand Vertrieb · Q4 2026 · noch 35 Tage</span>
+<span style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+<span style="background:#272d3a;color:#cde7c4;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:#7fd35f;animation:l-blink 1.6s infinite"></span>{{syncLabel}}</span>
+<div role="group" aria-label="Ansicht wechseln" style="display:flex;background:rgba(39,45,58,.14);border-radius:999px;padding:3px;gap:2px">
+<a href="C_App.dc.html" style="text-decoration:none;height:36px;padding:0 14px;border-radius:999px;color:#272d3a;font-size:13px;font-weight:800;display:flex;align-items:center">Außendienst</a>
+<span style="height:36px;padding:0 14px;border-radius:999px;background:#272d3a;color:#ffffff;font-size:13px;font-weight:800;display:flex;align-items:center">Head of Sales</span>
+</div>
+</span>
+</div>
+<div style="font-size:clamp(36px,5vw,60px);font-weight:800;letter-spacing:-.04em;line-height:1;margin-top:18px">14,2 von 18,0 Mio €.</div>
+<div style="font-size:18px;font-weight:600;margin-top:6px;opacity:.85">79 % Auftragseingang. Vorjahr zum Stichtag: 71 %.</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:20px">
+<div style="background:#ffffff;border-radius:22px;padding:14px 18px;flex:1.4 1 300px">
+<div style="font-size:13px;font-weight:600;color:#575756">Forecast nach Belegen</div>
+<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><span style="font-size:32px;font-weight:800;letter-spacing:-.03em">{{fcBelegt}} Mio €</span><span style="background:#ffc85c;color:#2e2000;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700">Vertrieb meldet 19,4</span></div>
+<div style="display:flex;height:10px;border-radius:5px;overflow:hidden;background:#eef3ea;margin-top:8px">
+<div style="width:73%;background:#272d3a"></div><div style="width:{{wBelegt}}%;background:#52ae32;transition:width .6s"></div><div style="width:{{wUnbelegt}}%;background:#ffc85c;transition:width .6s"></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:#575756;margin-top:6px;font-weight:600"><span>■ Gebucht 14,2</span><span style="color:#2f7a17">■ Belegt {{belegt}}</span><span style="color:#8a5a00">■ Unbelegt {{unbelegt}}</span></div>
+</div>
+<div style="background:#ffffff;border-radius:22px;padding:14px 18px;flex:1 1 200px">
+<div style="font-size:13px;font-weight:600;color:#575756">Pipeline-Abdeckung H1/27</div>
+<div style="font-size:32px;font-weight:800;letter-spacing:-.03em">3,1×</div>
+<div style="font-size:12px;color:#575756;font-weight:600">Ziel ≥ 3,0× · 41,6 Mio €</div>
+</div>
+<div style="background:#272d3a;color:#ffffff;border-radius:22px;padding:14px 18px;flex:1 1 200px">
+<div style="font-size:13px;font-weight:600;color:#b8bec9">Angebote ohne Nachfass</div>
+<div style="font-size:32px;font-weight:800;letter-spacing:-.03em;color:#ff8a8d">{{nfCount}}</div>
+<div style="font-size:12px;color:#b8bec9;font-weight:600">{{nfVol}} Mio € liegen still · &gt; 21 Tage</div>
+</div>
+</div>
+</div>
+</div>
+
+<div style="max-width:1360px;margin:0 auto;padding:22px 28px 40px;display:flex;flex-direction:column;gap:20px;box-sizing:border-box">
+
+<sc-if value="{{live}}" hint-placeholder-val="{{false}}">
+<div class="l-pop" style="background:#272d3a;color:#ffffff;border-radius:26px;padding:18px 22px;display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px">
+<span style="background:#52ae32;color:#10210a;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800">NEU · {{liveTs}}</span>
+<span style="flex:1 1 360px;font-size:18px;font-weight:700;line-height:1.3">{{liveHead}}</span>
+<span style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-for list="{{liveChips}}" as="c" hint-placeholder-count="3"><span style="background:rgba(255,255,255,.1);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600">{{c.t}}</span></sc-for>
+</span>
+<sc-if value="{{liveGain}}" hint-placeholder-val="{{true}}"><span style="font-size:22px;font-weight:800;color:#7fd35f">{{liveGainText}}</span></sc-if>
+</div>
+</sc-if>
+
+<div>
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:12px">
+<div style="font-size:26px;font-weight:800;letter-spacing:-.02em">Team.</div>
+<button onClick="{{clearRep}}" style="background:{{clearBg}};color:{{clearFg}};border:0;border-radius:999px;padding:9px 14px;font-size:13px;font-weight:700;min-height:40px">{{clearLabel}}</button>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+<sc-for list="{{reps}}" as="r" hint-placeholder-count="12">
+<button onClick="{{r.pick}}" aria-pressed="{{r.pressed}}" style="text-align:left;background:{{r.bg}};color:{{r.fg}};border:0;border-radius:22px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-height:44px;box-shadow:{{r.shadow}};transition:transform .2s;transform:{{r.tf}}">
+<span style="display:flex;justify-content:space-between;align-items:center">
+<span style="background:{{r.chipBg}};color:{{r.chipFg}};border-radius:999px;padding:4px 9px;font-size:11px;font-weight:800">{{r.chip}}</span>
+<span style="font-size:24px;font-weight:800;letter-spacing:-.02em">{{r.pct}} %</span>
+</span>
+<span style="font-size:16px;font-weight:700">{{r.name}}</span>
+<span style="font-size:12px;font-weight:600;opacity:.7">{{r.gebiet}} · {{r.riskLabel}}</span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:999 1 600px;min-width:0">
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:12px">
+<div style="font-size:26px;font-weight:800;letter-spacing:-.02em">Was brennt.</div>
+<span style="font-size:13px;color:#575756;font-weight:600">{{dealScope}} · antippen für Belege</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{deals}}" as="d" hint-placeholder-count="10">
+<div class="{{d.cls}}" style="background:{{d.cardBg}};border-radius:20px;overflow:hidden;box-shadow:{{d.ring}}">
+<button onClick="{{d.toggle}}" style="width:100%;background:none;border:0;color:#272d3a;text-align:left;padding:14px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;min-height:56px">
+<span style="background:{{d.chipBg}};color:{{d.chipFg}};border-radius:999px;padding:5px 10px;font-size:12px;font-weight:800;flex:none;min-width:58px;text-align:center">{{d.chip}}</span>
+<span style="flex:2 1 220px;min-width:0"><span style="display:block;font-size:16px;font-weight:700">{{d.kunde}}</span><span style="display:block;font-size:13px;color:#575756">{{d.titel}} · {{d.phase}}</span></span>
+<span style="flex:2 1 200px;font-size:14px;font-weight:600">{{d.grund}}</span>
+<span style="flex:1 1 110px;font-size:13px;color:#575756;font-weight:600">{{d.rep}}</span>
+<span style="font-size:20px;font-weight:800;letter-spacing:-.02em;flex:none;min-width:96px;text-align:right">{{d.wert}}</span>
+</button>
+<sc-if value="{{d.isOpen}}" hint-placeholder-val="{{false}}">
+<div class="l-in" style="padding:0 18px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<sc-for list="{{d.ev}}" as="e" hint-placeholder-count="4"><span style="font-size:13px;font-weight:700;padding:7px 12px;border-radius:999px;background:{{e.bg}};color:{{e.color}}">{{e.mark}} {{e.label}}</span></sc-for>
+<span style="font-size:13px;font-weight:800;margin-left:6px;color:{{d.fcColor}}">{{d.fc}}</span>
+<span style="flex-basis:100%;font-size:14px;margin-top:2px">Nächster Schritt: <strong>{{d.next}}</strong></span>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{hasMore}}" hint-placeholder-val="{{true}}">
+<button onClick="{{showAll}}" style="margin-top:12px;background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:11px 18px;font-size:14px;font-weight:700;min-height:44px">{{moreLabel}}</button>
+</sc-if>
+</div>
+
+<div style="flex:1 1 330px;min-width:0;background:#272d3a;color:#ffffff;border-radius:28px;padding:22px;display:flex;flex-direction:column;gap:14px">
+<sc-if value="{{noRep}}" hint-placeholder-val="{{true}}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<span style="align-self:flex-start;background:#52ae32;color:#10210a;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800">WOCHEN-REVIEW</span>
+<div style="font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.1">Wen nimmst du dir diese Woche vor?</div>
+<div style="font-size:15px;color:#c9ced8;line-height:1.5">Unter 65 % Ziel: <strong style="color:#ffffff">Lang, Braun, Roth</strong>. Zusammen 8 Risiko-Deals mit 4,1 Mio €.</div>
+<div style="font-size:13px;color:#b8bec9">Tipp auf eine Person im Team. Die Fragen ergeben sich aus ihren Deals.</div>
+<div style="border-top:1px solid #3a4152;padding-top:14px;display:flex;flex-direction:column;gap:10px">
+<span style="font-size:12px;font-weight:800;letter-spacing:.1em;color:#7fd35f">LIVE VOM AUSSENDIENST</span>
+<sc-for list="{{feed}}" as="f" hint-placeholder-count="4">
+<div class="{{f.cls}}" style="display:flex;gap:12px;font-size:14px;align-items:baseline"><span style="font-weight:800;color:{{f.tc}};min-width:58px">{{f.t}}</span><span style="color:#dfe3ea">{{f.x}}</span></div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{hasRep}}" hint-placeholder-val="{{false}}">
+<div class="l-in" style="display:flex;flex-direction:column;gap:12px">
+<span style="align-self:flex-start;background:#52ae32;color:#10210a;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800">WOCHEN-REVIEW · 15 MIN</span>
+<div style="font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1">{{sel.name}}</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+<div style="background:rgba(255,255,255,.08);border-radius:18px;padding:12px;text-align:center"><div style="font-size:24px;font-weight:800">{{sel.pct}} %</div><div style="font-size:11px;color:#b8bec9;font-weight:700">ZIEL</div></div>
+<div style="background:rgba(255,255,255,.08);border-radius:18px;padding:12px;text-align:center"><div style="font-size:24px;font-weight:800">{{sel.risk}}</div><div style="font-size:11px;color:#b8bec9;font-weight:700">RISIKO</div></div>
+<div style="background:rgba(255,255,255,.08);border-radius:18px;padding:12px;text-align:center"><div style="font-size:24px;font-weight:800">{{sel.besuche}}</div><div style="font-size:11px;color:#b8bec9;font-weight:700">BESUCHE KW</div></div>
+</div>
+<span style="font-size:12px;font-weight:800;letter-spacing:.1em;color:#7fd35f;margin-top:4px">FRAGEN FÜRS GESPRÄCH</span>
+<sc-for list="{{questions}}" as="q" hint-placeholder-count="3">
+<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.07);border-radius:18px;padding:12px 14px">
+<span style="font-size:22px;font-weight:800;color:#7fd35f;line-height:1">{{q.nr}}</span>
+<span style="font-size:15px;line-height:1.4">{{q.t}}</span>
+</div>
+</sc-for>
+<sc-if value="{{noQuestions}}" hint-placeholder-val="{{false}}"><div style="font-size:15px;color:#cde7c4">Nichts brennt. Kurz halten: Was brauchst du fürs nächste Quartal?</div></sc-if>
+<button onClick="{{toggleDone}}" style="margin-top:4px;border:0;border-radius:999px;padding:15px;font-size:16px;font-weight:800;background:{{doneBg}};color:#10210a;min-height:52px">{{doneLabel}}</button>
+</div>
+</sc-if>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:stretch">
+<div style="flex:1 1 300px;background:#ffffff;border-radius:26px;padding:20px 22px">
+<div style="font-size:22px;font-weight:800;letter-spacing:-.02em">A-Kunden ohne Besuch.</div>
+<div style="font-size:13px;color:#575756;font-weight:600;margin:2px 0 12px">Seit über 90 Tagen niemand vor Ort</div>
+<sc-for list="{{akunden}}" as="a" hint-placeholder-count="5">
+<div class="l-in" style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #eef3ea;font-size:15px">
+<span style="font-weight:700">{{a.k}}</span><span style="font-size:13px;color:#575756;font-weight:600">{{a.rep}} · <span style="background:#ff6b6f;color:#2a0a0b;border-radius:999px;padding:2px 8px;font-weight:800">{{a.tage}} T</span></span>
+</div>
+</sc-for>
+</div>
+<div style="flex:1.3 1 340px;background:#cde7c4;border-radius:26px;padding:20px 22px;display:flex;flex-direction:column">
+<div style="font-size:22px;font-weight:800;letter-spacing:-.02em">21,4 Mio € schlafen in alten Anlagen.</div>
+<div style="font-size:13px;color:#2f4a26;font-weight:600;margin:2px 0 12px">62 Anlagen beim Kunden älter als 15 Jahre</div>
+<sc-for list="{{basis}}" as="m" hint-placeholder-count="5">
+<div style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid rgba(39,45,58,.12);font-size:15px">
+<span><strong>{{m.k}}</strong> · {{m.typ}}</span><span style="font-size:13px;font-weight:600">Bj. {{m.bj}} · {{m.rep}}</span>
+</div>
+</sc-for>
+<button onClick="{{toggleCampaign}}" style="margin-top:14px;align-self:flex-start;border:0;border-radius:999px;padding:13px 18px;font-size:15px;font-weight:800;background:{{campBg}};color:{{campFg}};min-height:48px">{{campLabel}}</button>
+</div>
+<div style="flex:1 1 280px;background:#ffffff;border-radius:26px;padding:20px 22px">
+<div style="font-size:22px;font-weight:800;letter-spacing:-.02em">Warum wir verlieren.</div>
+<div style="font-size:13px;color:#575756;font-weight:600;margin:2px 0 14px">2026 verloren: 22 Deals · 9,8 Mio €</div>
+<sc-for list="{{lost}}" as="l" hint-placeholder-count="4">
+<div style="margin-bottom:12px">
+<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:5px"><span>{{l.g}}</span><span style="font-weight:800">{{l.p}} %</span></div>
+<div style="height:12px;background:#eef3ea;border-radius:6px;overflow:hidden"><div style="height:100%;width:{{l.p}}%;background:#272d3a;border-radius:6px"></div></div>
+</div>
+</sc-for>
+</div>
+</div>
+
+</div>
+</div></template>
+<script>
+{
+/* Mini-Laufzeit: rendert die DC-Vorlagen (Holes, sc-if, sc-for, Events) mit DOM-Abgleich */
+function DCLogic(props) { this.props = props || {}; this.state = this.state || {}; }
+DCLogic.prototype.setState = function (p) {
+  var u = typeof p === 'function' ? p(this.state, this.props) : p;
+  this.state = Object.assign({}, this.state, u || {});
+  this.__schedule && this.__schedule();
+};
+DCLogic.prototype.forceUpdate = function () { this.__schedule && this.__schedule(); };
+
+var DC = (function () {
+  var HOLE = /\{\{([^}]+)\}\}/g, WHOLE = /^\s*\{\{([^}]+)\}\}\s*$/;
+  function look(path, scope) {
+    path = path.trim();
+    if (path === 'true') return true; if (path === 'false') return false;
+    if (/^-?\d+(\.\d+)?$/.test(path)) return +path;
+    if (/^'.*'$/.test(path)) return path.slice(1, -1);
+    var parts = path.split('.'), v;
+    for (var i = scope.length - 1; i >= 0; i--) { if (scope[i] && parts[0] in scope[i]) { v = scope[i][parts[0]]; break; } }
+    for (var k = 1; k < parts.length; k++) v = v == null ? undefined : v[parts[k]];
+    return v;
+  }
+  function interp(str, scope) { return str.replace(HOLE, function (_, p) { var v = look(p, scope); return v == null ? '' : String(v); }); }
+  function build(node, scope, out) {
+    if (node.nodeType === 3) { out.push({ text: node.data.indexOf('{{') >= 0 ? interp(node.data, scope) : node.data }); return; }
+    if (node.nodeType !== 1) return;
+    var tag = node.localName;
+    if (tag === 'sc-if') {
+      var a = node.getAttribute('value') || '', m = a.match(WHOLE);
+      if (m ? look(m[1], scope) : a) kids(node, scope, out);
+      return;
+    }
+    if (tag === 'sc-for') {
+      var lm = (node.getAttribute('list') || '').match(WHOLE), list = lm ? look(lm[1], scope) : null, as = node.getAttribute('as') || 'item';
+      (list || []).forEach(function (it, i) { var o = { $index: i }; o[as] = it; kids(node, scope.concat([o]), out); });
+      return;
+    }
+    if (tag === 'dc-import') return;
+    var v = { tag: tag, ns: node.namespaceURI, attrs: {}, on: {}, children: [] };
+    for (var i = 0; i < node.attributes.length; i++) {
+      var at = node.attributes[i], n = at.name, val = at.value;
+      if (n.indexOf('hint-') === 0) continue;
+      var wm = val.match(WHOLE);
+      if (/^on/i.test(n) && wm) { var f = look(wm[1], scope); if (typeof f === 'function') v.on[n.slice(2).toLowerCase()] = f; continue; }
+      var r = wm ? look(wm[1], scope) : (val.indexOf('{{') >= 0 ? interp(val, scope) : val);
+      if (r === false || r == null) continue;
+      v.attrs[n] = r === true ? '' : String(r);
+    }
+    kids(node, scope, v.children);
+    out.push(v);
+  }
+  function kids(node, scope, out) { for (var c = node.firstChild; c; c = c.nextSibling) build(c, scope, out); }
+  function create(v) {
+    if (!v.tag) return document.createTextNode(v.text);
+    var el = v.ns && v.ns !== 'http://www.w3.org/1999/xhtml' ? document.createElementNS(v.ns, v.tag) : document.createElement(v.tag);
+    update(el, v); return el;
+  }
+  function same(el, v) { return v.tag ? (el.nodeType === 1 && el.localName === v.tag) : el.nodeType === 3; }
+  function update(el, v) {
+    if (!v.tag) { if (el.data !== v.text) el.data = v.text; return; }
+    var cur = el.attributes;
+    for (var i = cur.length - 1; i >= 0; i--) if (!(cur[i].name in v.attrs)) el.removeAttribute(cur[i].name);
+    for (var n in v.attrs) if (el.getAttribute(n) !== v.attrs[n]) el.setAttribute(n, v.attrs[n]);
+    if ('value' in v.attrs && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') && el.value !== v.attrs.value) el.value = v.attrs.value;
+    el.__on = v.on; el.__bound = el.__bound || {};
+    for (var t in v.on) if (!el.__bound[t]) { el.__bound[t] = 1; (function (type) { var ev = type === 'change' && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && el.type !== 'checkbox' && el.type !== 'radio')) ? 'input' : type; el.addEventListener(ev, function (e) { var h = el.__on && el.__on[type]; if (h) h(e); }); })(t); }
+    patch(el, v.children);
+  }
+  function patch(parent, list) {
+    for (var i = 0; i < list.length; i++) {
+      var el = parent.childNodes[i], v = list[i];
+      if (el && same(el, v)) update(el, v);
+      else { var n = create(v); if (el) parent.replaceChild(n, el); else parent.appendChild(n); }
+    }
+    while (parent.childNodes.length > list.length) parent.removeChild(parent.lastChild);
+  }
+  function mount(Comp, tplRoot, host) {
+    var inst = new Comp({}), queued = false, mounted = false;
+    function render() {
+      queued = false;
+      var vals; try { vals = inst.renderVals() || {}; } catch (e) { console.error(e); return; }
+      var out = []; build(tplRoot, [vals], out); patch(host, out);
+      if (!mounted) { mounted = true; if (inst.componentDidMount) try { inst.componentDidMount(); } catch (e) { console.error(e); } }
+    }
+    inst.__schedule = function () { if (!queued) { queued = true; Promise.resolve().then(render); } };
+    render();
+    return inst;
+  }
+  return { mount: mount };
+})();
+
+var AppComp = (function () {
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = this.initial();
+  }
+  initial() {
+    return { screen: 'heute', back: 'heute', brief: null, front: null, rec: 'idle', n: 0, acc: { a: true, b: true, c: true, d: true }, sent: false, filter: 'alle', open: null, swap: 0, ghost: null, cnt: null, dragX: 0, dragY: 0, dragging: false, celebrated: false, day: 'heute', moves: {}, dock: false, hover: -1, toast: null, landed: null, gone: {}, calling: null, enter: 'stack', end: false, legend: false, coach: true, edits: this.defaultEdits(), edited: {}, editing: null, draft: null, pressing: null, capSent: false, capFor: 'brandt', doneIds: {}, captures: {}, seq: 0 };
+  }
+  componentDidMount() {
+    this._alive = true;
+    this.countTo(this.openList()[0]);
+    this._ct = setTimeout(() => { if (this._alive) this.setState({ coach: false }); }, 3200);
+    try { this._bc = new BroadcastChannel('pp-live'); this._bc.onmessage = (e) => { if (e && e.data) this.applyLive(e.data); }; } catch (e) {}
+    try { const raw = window.localStorage.getItem('pp-live'); if (raw) this.applyLive(JSON.parse(raw)); } catch (e) {}
+    try {
+      const c = window.claude;
+      if (c && typeof c.use === 'function') {
+        c.use('db').then((db) => {
+          if (!db || !this._alive) return;
+          this._db = db;
+          this._unsub = db.doc('pp/live').onSnapshot((snap) => { if (snap && snap.exists) this.applyLive(snap.data()); }, () => {});
+        }).catch(() => {});
+      }
+    } catch (e) {}
+  }
+  componentWillUnmount() {
+    this._alive = false; this.stop();
+    if (this._raf) cancelAnimationFrame(this._raf);
+    if (this._gt) clearTimeout(this._gt);
+    if (this._lt) clearTimeout(this._lt);
+    if (this._tt) clearTimeout(this._tt);
+    if (this._ct) clearTimeout(this._ct);
+    if (this._lp) clearTimeout(this._lp);
+    if (this._unsub) this._unsub();
+    try { if (this._bc) this._bc.close(); } catch (e) {}
+  }
+  applyLive(d) {
+    if (!d || typeof d !== 'object') return;
+    const caps = d.captures && typeof d.captures === 'object' ? d.captures : {};
+    const ids = Object.keys(caps);
+    if (!d.erfasst && !ids.length) { if (this.state.sent || Object.keys(this.state.captures || {}).length) { this.stop(); this.setState(this.initial()); } return; }
+    const doneIds = { ...this.state.doneIds };
+    ids.forEach((k) => { if (k !== 'brandt' && this.data().st[k]) doneIds[k] = true; });
+    this.setState({ captures: caps, doneIds, seq: Math.max(this.state.seq || 0, +d.seq || 0), sent: this.state.sent || !!d.erfasst || !!caps.brandt, celebrated: true });
+  }
+  pushLive(d) {
+    try { window.localStorage.setItem('pp-live', JSON.stringify(d)); } catch (e) {}
+    try { if (this._bc) this._bc.postMessage(d); } catch (e) {}
+    if (this._db) { try { this._db.doc('pp/live').set(d).catch(() => {}); } catch (e) {} }
+  }
+  apDay(id) { const m = this.state.moves[id]; if (m) return m.day; const a = this.data().ap.find((x) => x.id === id); return a ? a.day : 'offen'; }
+  apTime(id) { const m = this.state.moves[id]; if (m) return m.time; const a = this.data().ap.find((x) => x.id === id); return a ? a.time : ''; }
+  isDone(id) { return id === 'hessler' || (id === 'brandt' && this.state.sent) || !!this.state.gone[id] || !!(this.state.doneIds || {})[id]; }
+  colorOf(id) {
+    const pal = ['#bfdcff', '#ffd3a8', '#ffc7d6', '#d9ccff', '#ffe58f', '#b8eef0', '#ffbfb3', '#c9d4ff'];
+    const i = this.data().ap.findIndex((a) => a.id === id);
+    return pal[(i < 0 ? 0 : i) % pal.length];
+  }
+  deepOf(id) {
+    const pal = ['#2f6fbf', '#b85f0f', '#b8325a', '#6247c2', '#8a6700', '#127a7f', '#b33c26', '#3f55c0'];
+    const i = this.data().ap.findIndex((a) => a.id === id);
+    return pal[(i < 0 ? 0 : i) % pal.length];
+  }
+  weekCount() { return this.data().ap.filter((a) => { const d = this.apDay(a.id); return (d === 'heute' || d === 'fr') && !this.state.gone[a.id]; }).length; }
+  dayList(day, withDone) {
+    return this.data().ap.map((a) => a.id).filter((id) => this.apDay(id) === day && (withDone || !this.isDone(id)))
+      .sort((x, y) => { const a = this.apTime(x) || '99', b = this.apTime(y) || '99'; return a < b ? -1 : a > b ? 1 : 0; });
+  }
+  openList(day) { return this.dayList(day || this.state.day, false); }
+  frontId() { const o = this.openList(); const f = this.state.front; return f && o.indexOf(f) >= 0 ? f : o[0]; }
+  setDay(d) {
+    if (d === this.state.day) return;
+    this.setState({ day: d, front: null, end: false, legend: false, enter: 'stack', calling: null, swap: 1 - this.state.swap, dock: false });
+    const first = this.openList(d)[0]; if (first) this.countTo(first);
+  }
+  moveTo(id, day, idx) {
+    const from = this.apDay(id), fromTime = this.apTime(id);
+    const orig = (this.data().ap.find((x) => x.id === id) || {}).time || '';
+    const def = { heute: '17:45', fr: '11:30', mo: '15:30' };
+    const time = day === 'offen' ? '' : (fromTime || orig || def[day] || '09:00');
+    const moves = { ...this.state.moves, [id]: { day, time } };
+    this.setState({ moves, end: false, legend: false, dock: false, hover: -1, dragX: 0, dragY: 0, dragging: false, front: null, swap: 1 - this.state.swap,
+      ghost: { id, kind: 'drop', idx }, landed: day, calling: null, enter: 'stack', toast: { kind: from === 'anrufe' ? 'won' : 'move', id, from, fromTime, day, time } });
+    this.ghostOut(null, 650);
+    if (this._lt) clearTimeout(this._lt);
+    this._lt = setTimeout(() => { if (this._alive) this.setState({ landed: null }); }, 900);
+    if (this._tt) clearTimeout(this._tt);
+    this._tt = setTimeout(() => { if (this._alive) this.setState({ toast: null }); }, 5000);
+    setTimeout(() => { const f = this.frontId(); if (f && this._alive) this.countTo(f); }, 0);
+  }
+  undo() {
+    const t = this.state.toast; if (!t) return;
+    if (t.kind === 'gone') { const g = { ...this.state.gone }; delete g[t.id]; this.setState({ gone: g, toast: null, front: t.id, enter: 'unpile', swap: 1 - this.state.swap }); return; }
+    if (t.kind === 'info') { this.setState({ toast: null }); return; }
+    const moves = { ...this.state.moves, [t.id]: { day: t.from, time: t.fromTime } };
+    this.setState({ moves, toast: null, day: t.from, front: t.id, swap: 1 - this.state.swap, landed: t.from });
+    this.countTo(t.id);
+  }
+  dayDefs() { return [{ key: 'heute', label: 'Heute', long: 'Heute' }, { key: 'fr', label: 'Fr 27.', long: 'Morgen' }, { key: 'mo', label: 'Mo 30.', long: 'Montag' }, { key: 'offen', label: 'Irgendwann', long: 'Irgendwann' }, { key: 'anrufe', label: 'Anrufe', long: 'Anrufe' }]; }
+  targetDefs() { const cur = this.state.day; return this.dayDefs().filter((d) => d.key !== cur && d.key !== 'anrufe' && !(cur === 'anrufe' && d.key === 'offen')); }
+  toastFor(t, ms) {
+    if (this._tt) clearTimeout(this._tt);
+    this.setState({ toast: t });
+    this._tt = setTimeout(() => { if (this._alive) this.setState({ toast: null }); }, ms || 4500);
+  }
+  view(id) {
+    const cur = this.frontId(); if (!id || (id === cur && !this.state.end)) return;
+    this.setState({ front: id, end: false, legend: false, enter: 'lift', calling: null, swap: 1 - this.state.swap, ghost: this.state.end ? null : { id: cur, kind: 'slot', dir: 1 }, dragX: 0, dragY: 0, dragging: false, dragAxis: null });
+    this.ghostOut(null, 520); this.countTo(id);
+  }
+  jumpBack(id) { this.view(id); }
+  edge() { this.setState({ enter: 'shake', swap: 1 - this.state.swap, dragX: 0, dragY: 0, dragging: false, dragAxis: null }); }
+  countTo(id) {
+    const st = this.data().st[id]; if (!st) return;
+    if (!/T€$/.test(st.wert)) { this.setState({ cnt: null }); return; }
+    const target = parseInt(st.wert.replace(/\./g, ''), 10); if (isNaN(target)) return;
+    if (this._raf) cancelAnimationFrame(this._raf);
+    const t0 = (window.performance && performance.now()) || Date.now();
+    const step = () => {
+      const t = Math.min(1, (((window.performance && performance.now()) || Date.now()) - t0) / 650);
+      const e = 1 - Math.pow(1 - t, 3);
+      if (!this._alive) return;
+      this.setState({ cnt: Math.round(target * e) });
+      if (t < 1) this._raf = requestAnimationFrame(step); else this._raf = null;
+    };
+    this._raf = requestAnimationFrame(step);
+  }
+  ghostOut(g, ms) {
+    if (this._gt) clearTimeout(this._gt);
+    this._gt = setTimeout(() => { this._gt = null; if (this._alive) this.setState({ ghost: null }); }, ms);
+  }
+  pick(id) { this.view(id); }
+  swipe(dir) {
+    const o = this.openList(); const cur = this.frontId(); const i = o.indexOf(cur);
+    if (this.state.end) { if (dir > 0) this.jumpBack(o[o.length - 1]); else this.edge(); return; }
+    if (dir < 0) {
+      if (i + 1 >= o.length) {
+        if (!o.length) return this.edge();
+        this.setState({ end: true, legend: false, calling: null, swap: 1 - this.state.swap, enter: 'stack', ghost: { id: cur, kind: 'slot', dir: -1 }, dragX: 0, dragY: 0, dragging: false, dragAxis: null });
+        this.ghostOut(null, 520); return;
+      }
+      this.view(o[i + 1]);
+    } else {
+      if (i <= 0) return this.edge();
+      this.view(o[i - 1]);
+    }
+  }
+  capTarget() {
+    const st = this.state, D = this.data();
+    let f = st.screen === 'brief' ? st.brief : (st.screen === 'heute' && st.day === 'heute' && !st.end ? this.frontId() : null);
+    if (!f || !D.st[f] || D.st[f].call || this.isDone(f)) f = this.openList('heute').find((id) => !D.st[id].call);
+    return f || 'brandt';
+  }
+  toCapture() {
+    this.stop();
+    this.setState({ screen: 'capture', rec: 'idle', n: 0, capSent: false, capFor: this.capTarget(), acc: { a: true, b: true, c: true, d: true }, edits: this.editsFor(this.capTarget()), edited: {}, editing: null, draft: null, dock: false, legend: false });
+  }
+  goHeute() {
+    if (this.state.capSent) {
+      const id = this.state.capFor;
+      this.setState({ screen: 'heute', day: 'heute', front: null, end: false, capSent: false, rec: 'idle', n: 0, celebrated: true, swap: 1 - this.state.swap, ghost: { id, kind: 'out', dir: 1, stamp: true } });
+      this.ghostOut(null, 1500); setTimeout(() => { const f = this.frontId(); if (f) this.countTo(f); }, 0);
+    } else {
+      const changed = this.state.screen !== 'heute' || this.state.day !== 'heute';
+      this.setState({ screen: 'heute', day: 'heute', front: null });
+      if (changed) { this.setState({ swap: 1 - this.state.swap }); const f = this.openList('heute')[0]; if (f) this.countTo(f); }
+    }
+  }
+  stop() {
+    if (this.timer) { clearInterval(this.timer); this.timer = null; }
+    if (this.t2) { clearTimeout(this.t2); this.t2 = null; }
+  }
+  tx() {
+    const id = this.state.capFor || 'brandt';
+    if (this._txFor !== id) { this._txFor = id; this._tx = null; }
+    if (!this._tx) {
+      const S = this.stories();
+      let t = S[id] ? S[id].tx : S.brandt.tx.replace(/Brandt/g, (this.data().st[id] || { short: 'Brandt' }).short.split(' ')[0]);
+      this._tx = t.split(' ');
+    }
+    return this._tx;
+  }
+  press() {
+    const s = this.state;
+    if (s.rec === 'idle') {
+      this.setState({ rec: 'rec', n: 0 });
+      const total = this.tx().length;
+      this.timer = setInterval(() => {
+        const n = this.state.n + 1;
+        if (n >= total) this.finish(); else this.setState({ n });
+      }, 120);
+    } else if (s.rec === 'rec') this.finish();
+  }
+  finish() {
+    this.stop();
+    this.setState({ rec: 'proc', n: this.tx().length });
+    this.t2 = setTimeout(() => { this.t2 = null; this.setState({ rec: 'done' }); }, 1500);
+  }
+  stories() { if (!this._st) this._st = {"brandt": {"tx": "Termin bei Brandt mit Doktor Meier und zum ersten Mal war Herr Brandl dabei, der neue Produktionsleiter. Die SX 450 fällt ständig aus, Brandl will Ersatz und ist klar für unsere Zelle. Der Einkauf will bis Mitte Dezember ein finales Angebot, ein Wettbewerber ist auch im Rennen. Budget ist fürs erste Quartal freigegeben. Nächster Schritt: Technik-Workshop am neunten Dezember bei denen vor Ort.", "hot": ["Brandl", "neunten", "Dezember", "SX", "450", "Budget", "Wettbewerber", "Technik-Workshop"], "a": {"name": "H. Brandl", "rolle": "Produktionsleitung", "haltung": "Befürworter"}, "b": {"art": "Technik-Workshop", "datum": "2026-12-09", "zeit": "09:00", "ort": "Bei Brandt in Augsburg", "mit": "H. Brandl, Dr. Meier"}, "c": {"nr": "ANG-1187", "title": "Automationszelle AZ-2", "phase": "Verhandlung", "prob": 60, "prev": 40, "abschluss": "2027-02", "wert": 386}, "d": "Termin mit Dr. Meier (GF) und H. Brandl (Produktion). SX 450 fällt häufiger aus, Produktion drängt auf Ersatz. Einkauf will bis Mitte Dezember ein finales Angebot, ein Wettbewerber ist im Rennen. Budget für Q1 freigegeben."}, "lindner": {"tx": "Termin bei Lindner mit Frau Doktor Haas aus der Qualität und Frau Kurz vom Einkauf. Die Reinraumzelle ist gesetzt, aber ohne Validierungskonzept gibt der Konzern kein Geld frei. Im zweiten Quartal kommt ein FDA-Audit, das macht Druck. Sie wollen eine Referenz in der Medizintechnik sehen. Nächster Schritt: Referenzbesuch bei Pfeiffer Medizin am fünfzehnten Januar, vorher schicke ich die Validierungsunterlagen.", "hot": ["Haas", "Validierungskonzept", "FDA-Audit", "Referenz", "Referenzbesuch", "Pfeiffer", "fünfzehnten", "Januar"], "a": {"name": "Dr. S. Haas", "rolle": "Leitung Qualität", "haltung": "Befürworter"}, "b": {"art": "Besuch", "datum": "2027-01-15", "zeit": "10:00", "ort": "Referenz bei Pfeiffer Medizin, Ulm", "mit": "Dr. S. Haas, M. Kurz"}, "c": {"nr": "ANG-1212", "title": "Reinraumzelle SX 300 CR", "phase": "Bedarf", "prob": 30, "prev": 10, "abschluss": "2027-05", "wert": 690}, "d": "Reinraumzelle gesetzt, Konzernfreigabe hängt am Validierungskonzept. FDA-Audit in Q2 erhöht den Druck. Referenzbesuch bei Pfeiffer Medizin am 15.01. vereinbart, Validierungsunterlagen vorab senden."}, "wolfram": {"tx": "Bei Wolfram mit Herrn Haas von der Instandhaltung die alte SX 450 angeschaut. Letzte Woche zwei Tage Stillstand, Ersatzteile für die Steuerung gibt es praktisch nicht mehr. Sie wollen Retrofit statt Neuanlage, Umbau im Werksurlaub im August. Neu dabei war Frau Lenz vom Einkauf, sie will das Angebot bis zum zwölften Dezember. Nächster Schritt: Aufmaß vor Ort am zehnten Dezember mit unserem Service.", "hot": ["Stillstand", "Retrofit", "August", "Lenz", "Einkauf", "zwölften", "zehnten", "Aufmaß"], "a": {"name": "P. Lenz", "rolle": "Einkauf", "haltung": "Neutral"}, "b": {"art": "Besuch", "datum": "2026-12-10", "zeit": "08:00", "ort": "Aufmaß bei Wolfram in Ulm", "mit": "T. Haas, Service-Team"}, "c": {"nr": "ANG-1219", "title": "Retrofit SX 450", "phase": "Angebot", "prob": 50, "prev": 20, "abschluss": "2027-03", "wert": 165}, "d": "Zwei Tage Stillstand an der SX 450, Steuerungsteile nicht mehr lieferbar. Kunde will Retrofit im Werksurlaub August. Einkauf (P. Lenz) erwartet Angebot bis 12.12., Aufmaß am 10.12."}, "ostermann": {"tx": "Verhandlung bei Ostermann mit Projektleiter Vogt, endlich war auch der Einkauf dabei, Herr Brenner. Er will sechs Prozent Nachlass und eine Lieferzeit von sechsundzwanzig Wochen, wir stehen bei dreißig. Ein italienischer Wettbewerber ist günstiger, aber technisch schwächer. Vogt will uns, braucht aber Argumente. Nächster Schritt: Teams-Call mit Brenner am vierten Dezember, bis dahin Lieferzeit mit der Fertigung klären.", "hot": ["Brenner", "Einkauf", "sechs", "Prozent", "sechsundzwanzig", "Wettbewerber", "vierten", "Dezember", "Lieferzeit"], "a": {"name": "J. Brenner", "rolle": "Einkauf", "haltung": "Kritisch"}, "b": {"art": "Teams-Call", "datum": "2026-12-04", "zeit": "14:00", "ort": "Microsoft Teams", "mit": "J. Brenner, M. Vogt"}, "c": {"nr": "ANG-1164", "title": "Neuanlage SX 800", "phase": "Verhandlung", "prob": 55, "prev": 50, "abschluss": "2027-01", "wert": 1120}, "d": "Einkauf (J. Brenner) fordert 6 % Nachlass und 26 Wochen Lieferzeit, wir liegen bei 30. Italienischer Wettbewerber günstiger, technisch schwächer. Projektleiter Vogt ist Befürworter. Teams-Call am 04.12., Lieferzeit vorher mit Fertigung klären."}, "kessler": {"tx": "Telefonat mit Herrn Kessler. Die zweimalige Verschiebung kommt vom Investitionsstopp bis zum Jahresabschluss, nicht von uns. Das Board entscheidet am zwanzigsten Januar. Herr Roth vom Einkauf ist offener als gedacht, wenn wir eine Leasing-Option anbieten. Nächster Schritt: Leasing-Angebot bis fünfzehnten Dezember, dann Termin mit Roth am achten Januar vor Ort.", "hot": ["Investitionsstopp", "Board", "zwanzigsten", "Januar", "Roth", "Leasing-Option", "Leasing-Angebot", "achten"], "a": {"name": "B. Roth", "rolle": "Einkauf", "haltung": "Neutral"}, "b": {"art": "Besuch", "datum": "2027-01-08", "zeit": "10:30", "ort": "Bei Kessler in Kempten", "mit": "B. Roth, A. Kessler"}, "c": {"nr": "ANG-1203", "title": "Linienerweiterung 2× SX 300", "phase": "Angebot", "prob": 45, "prev": 35, "abschluss": "2027-02", "wert": 520}, "d": "Verschiebungen wegen Investitionsstopp bis Jahresabschluss, nicht wegen uns. Board entscheidet am 20.01. Einkauf (B. Roth) offen für Leasing. Leasing-Angebot bis 15.12., Termin mit Roth am 08.01."}, "seitz": {"tx": "Telefonat mit Frau Seitz, der Geschäftsführerin, wir hatten uns auf der Fakuma kurz gesprochen. Sie haben zwei alte Fremdmaschinen ohne Automatisierung und finden kein Personal mehr für die Nachtschicht. Budget für nächstes Jahr ungefähr hundertzwanzigtausend. Sie will sich das vor Ort zeigen lassen. Nächster Schritt: Erstbesuch am dritten Dezember in der Halle.", "hot": ["Seitz", "Fakuma", "Nachtschicht", "hundertzwanzigtausend", "Erstbesuch", "dritten", "Dezember"], "a": {"name": "A. Seitz", "rolle": "Geschäftsführerin", "haltung": "Befürworter"}, "b": {"art": "Besuch", "datum": "2026-12-03", "zeit": "13:00", "ort": "Bei Seitz in Neu-Ulm", "mit": "A. Seitz"}, "c": {"nr": "LEAD-0871", "title": "Automation Bestandsmaschinen", "phase": "Bedarf", "prob": 25, "prev": 10, "abschluss": "2027-06", "wert": 120}, "d": "Messe-Kontakt von der Fakuma. Zwei Fremdmaschinen ohne Automatisierung, kein Personal für die Nachtschicht. Budget 2027 ca. 120 T€. Erstbesuch am 03.12."}, "mayer": {"tx": "Bei Mayer mit Herrn Kraus aus der Produktion. Das Angebot liegt vor, technisch ist alles klar. Budget gibt es aber erst ab März, deshalb kein Auftrag mehr in diesem Jahr. Wenn wir die Zelle bis April liefern, unterschreiben sie im Februar. Nächster Schritt: Liefertermin April intern bestätigen, Telefonat am vierzehnten Januar.", "hot": ["Kraus", "März", "April", "Februar", "vierzehnten", "Januar"], "a": {"name": "F. Kraus", "rolle": "Produktionsleitung", "haltung": "Befürworter"}, "b": {"art": "Teams-Call", "datum": "2027-01-14", "zeit": "09:30", "ort": "Telefon", "mit": "F. Kraus"}, "c": {"nr": "ANG-1195", "title": "Folienwickelzelle", "phase": "Verhandlung", "prob": 65, "prev": 50, "abschluss": "2027-02", "wert": 240}, "d": "Angebot technisch abgestimmt. Budget erst ab März, Unterschrift im Februar, wenn Lieferung bis April klappt. Liefertermin intern bestätigen, Call am 14.01."}, "rothd": {"tx": "Termin bei Roth Dosiertechnik mit Herrn Weber aus der Instandhaltung. Die SX 300 läuft, aber die Taktzeit reicht für den neuen Großauftrag nicht. Ein Retrofit mit neuem Greifer würde zwölf Prozent bringen. Herr Weber nimmt das in die Budgetrunde im Januar mit. Nächster Schritt: Kurzangebot bis neunzehnten Dezember.", "hot": ["Weber", "Taktzeit", "Retrofit", "Greifer", "zwölf", "Prozent", "Budgetrunde", "neunzehnten"], "a": {"name": "K. Weber", "rolle": "Instandhaltung", "haltung": "Befürworter"}, "b": {"art": "Teams-Call", "datum": "2026-12-19", "zeit": "11:00", "ort": "Angebotsbesprechung", "mit": "K. Weber"}, "c": {"nr": "ANG-1225", "title": "Retrofit SX 300 + Greifer", "phase": "Angebot", "prob": 40, "prev": 20, "abschluss": "2027-03", "wert": 175}, "d": "Taktzeit der SX 300 reicht für Neuauftrag nicht. Retrofit mit neuem Greifer bringt ca. 12 %. Thema geht in die Budgetrunde im Januar. Kurzangebot bis 19.12."}, "hagen": {"tx": "Rückruf bei Hagen Pumpen, Frau Ilg aus der Arbeitsvorbereitung. Ihr bisheriger Dienstleister hat aufgehört, sie brauchen kurzfristig einen Ersatzteilvertrag für beide Zellen. Volumen etwa fünfundneunzigtausend über drei Jahre. Nächster Schritt: Service-Kollegen einbinden, Vorschlag am siebten Januar per Teams.", "hot": ["Ilg", "Dienstleister", "Ersatzteilvertrag", "fünfundneunzigtausend", "siebten", "Januar"], "a": {"name": "S. Ilg", "rolle": "Arbeitsvorbereitung", "haltung": "Befürworter"}, "b": {"art": "Teams-Call", "datum": "2027-01-07", "zeit": "10:00", "ort": "Microsoft Teams", "mit": "S. Ilg, Service"}, "c": {"nr": "SRV-0331", "title": "Ersatzteilvertrag 3 Jahre", "phase": "Angebot", "prob": 60, "prev": 30, "abschluss": "2027-01", "wert": 95}, "d": "Bisheriger Dienstleister weggefallen. Ersatzteilvertrag für beide Zellen gewünscht, ca. 95 T€ über drei Jahre. Service einbinden, Vorschlag am 07.01. per Teams."}, "vogel": {"tx": "Bei Vogel mit dem Werksleiter Herrn Fink. Die zweite Linie kommt sicher, offen ist nur der Lieferant. Der Wettbewerb war letzte Woche da und hat Rabatt angeboten. Fink schätzt unsere Verfügbarkeit, die erste Linie läuft seit drei Jahren ohne großen Ausfall. Nächster Schritt: Besichtigung der ersten Linie mit seinem Geschäftsführer am zwölften Januar.", "hot": ["Fink", "Lieferant", "Wettbewerb", "Rabatt", "Verfügbarkeit", "zwölften", "Januar"], "a": {"name": "R. Fink", "rolle": "Werksleitung", "haltung": "Befürworter"}, "b": {"art": "Besuch", "datum": "2027-01-12", "zeit": "09:00", "ort": "Bei Vogel in Ingolstadt", "mit": "R. Fink, Geschäftsführung"}, "c": {"nr": "ANG-1208", "title": "Zweite Linie SX 450", "phase": "Verhandlung", "prob": 55, "prev": 45, "abschluss": "2027-02", "wert": 410}, "d": "Zweite Linie ist gesetzt, Lieferant offen. Wettbewerb bietet Rabatt. Werksleiter Fink überzeugt von unserer Verfügbarkeit. Besichtigung der ersten Linie mit der GF am 12.01."}, "kuhn": {"tx": "Erstbesuch bei Kuhn Elektronik, Herr Albrecht aus der Fertigungsplanung. Sie vergießen Platinen bisher von Hand, der Ausschuss liegt bei vier Prozent. Eine kleine Zelle mit Kamerakontrolle wäre interessant. Er braucht eine Wirtschaftlichkeitsrechnung für die Geschäftsführung. Nächster Schritt: Rechnung schicken und Workshop am zwanzigsten Januar.", "hot": ["Albrecht", "Ausschuss", "vier", "Prozent", "Kamerakontrolle", "Wirtschaftlichkeitsrechnung", "zwanzigsten", "Januar"], "a": {"name": "T. Albrecht", "rolle": "Fertigungsplanung", "haltung": "Befürworter"}, "b": {"art": "Technik-Workshop", "datum": "2027-01-20", "zeit": "13:00", "ort": "Bei Kuhn in Landsberg", "mit": "T. Albrecht"}, "c": {"nr": "LEAD-0902", "title": "Vergusszelle mit Kamera", "phase": "Bedarf", "prob": 30, "prev": 10, "abschluss": "2027-07", "wert": 130}, "d": "Platinenverguss bisher manuell, 4 % Ausschuss. Interesse an kleiner Zelle mit Kamerakontrolle. Wirtschaftlichkeitsrechnung für die GF nötig. Workshop am 20.01."}, "baur": {"tx": "Erstgespräch bei Baur Kunststoffwerk mit Frau Baur aus der Inhaberfamilie. Ihre Entnahmeroboter sind fünfzehn Jahre alt, zwei fallen regelmäßig aus. Sie will schrittweise erneuern, erst einen, dann den zweiten. Nächster Schritt: Angebot für den ersten Roboter und Termin am sechsundzwanzigsten Januar.", "hot": ["Baur", "Entnahmeroboter", "fünfzehn", "schrittweise", "sechsundzwanzigsten", "Januar"], "a": {"name": "C. Baur", "rolle": "Inhaberin", "haltung": "Befürworter"}, "b": {"art": "Besuch", "datum": "2027-01-26", "zeit": "10:00", "ort": "Bei Baur in Biberach", "mit": "C. Baur"}, "c": {"nr": "LEAD-0915", "title": "Entnahmeroboter Erneuerung", "phase": "Bedarf", "prob": 35, "prev": 15, "abschluss": "2027-04", "wert": 60}, "d": "Entnahmeroboter 15 Jahre alt, zwei fallen regelmäßig aus. Schrittweise Erneuerung gewünscht. Angebot für ersten Roboter, Termin am 26.01."}, "schmid": {"tx": "Bei Schmid Antriebe mit Herrn Ott von der Technik. Die Retrofit-Anfrage ist ernst, die alte Zelle schafft die neuen Toleranzen nicht. Herr Ott hat schon ein Budget von hundertzwanzigtausend beantragt, entschieden wird im Februar. Nächster Schritt: Messprotokolle anfordern und Technik-Workshop am achtundzwanzigsten Januar.", "hot": ["Ott", "Retrofit-Anfrage", "Toleranzen", "hundertzwanzigtausend", "Februar", "Messprotokolle", "achtundzwanzigsten"], "a": {"name": "M. Ott", "rolle": "Technik", "haltung": "Befürworter"}, "b": {"art": "Technik-Workshop", "datum": "2027-01-28", "zeit": "09:00", "ort": "Bei Schmid in Kaufbeuren", "mit": "M. Ott"}, "c": {"nr": "ANG-1231", "title": "Retrofit Toleranzpaket", "phase": "Angebot", "prob": 45, "prev": 25, "abschluss": "2027-02", "wert": 120}, "d": "Alte Zelle schafft neue Toleranzen nicht. Budget 120 T€ beantragt, Entscheidung im Februar. Messprotokolle anfordern, Technik-Workshop am 28.01."}, "c1": {"tx": "Termin bei Weiss Extrusion mit Herrn Weiss und Herrn Graf aus der Instandhaltung. Er war froh, dass sich endlich jemand meldet, unser letzter Besuch ist über hundert Tage her. Die Extruderlinie drei bekommt eine neue Nachfolgeautomatisierung, Budget steht ab Mitte nächsten Jahres. Nächster Schritt: Technik-Workshop am dreizehnten Januar mit Graf.", "hot": ["Graf", "hundert", "Extruderlinie", "Nachfolgeautomatisierung", "Budget", "dreizehnten", "Januar"], "a": {"name": "L. Graf", "rolle": "Instandhaltung", "haltung": "Neutral"}, "b": {"art": "Technik-Workshop", "datum": "2027-01-13", "zeit": "09:00", "ort": "Bei Weiss in Kaufbeuren", "mit": "R. Weiss, L. Graf"}, "c": {"nr": "LEAD-0920", "title": "Automation Extruderlinie 3", "phase": "Bedarf", "prob": 30, "prev": 10, "abschluss": "2027-06", "wert": 280}, "d": "Kunde fühlte sich vernachlässigt, letzter Besuch über 100 Tage her. Extruderlinie 3 bekommt neue Automatisierung, Budget ab Mitte 2027. Technik-Workshop mit Instandhaltung am 13.01."}, "c2": {"tx": "Bei Huber Kunststoffteile mit Herrn Huber. Die SX 450 von 2008 macht immer mehr Probleme, gestern wieder ein Hydraulikschaden. Er will noch dieses Quartal ein Angebot für eine Ersatzzelle, die Hausbank ist schon informiert. Nächster Schritt: Angebot bis elften Dezember, Besprechung am siebzehnten Dezember.", "hot": ["2008", "Hydraulikschaden", "Ersatzzelle", "Hausbank", "elften", "siebzehnten", "Dezember"], "a": {"name": "K. Huber", "rolle": "Technik", "haltung": "Befürworter"}, "b": {"art": "Besuch", "datum": "2026-12-17", "zeit": "10:00", "ort": "Bei Huber in Memmingen", "mit": "K. Huber"}, "c": {"nr": "ANG-1234", "title": "Ersatzzelle SX 450", "phase": "Angebot", "prob": 45, "prev": 15, "abschluss": "2027-01", "wert": 310}, "d": "SX 450 von 2008 mit wiederholten Hydraulikschäden. Angebot für Ersatzzelle noch in diesem Quartal, Finanzierung über Hausbank vorbereitet. Angebot bis 11.12., Besprechung am 17.12."}, "c3": {"tx": "Lechner Pack, Frau Lechner vom Einkauf, unser Kontakt von der Fakuma. Sie suchen eine Lösung für Kleinserien mit schnellem Formwechsel. Konkret wird es im Herbst nächsten Jahres, vorher wollen sie Referenzen sehen. Nächster Schritt: Referenzliste schicken und Teams-Call am einundzwanzigsten Januar.", "hot": ["Fakuma", "Kleinserien", "Formwechsel", "Herbst", "Referenzen", "einundzwanzigsten", "Januar"], "a": {"name": "S. Lechner", "rolle": "Einkauf", "haltung": "Neutral"}, "b": {"art": "Teams-Call", "datum": "2027-01-21", "zeit": "15:00", "ort": "Microsoft Teams", "mit": "S. Lechner"}, "c": {"nr": "LEAD-0922", "title": "Schnellwechselzelle Kleinserie", "phase": "Bedarf", "prob": 20, "prev": 5, "abschluss": "2027-09", "wert": 90}, "d": "Bedarf an Kleinserienlösung mit schnellem Formwechsel, Projekt im Herbst 2027. Referenzen gewünscht. Referenzliste senden, Teams-Call am 21.01."}, "c4": {"tx": "Pfeiffer Medizin, Frau Doktor Pfeiffer. Das Angebot lag dreiunddreißig Tage, sie hatte schlicht keine Zeit. Inhaltlich passt alles, nur die Schulung vor Ort fehlt ihr. Wenn wir die mit reinnehmen, geht es in die Freigabe. Nächster Schritt: Angebot mit Schulungspaket bis neunten Dezember, Abschlussgespräch am sechzehnten Dezember.", "hot": ["dreiunddreißig", "Schulung", "Freigabe", "Schulungspaket", "neunten", "sechzehnten", "Dezember"], "a": {"name": "Dr. A. Pfeiffer", "rolle": "Werkleitung", "haltung": "Befürworter"}, "b": {"art": "Besuch", "datum": "2026-12-16", "zeit": "11:00", "ort": "Bei Pfeiffer in Ulm", "mit": "Dr. A. Pfeiffer"}, "c": {"nr": "ANG-1171", "title": "Reinraum-Handlingzelle", "phase": "Verhandlung", "prob": 70, "prev": 40, "abschluss": "2026-12", "wert": 220}, "d": "Angebot lag 33 Tage aus Zeitmangel. Inhaltlich passend, Schulung vor Ort fehlt. Mit Schulungspaket geht es in die Freigabe. Angebot bis 09.12., Abschlussgespräch am 16.12."}, "c5": {"tx": "Gruber Automotive, Herr Gruber aus der Instandhaltung. Der Wartungsvertrag läuft im Januar aus und er will verlängern, aber mit kürzeren Reaktionszeiten. Dafür würde er auch das Premium-Paket nehmen. Nächster Schritt: Premium-Angebot bis achtzehnten Dezember, Unterschrift im Januar.", "hot": ["Wartungsvertrag", "Januar", "Reaktionszeiten", "Premium-Paket", "Premium-Angebot", "achtzehnten"], "a": {"name": "T. Gruber", "rolle": "Instandhaltung", "haltung": "Befürworter"}, "b": {"art": "Teams-Call", "datum": "2026-12-18", "zeit": "10:00", "ort": "Microsoft Teams", "mit": "T. Gruber"}, "c": {"nr": "SRV-0340", "title": "Wartung Premium 3 Jahre", "phase": "Verhandlung", "prob": 75, "prev": 50, "abschluss": "2027-01", "wert": 60}, "d": "Wartungsvertrag endet im Januar, Verlängerung gewünscht mit kürzeren Reaktionszeiten. Premium-Paket interessant. Angebot bis 18.12., Unterschrift im Januar."}}
+; return this._st; }
+  story(id) { const S = this.stories(); return S[id] || S.brandt; }
+  editsFor(id) {
+    const st = this.story(id);
+    return { a: { ...st.a }, b: { ...st.b }, c: { phase: st.c.phase, prob: st.c.prob, abschluss: st.c.abschluss, wert: st.c.wert }, d: { text: st.d } };
+  }
+  defaultEdits() {
+    return {
+      a: { name: 'H. Brandl', rolle: 'Produktionsleitung', haltung: 'Befürworter' },
+      b: { art: 'Technik-Workshop', datum: '2026-12-09', zeit: '09:00', ort: 'Bei Brandt in Augsburg', mit: 'H. Brandl, Dr. Meier' },
+      c: { phase: 'Verhandlung', prob: 60, abschluss: '2027-02', wert: 386 },
+      d: { text: 'Termin mit Dr. Meier (GF) und H. Brandl (Produktion). SX 450 fällt häufiger aus, Produktion drängt auf Ersatz. Einkauf will bis Mitte Dezember ein finales Angebot, ein Wettbewerber ist im Rennen. Budget für Q1 freigegeben.' }
+    };
+  }
+  fmtD(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); if (!m) return iso || '';
+    const d = new Date(+m[1], +m[2] - 1, +m[3]);
+    return ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][d.getDay()] + ' ' + m[3] + '.' + m[2] + '.';
+  }
+  fmtM(ym) {
+    const m = /^(\d{4})-(\d{2})$/.exec(ym || ''); if (!m) return ym || '';
+    return ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'][+m[2] - 1] + ' ' + m[1];
+  }
+  openEditor(k) { this.setState({ editing: k, draft: { ...this.state.edits[k] }, pressing: null }); }
+  send() {
+    const now = new Date();
+    const ts = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    const id = this.state.capFor, st = this.story(id), D = this.data();
+    const seq = (this.state.seq || 0) + 1;
+    const cap = { id, seq, ts, by: 'Jonas Keller', kunde: (D.st[id] || D.st.brandt).name2.replace('\n', ' '), nr: st.c.nr, title: st.c.title, prev: st.c.prev, acc: this.state.acc, edits: this.state.edits };
+    const captures = { ...this.state.captures, [id]: cap };
+    const upd = { capSent: true, screen: 'capture', captures, seq };
+    if (id === 'brandt') upd.sent = true; else upd.doneIds = { ...this.state.doneIds, [id]: true };
+    this.setState(upd);
+    this.pushLive({ erfasst: id === 'brandt' || !!this.state.sent, ts, acc: this.state.acc, edits: this.state.edits, captures, seq });
+  }
+  reset() {
+    this.stop();
+    this.setState(this.initial());
+    this.pushLive({ erfasst: false, captures: {}, seq: 0 });
+  }
+  data() {
+    const R = '#ff6b6f', A = '#ffc85c', G = '#cde7c4';
+    return {
+      st: {
+        hessler: { time: '08:30', ort: 'Fulda', km: '—', short: 'Hessler', name2: 'Hessler\nVerpackungstechnik', wert: '64 T€', chips: [{ t: 'Zusage mündlich', bg: G, fg: '#1d3315' }] },
+        brandt: { time: '11:00', ort: 'Augsburg', km: '42 km', short: 'Brandt Kunststoff', name2: 'Brandt\nKunststofftechnik', wert: '386 T€', chips: [{ t: '41 Tage still', bg: R, fg: '#2a0a0b' }, { t: 'SX 450 · 17 J.', bg: A, fg: '#2e2000' }, { t: 'Produktion fehlt', bg: A, fg: '#2e2000' }] },
+        wolfram: { time: '14:30', ort: 'Ulm', km: '78 km', short: 'Wolfram Präzisionsguss', name2: 'Wolfram\nPräzisionsguss', wert: '145 T€', chips: [{ t: 'SX 450 · 18 J.', bg: A, fg: '#2e2000' }, { t: 'Steuerung abgekündigt', bg: A, fg: '#2e2000' }, { t: 'Einkauf fehlt', bg: R, fg: '#2a0a0b' }] },
+        kessler: { time: '16:30', ort: 'Anruf', km: 'Telefon', short: 'Kessler Food', name2: 'Kessler\nFood Systems', wert: '520 T€', chips: [{ t: '2× verschoben', bg: A, fg: '#2e2000' }, { t: 'Einkauf kritisch', bg: R, fg: '#2a0a0b' }] },
+        lindner: { ort: 'Ulm', km: '74 km', short: 'Lindner Medizintechnik', name2: 'Lindner\nMedizintechnik', wert: '690 T€', chips: [{ t: 'Kein nächster Schritt', bg: R, fg: '#2a0a0b' }, { t: 'Reinraum', bg: G, fg: '#1d3315' }] },
+        ostermann: { ort: 'Neu-Ulm', km: '6 km', short: 'Ostermann Automotive', name2: 'Ostermann\nAutomotive', wert: '1.120 T€', chips: [{ t: 'Einkauf unbekannt', bg: A, fg: '#2e2000' }, { t: 'Verhandlung', bg: G, fg: '#1d3315' }] },
+        seitz: { ort: 'Anruf', km: 'Telefon', short: 'Seitz Maschinenbau', name2: 'Seitz\nMaschinenbau', wert: '80 T€', chips: [{ t: 'Messe-Lead', bg: G, fg: '#1d3315' }, { t: 'Bedarf offen', bg: A, fg: '#2e2000' }] },
+        mayer: { ort: 'Kempten', km: '128 km', short: 'Mayer Folientechnik', name2: 'Mayer\nFolientechnik', wert: '240 T€', chips: [{ t: 'Angebot raus', bg: G, fg: '#1d3315' }, { t: 'Budget 2027', bg: A, fg: '#2e2000' }] },
+        rothd: { ort: 'Memmingen', km: '96 km', short: 'Roth Dosiertechnik', name2: 'Roth\nDosiertechnik', wert: '175 T€', chips: [{ t: 'Retrofit SX 300', bg: G, fg: '#1d3315' }] },
+        hagen: { ort: 'Anruf', km: 'Telefon', short: 'Hagen Pumpen', name2: 'Hagen\nPumpen', wert: '95 T€', chips: [{ t: 'Rückruf zugesagt', bg: A, fg: '#2e2000' }] },
+        vogel: { ort: 'Ingolstadt', km: '84 km', short: 'Vogel Spritzguss', name2: 'Vogel\nSpritzguss', wert: '410 T€', chips: [{ t: 'Zweite Linie', bg: G, fg: '#1d3315' }, { t: 'Wettbewerb', bg: A, fg: '#2e2000' }] },
+        kuhn: { ort: 'Landsberg', km: '58 km', short: 'Kuhn Elektronik', name2: 'Kuhn\nElektronik', wert: '130 T€', chips: [{ t: 'Erstbesuch', bg: G, fg: '#1d3315' }] },
+        baur: { ort: 'Biberach', km: '112 km', short: 'Baur Kunststoffwerk', name2: 'Baur\nKunststoffwerk', wert: '60 T€', chips: [{ t: 'Erstgespräch', bg: G, fg: '#1d3315' }, { t: 'Termin offen', bg: A, fg: '#2e2000' }] },
+        schmid: { ort: 'Kaufbeuren', km: '64 km', short: 'Schmid Antriebe', name2: 'Schmid\nAntriebe', wert: '120 T€', chips: [{ t: 'Retrofit-Anfrage', bg: G, fg: '#1d3315' }] },
+        c1: { call: true, ort: 'Kaufbeuren', km: 'A-Kunde', short: 'Weiss Extrusion', name2: 'Weiss\nExtrusion', wert: '280 T€', person: 'R. Weiss · Geschäftsführung', tel: '+49 8341 552010', chips: [{ t: '112 Tage ohne Besuch', bg: R, fg: '#2a0a0b' }] },
+        c2: { call: true, ort: 'Memmingen', km: 'Bestand', short: 'Huber Kunststoffteile', name2: 'Huber\nKunststoffteile', wert: '310 T€', person: 'K. Huber · Technik', tel: '+49 8331 92410', chips: [{ t: 'SX 450 · Bj. 2008', bg: A, fg: '#2e2000' }, { t: 'Ersatz fällig', bg: A, fg: '#2e2000' }] },
+        c3: { call: true, ort: 'Augsburg', km: 'Messe-Lead', short: 'Lechner Pack', name2: 'Lechner\nPack', wert: '90 T€', person: 'S. Lechner · Einkauf', tel: '+49 821 457730', chips: [{ t: 'Fakuma-Kontakt', bg: G, fg: '#1d3315' }, { t: 'Noch nicht angerufen', bg: A, fg: '#2e2000' }] },
+        c4: { call: true, ort: 'Ulm', km: 'Angebot offen', short: 'Pfeiffer Medizin', name2: 'Pfeiffer\nMedizin', wert: '220 T€', person: 'Dr. A. Pfeiffer · Werkleitung', tel: '+49 731 180640', chips: [{ t: 'Angebot 33 Tage still', bg: R, fg: '#2a0a0b' }] },
+        c5: { call: true, ort: 'Ingolstadt', km: 'Service', short: 'Gruber Automotive', name2: 'Gruber\nAutomotive', wert: '60 T€', person: 'T. Gruber · Instandhaltung', tel: '+49 841 30129', chips: [{ t: 'Wartung endet 01/27', bg: A, fg: '#2e2000' }] }
+      },
+      ap: [
+        { id: 'hessler', day: 'heute', time: '08:30' }, { id: 'brandt', day: 'heute', time: '11:00' }, { id: 'lindner', day: 'heute', time: '12:30' },
+        { id: 'wolfram', day: 'heute', time: '14:30' }, { id: 'ostermann', day: 'heute', time: '15:45' }, { id: 'kessler', day: 'heute', time: '16:30' },
+        { id: 'seitz', day: 'heute', time: '17:15' }, { id: 'mayer', day: 'fr', time: '09:00' }, { id: 'rothd', day: 'fr', time: '13:30' },
+        { id: 'hagen', day: 'fr', time: '16:00' }, { id: 'vogel', day: 'mo', time: '10:00' }, { id: 'kuhn', day: 'mo', time: '14:00' },
+        { id: 'baur', day: 'offen', time: '' }, { id: 'schmid', day: 'offen', time: '' },
+        { id: 'c1', day: 'anrufe', time: '' }, { id: 'c2', day: 'anrufe', time: '' }, { id: 'c3', day: 'anrufe', time: '' }, { id: 'c4', day: 'anrufe', time: '' }, { id: 'c5', day: 'anrufe', time: '' }
+      ],
+      briefs: {
+        hessler: { time: '08:30', name: 'Hessler Verpackungstechnik', ort: 'Fulda', klasse: 'B-Kunde', last: 'heute besucht',
+          machines: [{ typ: 'VX 120 Kartonierer', sn: 'SN 18-2210', bj: '2018', note: 'Vertrag endet 12/26', bg: A, fg: '#2e2000' }],
+          offer: { title: 'Ersatzteile + Wartung', info: 'Mündliche Zusage · Auftrag KW 49', wert: '64 T€', bg: G, fg: '#1d3315' },
+          contacts: [{ ini: 'MH', n: 'M. Hessler', r: 'Geschäftsführung', s: 'Dafür', ring: '#7fd35f' }, { ini: 'LG', n: 'L. Gruber', r: 'Instandhaltung', s: 'Dafür', ring: '#7fd35f' }, { ini: '?', n: 'Einkauf', r: 'nicht nötig', s: '—', ring: '#e4ecdf' }],
+          points: [{ nr: '1', t: 'Unterschrift bis KW 49 sichern' }, { nr: '2', t: 'Zweite Linie 2027 erfragen' }, { nr: '3', t: 'Referenzbesuch für Kessler anbieten' }] },
+        brandt: { time: '11:00', name: 'Brandt Kunststofftechnik', ort: 'Augsburg', klasse: 'A-Kunde', last: 'zuletzt vor 104 Tagen',
+          machines: [{ typ: 'SX 450 Zelle', sn: 'SN 09-4471', bj: '2009', note: '17 J. · Ersatz', bg: A, fg: '#2e2000' }, { typ: 'SX 300 Zelle', sn: 'SN 16-0982', bj: '2016', note: 'Läuft', bg: G, fg: '#1d3315' }],
+          offer: { title: 'ANG-1187 · Zelle AZ-2', info: '41 Tage offen · noch kein Nachfass', wert: '386 T€', bg: R, fg: '#2a0a0b' },
+          contacts: [{ ini: 'KM', n: 'Dr. Meier', r: 'Geschäftsführung', s: 'Dafür', ring: '#7fd35f' }, { ini: 'SY', n: 'S. Yilmaz', r: 'Einkauf', s: 'Neutral', ring: '#ffc85c' }, { ini: '?', n: 'Produktion', r: 'unbekannt', s: 'Lücke', ring: '#ff6b6f' }],
+          points: [{ nr: '1', t: 'Ausfälle der SX 450 ansprechen und Stillstandskosten beziffern' }, { nr: '2', t: 'ANG-1187: Was fehlt noch zur Entscheidung?' }, { nr: '3', t: 'Produktionsleitung kennenlernen' }] },
+        wolfram: { time: '14:30', name: 'Wolfram Präzisionsguss', ort: 'Ulm', klasse: 'A-Kunde', last: 'zuletzt vor 55 Tagen',
+          machines: [{ typ: 'SX 450 Zelle', sn: 'SN 08-3307', bj: '2008', note: '18 J. · Retrofit', bg: A, fg: '#2e2000' }, { typ: 'SX 300 Zelle', sn: 'SN 20-1145', bj: '2020', note: 'Läuft', bg: G, fg: '#1d3315' }],
+          offer: { title: 'Noch kein Angebot', info: 'Retrofit-Potenzial geschätzt', wert: '145 T€', bg: G, fg: '#1d3315' },
+          contacts: [{ ini: 'PW', n: 'P. Wolfram', r: 'Geschäftsführung', s: 'Dafür', ring: '#7fd35f' }, { ini: 'TH', n: 'T. Haas', r: 'Instandhaltung', s: 'Dafür', ring: '#7fd35f' }, { ini: '?', n: 'Einkauf', r: 'unbekannt', s: 'Lücke', ring: '#ff6b6f' }],
+          points: [{ nr: '1', t: 'Abkündigung der Steuerung als Anlass nutzen' }, { nr: '2', t: 'Budgetzeitraum klären' }, { nr: '3', t: 'Einkauf identifizieren' }] },
+        kessler: { time: '16:30', name: 'Kessler Food Systems', ort: 'Kempten', klasse: 'A-Kunde', last: 'Telefonat 03.11.',
+          machines: [{ typ: '2× SX 300 Zelle', sn: 'SN 14-0761/62', bj: '2014', note: 'Läuft', bg: G, fg: '#1d3315' }],
+          offer: { title: 'ANG-1203 · Erweiterung', info: '23 Tage offen · 2× verschoben', wert: '520 T€', bg: A, fg: '#2e2000' },
+          contacts: [{ ini: 'AK', n: 'A. Kessler', r: 'Vorstand Technik', s: 'Neutral', ring: '#ffc85c' }, { ini: 'BR', n: 'B. Roth', r: 'Einkauf', s: 'Kritisch', ring: '#ff6b6f' }, { ini: 'FN', n: 'F. Nowak', r: 'Werkleitung', s: 'Dafür', ring: '#7fd35f' }],
+          points: [{ nr: '1', t: 'Grund für die Verschiebung klären' }, { nr: '2', t: 'Einkauf mit Referenz Hessler überzeugen' }, { nr: '3', t: 'Verbindliches Entscheidungsdatum vereinbaren' }] }
+      }
+    };
+  }
+  renderVals() {
+    const s = this.state, sent = s.sent;
+    const set = (o) => this.setState(o);
+    const D = this.data();
+    const open = this.openList();
+    const frontId = this.frontId();
+    const AB = s.swap ? 'B' : 'A';
+    const DD = this.dayDefs();
+    const idx0 = s.end && open.length ? open.length : Math.max(0, open.indexOf(frontId));
+    const nS = open.length;
+    const S = nS ? Math.min(30, Math.floor(128 / nS)) : 0;
+    const frontTop = nS ? nS * S + 8 : 0;
+    const slotTop = (id) => Math.max(0, open.indexOf(id)) * S;
+    const endNow = !!(s.end && nS);
+    const backs = open.map((id, i) => {
+      const st = D.st[id]; const cur = id === frontId && !endNow; const c = this.colorOf(id); const dp = this.deepOf(id);
+      return { time: this.apTime(id) || (st.call ? 'Anruf' : '—'), short: st.short, right: cur ? 'angezeigt ↓' : st.wert,
+        top: i * S, inset: Math.max(4, Math.min(28, (nS - i) * 5)), pad: S < 24 ? '2px' : '5px',
+        bg: cur ? 'rgba(255,255,255,.6)' : c, fg: cur ? dp : '#272d3a', border: cur ? '2px dashed ' + dp : '0', current: cur ? 'true' : 'false',
+        aria: cur ? st.short + ', wird angezeigt' : st.short + ' anzeigen', pick: () => this.view(id) };
+    });
+    const isEnd = !!(s.end && open.length);
+    const hasFront = !!frontId && !isEnd;
+    const fs = hasFront ? D.st[frontId] : D.st.brandt;
+    const ftime = hasFront ? this.apTime(frontId) : '';
+    const isNext = s.day === 'heute' && idx0 === 0;
+    const isCallCard = hasFront && s.day === 'anrufe';
+    const cardOpen = !!frontId;
+    const dayDef = DD.find((d) => d.key === s.day) || DD[0];
+    let flabel, fchip = '#ffffff';
+    if (isCallCard) { flabel = 'ANRUF ' + (idx0 + 1) + ' VON ' + open.length; fchip = '#2bbbad'; }
+    else if (!ftime) flabel = 'ZEIT OFFEN';
+    else if (s.day === 'heute') { flabel = (idx0 === 0 ? 'JETZT · ' : idx0 === 1 ? 'DANACH · ' : 'SPÄTER · ') + ftime; if (idx0 === 0) fchip = '#52ae32'; }
+    else flabel = dayDef.label.toUpperCase() + ' · ' + ftime;
+    const unit = fs.wert.replace(/^[0-9.]+/, '');
+    const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const front = { ...fs, color: hasFront ? this.colorOf(frontId) : '#272d3a', label: flabel, chipBg: fchip, telRaw: (fs.tel || '').replace(/\s/g, ''),
+      wertAnim: s.cnt != null && /T€$/.test(fs.wert) ? fmt(s.cnt) + unit : fs.wert,
+      chips: fs.chips.map((c, i) => ({ ...c, anim: 'c-chip' + AB + ' .45s ' + (0.25 + i * 0.08).toFixed(2) + 's cubic-bezier(.2,.9,.3,1.5) backwards' })) };
+    const days = DD.map((d) => {
+      const on = s.day === d.key; const n = this.openList(d.key).length; const off = d.key === 'offen' || d.key === 'anrufe';
+      return { ...d, count: String(n), pressed: on ? 'true' : 'false',
+        bg: on ? '#272d3a' : off ? 'transparent' : 'rgba(39,45,58,.12)', fg: on ? '#ffffff' : '#272d3a',
+        border: off && !on ? '2px dashed rgba(39,45,58,.45)' : '2px solid transparent',
+        glyph: on ? '#7fd35f' : '#272d3a', cntBg: on ? '#52ae32' : '#272d3a', cntFg: on ? '#10210a' : '#ffffff',
+        anim: s.landed === d.key ? 'c-land .6s cubic-bezier(.2,.9,.3,1.4)' : 'none',
+        pick: () => this.setDay(d.key) };
+    });
+    const toX = (t) => { if (!t) return null; const p = t.split(':'); const h = +p[0] + (+p[1]) / 60; return Math.max(2, Math.min(98, ((h - 7) / 12) * 100)); };
+    const band = this.dayList(s.day, true).filter((id) => this.apTime(id)).map((id) => {
+      const isF = id === frontId && !(s.end && open.length); const done = this.isDone(id);
+      return { x: toX(this.apTime(id)).toFixed(1), time: this.apTime(id), isFront: isF,
+        size: isF ? 20 : 13, mb: isF ? 0 : 3, fill: done ? 'rgba(39,45,58,.35)' : this.colorOf(id), bd: isF ? '#272d3a' : done ? 'rgba(39,45,58,.35)' : this.deepOf(id),
+        anim: 'c-chip' + AB + ' .35s cubic-bezier(.2,.9,.3,1.5) backwards',
+        aria: D.st[id].short + ' ' + this.apTime(id) + (done ? ', erledigt' : ''),
+        pick: () => { if (!done) this.pick(id); } };
+    });
+    const dayLong = (DD.find((d) => d.key === s.day) || DD[0]).long;
+    const potSum = open.reduce((acc, id) => acc + (parseInt((D.st[id].wert || '').replace(/\./g, ''), 10) || 0), 0);
+    const fmtT = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' T€';
+    let headA, headB;
+    if (s.day === 'anrufe') { headA = open.length ? open.length + ' Anrufe.' : 'Liste durch.'; headB = open.length ? fmtT(potSum) + ' Potenzial.' : 'Stark gemacht.'; }
+    else if (!hasFront && !isEnd) { headA = (s.day === 'heute' ? 'Heute' : dayLong) + ' leer?'; headB = 'Ran ans Telefon.'; }
+    else if (s.day === 'heute') { headA = open.length + ' Stationen.'; headB = fmtT(potSum) + ' im Feuer.'; }
+    else { headA = dayLong + '.'; headB = s.day === 'offen' ? open.length + ' ohne Termin.' : open.length + ' Stationen.'; }
+    const wk = this.weekCount();
+    const callsLeft = this.openList('anrufe');
+    const callPot = callsLeft.reduce((acc, id) => acc + (parseInt((D.st[id].wert || '').replace(/\./g, ''), 10) || 0), 0);
+    const missing = Math.max(0, 12 - wk);
+    let empty;
+    if (s.day === 'anrufe') empty = { chip: 'ANRUFLISTE ERLEDIGT', title: 'Liste durch.', text: 'Gute Arbeit. Neue Kontakte kommen aus dem Leitstand: A-Kunden ohne Besuch, alte Anlagen, stille Angebote.', cta: 'Zu meinem Stapel →', go: () => this.setDay('heute') };
+    else if (missing > 0) empty = { chip: 'KEIN TERMIN = TELEFONZEIT', title: 'Telefon raus.', text: 'Bis zum Wochenziel fehlen ' + missing + ' Termine. In deiner Anrufliste warten ' + callsLeft.length + ' Kontakte mit ' + fmtT(callPot) + ' Potenzial.', cta: 'Anrufliste starten →', go: () => this.setDay('anrufe') };
+    else empty = { chip: 'WOCHENZIEL GESCHAFFT', title: 'Leg nach.', text: 'Jeder Termin mehr ist Vorsprung fürs nächste Quartal. ' + callsLeft.length + ' Kontakte mit ' + fmtT(callPot) + ' Potenzial warten.', cta: 'Anrufliste starten →', go: () => this.setDay('anrufe') };
+    const tgs = this.targetDefs();
+    const targets = tgs.map((t, i) => {
+      const hov = s.hover === i; const off = t.key === 'offen'; const n = this.openList(t.key).length;
+      return { ...t, label: t.key === 'heute' ? 'Heute' : t.key === 'fr' ? 'Morgen' : t.key === 'mo' ? 'Montag' : 'Irgendwann',
+        sub: off ? 'ohne Termin' : t.label + ' · ' + n + ' Termin' + (n === 1 ? '' : 'e'),
+        bg: off ? '#272d3a' : hov ? '#7fd35f' : '#cde7c4', fg: off ? '#ffffff' : '#272d3a',
+        border: off ? '2px dashed #7fd35f' : '2px solid transparent', plate: off ? '#7fd35f' : '#cde7c4',
+        ring: hov ? '0 0 0 4px #ffffff' : 'none', tf: hov ? 'scale(1.08) translateY(-4px)' : 'none',
+        pick: () => { if (frontId) this.moveTo(frontId, t.key, i); } };
+    });
+    const prevId = idx0 > 0 ? open[idx0 - 1] : null, nextId = idx0 + 1 < open.length ? open[idx0 + 1] : null;
+    const nm = (id) => D.st[id].short.split(' ')[0] + (this.apTime(id) ? ' ' + this.apTime(id) : '');
+    const pileN = 0;
+    const pile = [];
+    for (let k = pileN - 1; k >= 0; k--) pile.push({ top: 376 - 40 + 8 * (k + 1), inset: 10 * (k + 1), bg: this.colorOf(open[idx0 - 1 - k]) });
+    const dots = open.map((id, i) => ({ w: i === idx0 ? 24 : 10, bd: i === idx0 ? '#272d3a' : this.deepOf(id), bg: this.colorOf(id),
+      aria: D.st[id].short + (i === idx0 ? ', aktuell' : ''), go: () => { if (i < idx0) this.jumpBack(id); else if (i > idx0) this.pick(id); } }));
+    const isCallNow = s.day === 'anrufe';
+    const dragDir = s.dragging && s.dragAxis ? (s.dragAxis === 'x' ? (s.dragX < 0 ? 'left' : 'right') : (s.dragY < 0 ? 'up' : 'down')) : null;
+    const armedDir = !dragDir ? null : dragDir === 'left' ? (s.dragX < -90 ? 'left' : null) : dragDir === 'right' ? (s.dragX > 90 && prevId ? 'right' : null) : dragDir === 'up' ? (s.dragY < -55 ? 'up' : null) : (s.dragY > 110 && s.hover >= 0 ? 'down' : null);
+    const legend = (s.legend || (s.coach && s.screen === 'heute')) && hasFront && !s.dragging;
+    const crossShow = hasFront && (legend || !!dragDir);
+    const tgt = this.targetDefs()[s.hover];
+    const tgtName = tgt ? (tgt.key === 'heute' ? 'Heute' : tgt.key === 'fr' ? 'Morgen' : tgt.key === 'mo' ? 'Montag' : 'Irgendwann') : '';
+    const armDefs = [
+      { k: 'up', pos: 'left:50%;top:12px;margin-left:-60px;width:120px', text: '↑ Rüstblatt', sub: 'Details öffnen', ok: true, go: () => set({ legend: false, coach: false, brief: frontId, screen: 'brief', back: 'heute' }) },
+      { k: 'down', pos: 'left:50%;bottom:12px;margin-left:-66px;width:132px', text: isCallNow ? '↓ Termin legen' : '↓ Verschieben', sub: dragDir === 'down' && tgt ? '→ ' + tgtName : 'auf einen Tag', ok: true, go: () => set({ legend: false, coach: false, dock: true, hover: -1 }) },
+      { k: 'left', pos: 'left:10px;top:50%;margin-top:-24px;width:118px', text: '← Weiter', sub: nextId ? nm(nextId) : 'zum Stapel-Ende', ok: true, go: () => { set({ legend: false, coach: false }); this.swipe(-1); } },
+      { k: 'right', pos: 'right:10px;top:50%;margin-top:-24px;width:118px', text: 'Zurück →', sub: prevId ? nm(prevId) : 'erste Karte', ok: !!prevId, go: () => { set({ legend: false, coach: false }); if (prevId) this.swipe(1); } }
+    ];
+    const cross = { show: crossShow, isLegend: legend, title: s.coach && !s.legend ? 'So steuerst du den Stapel: wischen oder antippen' : 'Wischen oder antippen',
+      tint: legend ? 'rgba(25,29,38,.9)' : 'rgba(25,29,38,.55)', pe: legend ? 'auto' : 'none', center: legend ? '✕' : '✛',
+      close: (e) => { if (e && e.target !== e.currentTarget) return; set({ legend: false, coach: false }); },
+      arms: armDefs.map((a) => {
+        const armed = armedDir === a.k; const active = dragDir === a.k;
+        return { ...a, aria: a.text + ', ' + a.sub, bg: armed ? '#52ae32' : '#ffffff', fg: armed ? '#10210a' : '#272d3a',
+          op: !a.ok ? '.35' : dragDir && !active ? '.35' : '1', tf: armed ? 'scale(1.12)' : active ? 'scale(1.04)' : 'none' };
+      }) };
+    let endCard = { title: '', text: '', restart: () => {}, back: () => {}, go: () => {}, goLabel: '' };
+    if (isEnd) {
+      const first = open[0];
+      endCard = { title: 'Durch.',
+        text: isCallNow ? 'Alle ' + open.length + ' Kontakte gesehen. Noch nicht erreicht? Ab nach vorn und nochmal.' : 'Alle ' + open.length + ' Karten gesehen. Als Nächstes dran: ' + nm(first) + '.',
+        restart: () => this.jumpBack(first), back: () => this.jumpBack(open[open.length - 1]),
+        goLabel: isCallNow ? 'Zum Stapel →' : s.day === 'heute' ? 'Anrufliste →' : 'Heute →',
+        go: () => this.setDay(isCallNow ? 'heute' : s.day === 'heute' ? 'anrufe' : 'heute') };
+    }
+    const toast = s.toast;
+    const toastDay = toast ? (DD.find((d) => d.key === toast.day) || DD[0]) : null;
+    let toastText = '';
+    if (toast) {
+      const nm = D.st[toast.id].short.split(' ')[0];
+      if (toast.kind === 'info' || toast.kind === 'gone') toastText = toast.text;
+      else if (toast.kind === 'won') toastText = 'Termin gemacht! ' + nm + ' → ' + toastDay.label + (toast.time ? ' · ' + toast.time : '') + ' · Woche ' + wk + '/12';
+      else toastText = nm + ' → ' + (toast.day === 'offen' ? 'Irgendwann' : toastDay.label + (toast.time ? ' · ' + toast.time : ''));
+    }
+    let ghost = { by: '0px', color: '#272d3a', dir: 1, tx: '0px', anim: 'none', name2: '', wert: '', stamp: false };
+    if (s.ghost && D.st[s.ghost.id]) {
+      const g = D.st[s.ghost.id];
+      const anim = s.ghost.kind === 'back' ? 'c-back' + AB + ' .5s ease-in forwards'
+        : s.ghost.stamp ? 'c-out' + AB + ' .6s .7s cubic-bezier(.5,0,.9,.4) forwards' : 'c-out' + AB + ' .55s cubic-bezier(.5,0,.9,.4) forwards';
+      const dropAnim = 'c-drop' + AB + ' .6s cubic-bezier(.5,0,.75,.6) forwards';
+      const pileAnim = 'c-pile' + AB + ' .5s cubic-bezier(.5,0,.75,.6) forwards';
+      const slotAnim = 'c-slot' + AB + ' .45s cubic-bezier(.5,0,.75,.6) forwards';
+      ghost = { by: (slotTop(s.ghost.id) - frontTop) + 'px', color: this.colorOf(s.ghost.id), dir: s.ghost.dir || 1, tx: [-118, 0, 118][s.ghost.idx || 0] + 'px', anim: s.ghost.kind === 'drop' ? dropAnim : s.ghost.kind === 'pile' ? pileAnim : s.ghost.kind === 'slot' ? slotAnim : anim, name2: g.name2, wert: g.wert, stamp: !!s.ghost.stamp };
+    }
+
+    const phases = ['Lead', 'Bedarf', 'Angebot', 'Verhandlung', 'Auftrag'];
+    const chip = { hot: ['Brennt', '#ff6b6f', '#2a0a0b'], warn: ['Achtung', '#ffc85c', '#2e2000'], ok: ['Läuft', '#cde7c4', '#1d3315'] };
+    const dealDefs = [
+      { id: 'd1', b: 'brandt', kunde: 'Brandt Kunststoff', titel: 'Automationszelle AZ-2 · ANG-1187', wert: '386 T€', ph: sent ? 3 : 2, k: sent ? 'ok' : 'hot', grund: sent ? 'Workshop 09.12. steht, Budget bestätigt, Entscheider bekannt.' : 'Angebot seit 41 Tagen ohne Nachfass. Produktion fehlt im Buying Center.', next: sent ? 'Workshop 09.12.' : 'Heute 11:00' },
+      { id: 'd3', b: null, kunde: 'Lindner Medizintechnik', titel: 'Reinraumzelle SX 300 CR', wert: '690 T€', ph: 0, k: 'hot', grund: 'Kein nächster Schritt. Letzter Kontakt vor 38 Tagen.', next: 'Kein Schritt' },
+      { id: 'd2', b: 'kessler', kunde: 'Kessler Food Systems', titel: 'Linienerweiterung 2× SX 300', wert: '520 T€', ph: 2, k: 'warn', grund: 'Abschlussdatum 2× verschoben, Einkauf kritisch.', next: 'Heute 16:30' },
+      { id: 'd4', b: null, kunde: 'Ostermann Automotive', titel: 'Neuanlage SX 800', wert: '1,12 Mio €', ph: 3, k: 'warn', grund: 'Ansprechpartner im Einkauf unbekannt.', next: 'Angebot 02.12.' },
+      { id: 'd5', b: 'wolfram', kunde: 'Wolfram Präzisionsguss', titel: 'Retrofit SX 450', wert: '145 T€', ph: 1, k: 'ok', grund: 'Bedarf bestätigt, Termin heute.', next: 'Heute 14:30' },
+      { id: 'd6', b: 'hessler', kunde: 'Hessler Verpackung', titel: 'Ersatzteile + Wartung', wert: '64 T€', ph: 4, k: 'ok', grund: 'Mündliche Zusage, Auftrag KW 49.', next: 'KW 49' }
+    ];
+    const rank = { hot: 0, warn: 1, ok: 2 };
+    const deals = dealDefs.filter((d) => s.filter === 'alle' || d.k === 'hot')
+      .sort((x, y) => rank[x.k] - rank[y.k])
+      .map((d, i) => ({ ...d, chip: chip[d.k][0], chipBg: chip[d.k][1], chipFg: chip[d.k][2], phase: phases[d.ph], delay: (i * 0.05) + 's',
+        segs: phases.map((p, j) => ({ bg: j <= d.ph ? '#272d3a' : '#e4ecdf' })),
+        isOpen: s.open === d.id, hasBrief: !!d.b,
+        toggle: () => set({ open: this.state.open === d.id ? null : d.id }),
+        openBrief: () => set({ brief: d.b, screen: 'brief', back: 'deals' }) }));
+
+    const rec = s.rec;
+    const words = this.tx();
+    const shown = words.slice(Math.max(0, s.n - 22), s.n);
+    const hotList = this.story(s.capFor).hot || [];
+    const hot = { test: (w) => { const c = w.replace(/[.,:;!?„“]/g, ''); return hotList.some((h) => c.indexOf(h) === 0); } };
+    const tokens = shown.map((w, i) => ({ t: w, c: hot.test(w) ? '#7fd35f' : (i < shown.length - 12 ? '#6f7787' : '#ffffff') }));
+    const sec = Math.round(s.n * 0.7);
+    const clock = '0:' + String(Math.min(sec, 59)).padStart(2, '0');
+    const bars = [];
+    for (let i = 0; i < 34; i++) {
+      const v = Math.abs(Math.sin(i * 0.55) * 0.7 + Math.sin(i * 1.7) * 0.3);
+      const live = rec === 'rec';
+      const h = live ? 10 + Math.round(98 * v) : rec === 'done' ? 6 + Math.round(30 * v) : 6 + Math.round(14 * v);
+      bars.push({ h, c: i % 7 === 3 ? '#cde7c4' : '#52ae32', anim: live ? 'c-bar ' + (0.6 + (i % 5) * 0.12).toFixed(2) + 's ease-in-out infinite' : 'none' });
+    }
+    const acc = s.acc;
+    const E = s.edits;
+    const stDefs = [
+      { k: 'a', label: 'NEUER KONTAKT', text: E.a.name + ' · ' + E.a.rolle, sub: 'Haltung: ' + E.a.haltung, bg: '#cde7c4', fg: '#272d3a', rot: -2.5, align: 'flex-start', title: 'Kontakt anpassen' },
+      { k: 'b', label: 'TERMIN', text: E.b.art + ' · ' + this.fmtD(E.b.datum) + (E.b.zeit ? ', ' + E.b.zeit : ''), sub: E.b.ort, bg: '#b8eef0', fg: '#0b3b3d', rot: 2, align: 'flex-end', title: 'Termin anpassen' },
+      { k: 'c', label: 'DEAL ' + this.story(s.capFor).c.nr, text: E.c.phase + ' · ' + E.c.prob + ' %', sub: 'Abschluss ' + this.fmtM(E.c.abschluss) + ' · ' + E.c.wert + ' T€', bg: '#ffffff', fg: '#272d3a', rot: -1, align: 'flex-start', title: 'Deal anpassen' },
+      { k: 'd', label: 'BERICHT', text: E.d.text.length > 46 ? E.d.text.slice(0, 46) + ' …' : E.d.text, sub: '', bg: '#ffe58f', fg: '#2e2000', rot: 1.5, align: 'flex-end', title: 'Bericht anpassen' }
+    ];
+    const stickers = stDefs.map((x, i) => {
+      const on = acc[x.k]; const pr = s.pressing === x.k;
+      return { ...x, hasSub: !!x.sub, op: on ? '1' : '.4', filter: on ? 'none' : 'grayscale(1)', pressed: on ? 'false' : 'true', delay: (i * 0.12) + 's',
+        status: !on ? 'NICHT ÜBERNEHMEN' : s.edited[x.k] ? '✎ ANGEPASST' : '✎ HALTEN',
+        scale: pr ? '1.06' : '1', shadow: pr ? '0 0 0 7px rgba(127,211,95,.55), 0 10px 22px rgba(0,0,0,.35)' : '0 8px 18px rgba(0,0,0,.3)',
+        aria: x.label + ': ' + x.text + (on ? '' : ', wird nicht übernommen') + '. Lang drücken zum Anpassen.',
+        down: () => { this._lpFired = false; if (this._lp) clearTimeout(this._lp); this.setState({ pressing: x.k }); this._lp = setTimeout(() => { this._lp = null; this._lpFired = true; this.openEditor(x.k); }, 480); },
+        up: () => { if (this._lp) { clearTimeout(this._lp); this._lp = null; } if (this.state.pressing) this.setState({ pressing: null }); },
+        ctx: (e) => { if (e && e.preventDefault) e.preventDefault(); },
+        tap: () => { if (this._lpFired) { this._lpFired = false; return; } set({ acc: { ...this.state.acc, [x.k]: !this.state.acc[x.k] } }); } };
+    });
+    const sumMap = { a: 'Kontakt ' + E.a.name, b: E.b.art + ' ' + this.fmtD(E.b.datum), c: this.story(s.capFor).c.nr + ' → ' + E.c.prob + ' %', d: 'Bericht in Kundenakte' };
+    const summary = ['a', 'b', 'c', 'd'].filter((k) => acc[k]).map((k, i) => ({ t: sumMap[k], delay: (0.2 + i * 0.1) + 's' }));
+    const delta = acc.c ? Math.round((+E.c.wert || 0) * ((+E.c.prob || 0) - this.story(s.capFor).c.prev) / 100) : 0;
+    const pipeDelta = (delta >= 0 ? '+' : '−') + Math.abs(delta) + ' T€';
+    let editor = { title: '', label: '', chipBg: '#cde7c4', chipFg: '#272d3a', fields: [], cancel: () => {}, save: () => {}, backdrop: () => {} };
+    if (s.editing && s.draft) {
+      const k = s.editing, dr = s.draft, def = stDefs.find((x) => x.k === k);
+      const setF = (key, num) => (e) => { const v = e && e.target ? e.target.value : e; this.setState({ draft: { ...this.state.draft, [key]: num ? +v : v } }); };
+      const F = {
+        a: [{ key: 'name', label: 'Name', type: 'input', itype: 'text' }, { key: 'rolle', label: 'Rolle', type: 'input', itype: 'text' }, { key: 'haltung', label: 'Haltung', type: 'seg', options: ['Befürworter', 'Neutral', 'Kritisch'] }],
+        b: [{ key: 'art', label: 'Art', type: 'seg', options: ['Technik-Workshop', 'Besuch', 'Teams-Call'] }, { key: 'datum', label: 'Datum', type: 'input', itype: 'date' }, { key: 'zeit', label: 'Uhrzeit', type: 'input', itype: 'time' }, { key: 'ort', label: 'Ort', type: 'input', itype: 'text' }, { key: 'mit', label: 'Teilnehmer', type: 'input', itype: 'text' }],
+        c: [{ key: 'phase', label: 'Phase', type: 'seg', options: ['Bedarf', 'Angebot', 'Verhandlung', 'Auftrag'] }, { key: 'prob', label: 'Wahrscheinlichkeit', type: 'range', num: true }, { key: 'abschluss', label: 'Abschluss', type: 'input', itype: 'month' }, { key: 'wert', label: 'Wert in T€', type: 'input', itype: 'number', num: true }],
+        d: [{ key: 'text', label: 'Bericht', type: 'area' }]
+      }[k];
+      editor = { title: def.title, label: def.label, chipBg: def.bg, chipFg: def.fg,
+        backdrop: (e) => { if (e && e.target === e.currentTarget) this.setState({ editing: null, draft: null }); },
+        cancel: () => this.setState({ editing: null, draft: null }),
+        save: () => this.setState({ edits: { ...this.state.edits, [k]: this.state.draft }, edited: { ...this.state.edited, [k]: true }, acc: { ...this.state.acc, [k]: true }, editing: null, draft: null }),
+        fields: F.map((f) => ({ ...f, value: dr[f.key] == null ? '' : String(dr[f.key]), extra: f.type === 'range' ? ' · ' + dr[f.key] + ' %' : '',
+          isInput: f.type === 'input', isArea: f.type === 'area', isRange: f.type === 'range', isSeg: f.type === 'seg',
+          set: setF(f.key, f.num),
+          opts: (f.options || []).map((o) => ({ t: o, on: dr[f.key] === o ? 'true' : 'false', bg: dr[f.key] === o ? '#272d3a' : '#eef3ea', fg: dr[f.key] === o ? '#ffffff' : '#272d3a', pick: () => this.setState({ draft: { ...this.state.draft, [f.key]: o } }) })) })) };
+    }
+    const scr = s.screen;
+    const showSent = scr === 'capture' && s.capSent;
+    const showCapture = scr === 'capture' && !s.capSent;
+    const capName = (D.st[s.capFor] || D.st.brandt).short.split(' ')[0];
+    const nextAfter = this.openList('heute').filter((id) => id !== s.capFor && !D.st[id].call)[0];
+    const bg = showCapture ? '#272d3a' : '#52ae32';
+    const fg = showCapture ? '#ffffff' : '#272d3a';
+    const briefId = s.brief || 'brandt';
+    return {
+      bg, fg,
+      showHeute: scr === 'heute', showDeals: scr === 'deals', showBrief: scr === 'brief', showCapture, showSent,
+      showNav: (scr === 'heute' || scr === 'deals') && !s.dock,
+      headA, headB, days, band, hasBand: s.day !== 'offen' && s.day !== 'anrufe' && (hasFront || isEnd), noBand: s.day === 'offen' || s.day === 'anrufe',
+      showNow: s.day === 'heute', nowX: toX('10:12').toFixed(1),
+      backs, front, ghost, hasGhost: !!s.ghost, hasFront, noFront: !hasFront && !isEnd,
+      showDock: s.dock && scr === 'heute', dockTitle: isCallCard ? 'Termin mit ' + fs.short.split(' ')[0] + ', wann?' : (hasFront ? fs.short.split(' ')[0] : '') + ' schieben', targets,
+      openDock: () => set({ dock: true, hover: -1 }), closeDock: () => set({ dock: false, hover: -1, dragX: 0, dragY: 0, dragging: false }),
+      hasToast: !!toast, toastText, toastColor: toast ? this.colorOf(toast.id) : '#272d3a', toastUndo: !!toast && toast.kind !== 'info', undo: () => this.undo(),
+      weekCount: wk, weekPct: Math.min(100, Math.round(wk / 12 * 100)), weekAnim: toast && toast.kind === 'won' ? 'c-land .6s .3s cubic-bezier(.2,.9,.3,1.4)' : 'none',
+      empty,
+      bandText: s.day === 'anrufe' ? 'Leerlauf ist Akquise. Jeder Anruf mit Termin landet direkt in deinem Stapel.' : 'Ohne festen Termin. Zieh eine Karte nach unten, um sie einem Tag zu geben.',
+      posLabel: cross.isLegend ? 'Wischen oder antippen:' : isEnd ? 'Ende' : !hasFront ? '' : (idx0 + 1) + ' / ' + open.length,
+      frontTop, fy: (hasFront ? slotTop(frontId) - frontTop : -120) + 'px',
+      dots, pile, cross, endCard, isEnd, showLegend: () => set({ legend: true, coach: false }),
+      navPrev: () => this.swipe(1), navNext: () => this.swipe(-1),
+      prevOp: prevId ? '1' : '.35', nextOp: nextId ? '1' : '.35',
+      prevAria: prevId ? 'Zurück zu ' + D.st[prevId].short : 'Erste Karte', nextAria: nextId ? 'Weiter zu ' + D.st[nextId].short : 'Letzte Karte',
+      showBackToStart: (hasFront || isEnd) && idx0 > 0,
+      backToStartLabel: s.day === 'heute' ? 'Jetzt: ' + D.st[open[0]].short.split(' ')[0] + ' ' + (this.apTime(open[0]) || '') : 'Zum Anfang',
+      backToStart: () => this.jumpBack(open[0]),
+      showLast: hasFront && idx0 === 0 && open.length === 1,
+      isCall: isCallCard, isAppt: hasFront && !isCallCard, isCalling: isCallCard && s.calling === frontId, isCallIdle: isCallCard && s.calling !== frontId,
+      showWert: !(isCallCard && s.calling === frontId),
+      startCall: () => set({ calling: frontId }),
+      laterCall: () => this.swipe(-1),
+      callWon: () => set({ dock: true, hover: -1 }),
+      callMissed: () => { const nm = fs.short.split(' ')[0]; set({ calling: null }); this.toastFor({ kind: 'info', id: frontId, text: nm + ': Wiedervorlage morgen, 9 Uhr' }); this.swipe(-1); },
+      callNo: () => { const nm = fs.short.split(' ')[0]; const g = { ...this.state.gone, [frontId]: true }; this.setState({ gone: g, calling: null, front: null, enter: 'stack', swap: 1 - this.state.swap, ghost: { id: frontId, kind: 'out', dir: 1 } }); this.ghostOut(null, 650); this.toastFor({ kind: 'gone', id: frontId, text: nm + ' aussortiert' }); setTimeout(() => { const f = this.frontId(); if (f) this.countTo(f); }, 0); },
+      headAnim: 'c-head' + AB + ' .5s cubic-bezier(.2,.9,.3,1.2) both',
+      frontAnim: s.ghost && s.ghost.stamp ? 'c-in' + AB + ' .65s .75s cubic-bezier(.2,.9,.3,1.2) backwards'
+        : s.enter === 'prev' ? 'c-prev' + AB + ' .55s cubic-bezier(.2,.9,.3,1.2) backwards'
+        : s.enter === 'unpile' ? 'c-unpile' + AB + ' .55s cubic-bezier(.2,.9,.3,1.2) backwards'
+        : s.enter === 'lift' ? 'c-lift' + AB + ' .5s cubic-bezier(.2,.9,.3,1.2) backwards'
+        : s.enter === 'shake' ? 'c-shake' + AB + ' .45s ease'
+        : 'c-in' + AB + ' .6s cubic-bezier(.2,.9,.3,1.2) backwards',
+      dragX: s.dragX, dragY: s.dragY, dragRot: (s.dragX / 18).toFixed(2), dragScale: (1 - Math.min(Math.max(s.dragY, 0), 240) / 700).toFixed(3),
+      dragTrans: s.dragging ? 'none' : 'transform .4s cubic-bezier(.2,.9,.3,1.3)',
+      onDown: (e) => { this._sx = e.clientX; this._sy = e.clientY; this._pid = e.pointerId; this._el = e.currentTarget; this._down = true; this._cap = false; this._axis = null; try { this._rect = e.currentTarget.getBoundingClientRect(); } catch (x) { this._rect = null; } },
+      onMove: (e) => {
+        if (!this._down) return;
+        const dx = e.clientX - this._sx, dy = e.clientY - this._sy;
+        if (!this._cap && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+          this._axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+          this._cap = true; try { this._el.setPointerCapture(this._pid); } catch (x) {}
+        }
+        if (!this._cap) return;
+        if (this._axis === 'x') {
+          const o = this.openList(), i = o.indexOf(this.frontId());
+          const can = dx < 0 ? i + 1 < o.length : i > 0;
+          this.setState({ dragging: true, dragAxis: 'x', dragX: can ? dx : dx * 0.3, dragY: 0 }); return;
+        }
+        if (dy < 0) { this.setState({ dragging: true, dragAxis: 'y', dragX: 0, dragY: Math.max(dy, -160) * 0.7, dock: false, hover: -1 }); return; }
+        const y = dy;
+        let hover = -1;
+        if (y > 110 && this._rect) { const rel = (e.clientX - this._rect.left) / this._rect.width; hover = Math.max(0, Math.min(2, Math.floor(rel * 3))); }
+        this.setState({ dragging: true, dragAxis: 'y', dragX: dx * 0.35, dragY: y, dock: y > 50 || this.state.dock, hover });
+      },
+      onUp: () => {
+        if (!this._down) return;
+        this._down = false;
+        if (!this._cap) return;
+        this._cap = false;
+        if (this._axis === 'x') {
+          const dx = this.state.dragX;
+          if (Math.abs(dx) > 90) this.swipe(dx > 0 ? 1 : -1); else this.setState({ dragging: false, dragAxis: null, dragX: 0 });
+          return;
+        }
+        if (this.state.dragY < -55) { const f = this.frontId(); this.setState({ dragging: false, dragAxis: null, dragX: 0, dragY: 0, brief: f, screen: 'brief', back: 'heute' }); return; }
+        const h = this.state.hover, f = this.frontId(), t = this.targetDefs()[h];
+        if (this.state.dragY > 110 && h >= 0 && f && t) this.moveTo(f, t.key, h);
+        else this.setState({ dragging: false, dragAxis: null, dragX: 0, dragY: 0, hover: -1 });
+      },
+      openFront: () => set({ brief: frontId, screen: 'brief', back: 'heute' }), frontZ: s.dragging ? 10 : 2,
+      brief: (() => {
+        const st = D.st[briefId] || D.st.brandt;
+        const b = D.briefs[briefId] || { name: st.name2.replace('\n', ' '), ort: st.ort, klasse: 'B-Kunde', last: 'Historie wird aus dem ERP geladen',
+          machines: [], contacts: [], offer: { title: 'Potenzial', info: st.chips[0].t, wert: st.wert, bg: st.chips[0].bg, fg: st.chips[0].fg },
+          points: [{ nr: '1', t: 'Bedarf und Zeitplan klären' }, { nr: '2', t: 'Entscheider identifizieren' }, { nr: '3', t: 'Nächsten Schritt mit Datum vereinbaren' }] };
+        return { ...b, color: this.colorOf(briefId), time: this.apTime(briefId) || 'Zeit offen', hasContacts: b.contacts.length > 0, hasMachines: b.machines.length > 0,
+          points: b.points.map((x, i) => ({ ...x, delay: (0.16 + i * 0.06).toFixed(2) + 's' })),
+          contacts: b.contacts.map((x, i) => ({ ...x, delay: (0.44 + i * 0.07).toFixed(2) + 's' })),
+          machines: b.machines.map((x, i) => ({ ...x, delay: (0.54 + i * 0.07).toFixed(2) + 's' })) }; })(),
+      closeBrief: () => { const bk = this.state.back || 'heute'; set({ screen: bk, swap: 1 - this.state.swap }); if (bk === 'heute') { const f = this.frontId(); if (f) this.countTo(f); } },
+      toCapture: () => this.toCapture(), capName, nextLabel2: nextAfter ? 'Nächste Station: ' + D.st[nextAfter].short.split(' ')[0] + ' →' : 'Zurück zum Stapel →', sentNote: s.capFor === 'brandt' ? 'Ist schon im Leitstand zu sehen.' : 'Landet im Leitstand bei der nächsten Synchronisierung.',
+      closeCapture: () => { this.stop(); set({ screen: 'heute', rec: 'idle', n: 0 }); },
+      goHeute: () => this.goHeute(),
+      goDeals: () => set({ screen: 'deals' }),
+      navHeuteW: scr === 'heute' ? '800' : '500', navHeuteOp: scr === 'heute' ? '1' : '.55',
+      navDealsW: scr === 'deals' ? '800' : '500', navDealsOp: scr === 'deals' ? '1' : '.55',
+      deals,
+      fAll: () => set({ filter: 'alle' }), fHot: () => set({ filter: 'hot' }),
+      fAllBg: s.filter === 'alle' ? '#272d3a' : 'rgba(39,45,58,.12)', fAllFg: s.filter === 'alle' ? '#ffffff' : '#272d3a',
+      fHotBg: s.filter === 'hot' ? '#272d3a' : 'rgba(39,45,58,.12)', fHotFg: s.filter === 'hot' ? '#ffffff' : '#272d3a',
+      isIdle: rec === 'idle', isRec: rec === 'rec', isProc: rec === 'proc', isDone: rec === 'done',
+      tokens, clock: rec === 'idle' ? '0:00' : clock, bars,
+      showMic: rec === 'idle' || rec === 'rec',
+      press: () => this.press(),
+      micAnim: rec === 'rec' ? 'c-ring 1.1s infinite' : 'none',
+      micAria: rec === 'rec' ? 'Aufnahme beenden' : 'Aufnahme starten',
+      micHint: rec === 'rec' ? 'Antippen, wenn du fertig bist' : 'Antippen und los',
+      stickers, summary, pipeDelta, editor, showEditor: !!s.editing, barsH: s.rec === 'done' ? 56 : 110,
+      send: () => this.send(),
+      reset: () => this.reset()
+    };
+  }
+}
+
+return Component; })();
+var HosComp = (function () {
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { rep: null, open: null, all: false, done: {}, camp: false, live: null, dbOn: false };
+  }
+  componentDidMount() {
+    this._alive = true;
+    try { this._bc = new BroadcastChannel('pp-live'); this._bc.onmessage = (e) => { if (e && e.data) this.setState({ live: e.data }); }; } catch (e) {}
+    try { const raw = window.localStorage.getItem('pp-live'); if (raw) this.setState({ live: JSON.parse(raw) }); } catch (e) {}
+    try {
+      const c = window.claude;
+      if (c && typeof c.use === 'function') {
+        c.use('db').then((db) => {
+          if (!db || !this._alive) return;
+          this.setState({ dbOn: true });
+          this._unsub = db.doc('pp/live').onSnapshot((snap) => { if (snap && snap.exists) this.setState({ live: snap.data() }); }, () => this.setState({ dbOn: false }));
+        }).catch(() => {});
+      }
+    } catch (e) {}
+  }
+  componentWillUnmount() {
+    this._alive = false;
+    if (this._unsub) this._unsub();
+    try { if (this._bc) this._bc.close(); } catch (e) {}
+  }
+  renderVals() {
+    const s = this.state;
+    const str = (v, d) => (typeof v === 'string' || typeof v === 'number') ? String(v).slice(0, 80) : d;
+    const fmtDate = (iso) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? m[3] + '.' + m[2] + '.' : ''; };
+    const fmtW = (v) => v >= 1000 ? (v / 1000).toFixed(2).replace('.', ',') + ' Mio €' : v + ' T€';
+    const live = s.live && typeof s.live === 'object' ? s.live : {};
+    const capsObj = live.captures && typeof live.captures === 'object' ? live.captures : {};
+    let caps = Object.keys(capsObj).filter((k) => capsObj[k] && typeof capsObj[k] === 'object').map((k) => ({ ...capsObj[k], key: k }));
+    if (!caps.length && live.erfasst) caps = [{ key: 'brandt', seq: 1, ts: live.ts, kunde: 'Brandt Kunststofftechnik', nr: 'ANG-1187', title: 'Automationszelle AZ-2', acc: live.acc, edits: live.edits }];
+    caps.sort((x, y) => (+y.seq || 0) - (+x.seq || 0));
+    const CI = caps.map((c) => {
+      const A = c.acc && typeof c.acc === 'object' ? c.acc : { a: true, b: true, c: true, d: true };
+      const E = c.edits && typeof c.edits === 'object' ? c.edits : {};
+      const g = (o, k, d) => str(o && typeof o === 'object' ? o[k] : undefined, d);
+      const dealOk = A.c !== false;
+      const prob = Math.max(0, Math.min(100, parseInt(g(E.c, 'prob', '50'), 10) || 0));
+      const wert = Math.max(0, parseInt(g(E.c, 'wert', '0'), 10) || 0);
+      const kunde = str(c.kunde, 'Kunde');
+      return { key: str(c.key, ''), kunde, short: kunde.split(' ')[0], ts: str(c.ts, '').slice(0, 5), nr: str(c.nr, ''), title: str(c.title, ''), A, dealOk,
+        phase: g(E.c, 'phase', 'Angebot'), prob, wert, bArt: g(E.b, 'art', 'Termin'), bDate: fmtDate(g(E.b, 'datum', '')), aName: g(E.a, 'name', ''),
+        add: dealOk ? wert * prob / 100 / 1000 : 0 };
+    });
+    const byKey = {}; CI.forEach((c) => { byKey[c.key] = c; });
+    const latest = CI[0] || null;
+    const L = CI.length > 0;
+    const belegtAdd = CI.reduce((acc, c) => acc + c.add, 0);
+    const liveTs = latest ? latest.ts : '';
+    const capDeal = (key, base) => {
+      const c = byKey[key]; if (!c || !c.dealOk) return base;
+      const hasB = c.A.b !== false;
+      return { ...base, wert: fmtW(c.wert), v: c.wert, phase: c.phase + ' · ' + c.prob + ' %', k: 'ok', grund: (hasB ? c.bArt + ' ' + c.bDate + ' · ' : '') + 'erfasst ' + c.ts, ev: hasB ? '1111' : '1110', next: hasB ? c.bArt + ' ' + c.bDate : 'nicht hinterlegt', fresh: true, frage: undefined };
+    };
+    const set = (o) => this.setState(o);
+    const chip = { hot: ['Brennt', '#ff6b6f', '#2a0a0b'], warn: ['Achtung', '#ffc85c', '#2e2000'], ok: ['Läuft', '#cde7c4', '#1d3315'] };
+    const repDefs = [
+      { id: 'keller', name: 'Jonas Keller', gebiet: 'Süd', pct: 74, besuche: 9 + CI.length },
+      { id: 'vogt', name: 'Miriam Vogt', gebiet: 'Nord', pct: 96, besuche: 11 },
+      { id: 'lang', name: 'Tobias Lang', gebiet: 'West', pct: 61, besuche: 5 },
+      { id: 'krueger', name: 'Sabine Krüger', gebiet: 'Ost', pct: 88, besuche: 10 },
+      { id: 'demir', name: 'Ahmet Demir', gebiet: 'Bayern', pct: 79, besuche: 8 },
+      { id: 'hoffmann', name: 'Lena Hoffmann', gebiet: 'Baden-Württ.', pct: 102, besuche: 12 },
+      { id: 'weber', name: 'Markus Weber', gebiet: 'NRW', pct: 70, besuche: 7 },
+      { id: 'schulz', name: 'Clara Schulz', gebiet: 'Export DACH', pct: 83, besuche: 6 },
+      { id: 'braun', name: 'Felix Braun', gebiet: 'Export EU', pct: 55, besuche: 4 },
+      { id: 'fischer', name: 'Nina Fischer', gebiet: 'Key Account', pct: 91, besuche: 7 },
+      { id: 'roth', name: 'David Roth', gebiet: 'Neukunden', pct: 48, besuche: 6 },
+      { id: 'wagner', name: 'Paul Wagner', gebiet: 'Service-Vertrieb', pct: 85, besuche: 13 }
+    ];
+    const dealDefs = [
+      capDeal('brandt', { id: 1, rep: 'keller', kunde: 'Brandt Kunststofftechnik', titel: 'Automationszelle AZ-2', wert: '386 T€', v: 386, phase: 'Angebot', k: 'hot', grund: 'Angebot 41 Tage ohne Nachfass', ev: '1100', next: 'Termin heute 11:00', frage: 'Brandt: Wer aus der Produktion entscheidet mit, und wann fasst du nach?' }),
+      capDeal('lindner', { id: 2, rep: 'keller', kunde: 'Lindner Medizintechnik', titel: 'Reinraumzelle SX 300 CR', wert: '690 T€', v: 690, phase: 'Lead', k: 'hot', grund: 'Kein nächster Schritt', ev: '0000', next: 'nicht hinterlegt', frage: 'Lindner: Echter Deal oder raus aus der Pipeline?' }),
+      capDeal('kessler', { id: 3, rep: 'keller', kunde: 'Kessler Food Systems', titel: 'Linienerweiterung 2× SX 300', wert: '520 T€', v: 520, phase: 'Angebot', k: 'warn', grund: 'Abschluss 2× verschoben', ev: '1101', next: 'Anruf heute 16:30', frage: 'Kessler: Warum zweimal verschoben, und was ist das neue, verbindliche Datum?' }),
+      capDeal('ostermann', { id: 4, rep: 'keller', kunde: 'Ostermann Automotive', titel: 'Neuanlage SX 800', wert: '1,12 Mio €', v: 1120, phase: 'Verhandlung', k: 'warn', grund: 'Einkauf unbekannt', ev: '1011', next: 'Angebot 02.12.' }),
+      { id: 5, rep: 'lang', kunde: 'Rhein-Metallwaren', titel: 'Pressenlinie PX 2', wert: '1,40 Mio €', v: 1400, phase: 'Verhandlung', k: 'hot', grund: 'Abschluss 3× verschoben', ev: '1101', next: 'Telefonat 28.11.', frage: 'Rhein-Metallwaren: Was blockiert wirklich, und wer beim Kunden löst es?' },
+      { id: 6, rep: 'lang', kunde: 'Hagedorn Logistik', titel: 'Palettierzelle', wert: '310 T€', v: 310, phase: 'Angebot', k: 'hot', grund: 'Kein nächster Schritt', ev: '1000', next: 'nicht hinterlegt', frage: 'Hagedorn: Welcher Termin steht bis Freitag?' },
+      { id: 7, rep: 'lang', kunde: 'Becker Bausysteme', titel: 'Ersatz SX 300', wert: '180 T€', v: 180, phase: 'Bedarf', k: 'warn', grund: 'Entscheider unbekannt', ev: '0011', next: 'Besuch 04.12.', frage: 'Becker: Wer unterschreibt am Ende?' },
+      { id: 8, rep: 'braun', kunde: 'Nordisk Plast (DK)', titel: '2× SX 450', wert: '980 T€', v: 980, phase: 'Angebot', k: 'hot', grund: 'Wettbewerber 12 % günstiger', ev: '1111', next: 'Workshop 03.12.', frage: 'Nordisk Plast: Wie begründen wir 12 % Mehrpreis über die Gesamtkosten?' },
+      { id: 9, rep: 'braun', kunde: 'Iberplast (ES)', titel: 'Automationszelle AZ-1', wert: '450 T€', v: 450, phase: 'Angebot', k: 'hot', grund: 'Angebot 58 Tage offen', ev: '1000', next: 'nicht hinterlegt', frage: 'Iberplast: 58 Tage still. Lebt der Deal noch?' },
+      { id: 10, rep: 'braun', kunde: 'Polmet (PL)', titel: 'Retrofit SX 450', wert: '210 T€', v: 210, phase: 'Bedarf', k: 'warn', grund: 'Kein Kontakt seit 47 Tagen', ev: '0101', next: 'Mail 27.11.' },
+      { id: 11, rep: 'roth', kunde: 'Voltwerk Energy', titel: 'Pilotzelle Batteriegehäuse', wert: '260 T€', v: 260, phase: 'Bedarf', k: 'hot', grund: 'Budget unbestätigt', ev: '0101', next: 'Call 01.12.', frage: 'Voltwerk: Gibt es freigegebenes Budget, ja oder nein?' },
+      { id: 12, rep: 'roth', kunde: 'Marquardt Elektro', titel: 'Montagezelle', wert: '330 T€', v: 330, phase: 'Lead', k: 'warn', grund: 'Kein Termin vereinbart', ev: '0000', next: 'nicht hinterlegt', frage: 'Marquardt: Bis wann steht der Ersttermin?' },
+      { id: 13, rep: 'weber', kunde: 'Dorn Armaturen', titel: 'Ersatz SX 300', wert: '150 T€', v: 150, phase: 'Angebot', k: 'hot', grund: 'Angebot 29 Tage ohne Nachfass', ev: '1100', next: 'nicht hinterlegt', frage: 'Dorn: Wann fasst du nach, und womit?' },
+      { id: 14, rep: 'weber', kunde: 'Schäfer Chemie', titel: 'Abfüllzelle', wert: '720 T€', v: 720, phase: 'Verhandlung', k: 'warn', grund: 'Einkauf fordert 8 % Nachlass', ev: '1111', next: 'Verhandlung 05.12.', frage: 'Schäfer: Was geben wir statt Rabatt?' },
+      { id: 15, rep: 'krueger', kunde: 'Elbe Pack', titel: 'Kartonierer VX 200', wert: '410 T€', v: 410, phase: 'Angebot', k: 'warn', grund: 'Entscheider unbekannt', ev: '1011', next: 'Besuch 02.12.', frage: 'Elbe Pack: Wer entscheidet, und kennst du die Person?' },
+      { id: 16, rep: 'demir', kunde: 'Alpen Kunststoff', titel: 'Linie SX 450 + AZ-2', wert: '560 T€', v: 560, phase: 'Verhandlung', k: 'warn', grund: 'Abschluss verschoben', ev: '1111', next: 'Termin 03.12.', frage: 'Alpen Kunststoff: Neues Abschlussdatum belastbar?' },
+      { id: 17, rep: 'schulz', kunde: 'Tiroler Formteile (AT)', titel: 'Retrofit 2× SX 300', wert: '290 T€', v: 290, phase: 'Angebot', k: 'warn', grund: 'Budget erst 2027', ev: '1101', next: 'Call 10.12.', frage: 'Tiroler Formteile: Ins Q1 schieben oder mit Finanzierung lösen?' },
+      { id: 18, rep: 'fischer', kunde: 'Vehra Group', titel: 'Rahmenvertrag 6 Zellen', wert: '2,30 Mio €', v: 2300, phase: 'Verhandlung', k: 'warn', grund: 'Vorstandsfreigabe ausstehend', ev: '1111', next: 'Vorstand 09.12.', frage: 'Vehra: Was braucht der Vorstand für die Freigabe?' }
+    ];
+    CI.filter((c) => c.dealOk && ['brandt', 'lindner', 'kessler', 'ostermann'].indexOf(c.key) < 0).forEach((c, i) => {
+      const hasB = c.A.b !== false;
+      dealDefs.push({ id: 100 + i, rep: 'keller', kunde: c.kunde, titel: c.title, wert: fmtW(c.wert), v: c.wert, phase: c.phase + ' · ' + c.prob + ' %', k: 'ok', grund: 'Neu in der Pipeline · erfasst ' + c.ts, ev: hasB ? '1111' : '1110', next: hasB ? c.bArt + ' ' + c.bDate : 'nicht hinterlegt', fresh: true });
+    });
+    const repName = {}; repDefs.forEach((r) => { repName[r.id] = r.name; });
+    const riskCount = {}; dealDefs.forEach((d) => { if (d.k !== 'ok') riskCount[d.rep] = (riskCount[d.rep] || 0) + 1; });
+    const lvl = (p) => (p < 65 ? 'hot' : p < 80 ? 'warn' : 'ok');
+    const reps = repDefs.map((r) => {
+      const sel = s.rep === r.id; const n = riskCount[r.id] || 0; const k = lvl(r.pct);
+      return { ...r, chip: k === 'hot' ? 'Unter Plan' : k === 'warn' ? 'Knapp' : 'Auf Kurs', chipBg: chip[k][1], chipFg: chip[k][2],
+        riskLabel: n === 0 ? 'keine Risiken' : n + ' Risiko-Deal' + (n > 1 ? 's' : ''),
+        bg: sel ? '#272d3a' : '#ffffff', fg: sel ? '#ffffff' : '#272d3a', shadow: sel ? '0 10px 24px rgba(39,45,58,.25)' : 'none', tf: sel ? 'translateY(-3px)' : 'none',
+        pressed: sel ? 'true' : 'false', pick: () => set({ rep: this.state.rep === r.id ? null : r.id, open: null }) };
+    });
+    const labels = ['Angebot', 'Entscheider', 'Budget', 'Nächster Schritt'];
+    const rank = { hot: 0, warn: 1, ok: 2 };
+    const list = dealDefs.filter((d) => !s.rep || d.rep === s.rep).sort((x, y) => (x.fresh ? -1 : y.fresh ? 1 : rank[x.k] !== rank[y.k] ? rank[x.k] - rank[y.k] : y.v - x.v));
+    const total = list.length;
+    const limit = s.rep || s.all ? total : 10;
+    const deals = list.slice(0, limit).map((d) => {
+      const ok = d.ev.split('').map((c) => c === '1'); const belegt = ok.every(Boolean);
+      return { ...d, rep: repName[d.rep], chip: d.fresh ? 'Neu · Läuft' : chip[d.k][0], chipBg: chip[d.k][1], chipFg: chip[d.k][2],
+        cardBg: d.fresh ? '#f1f8ee' : '#ffffff', ring: d.fresh ? '0 0 0 3px #52ae32' : 'none', cls: d.fresh ? 'l-pop' : '',
+        isOpen: s.open === d.id,
+        ev: labels.map((l, i) => ({ label: l, mark: ok[i] ? '✓' : '✗', bg: ok[i] ? '#cde7c4' : '#ffd9da', color: ok[i] ? '#1d3315' : '#7a1a1e' })),
+        fc: belegt ? 'Zählt im Forecast' : 'Zählt nicht im Forecast', fcColor: belegt ? '#2f7a17' : '#a3242a',
+        toggle: () => set({ open: this.state.open === d.id ? null : d.id }) };
+    });
+    const selDef = repDefs.find((r) => r.id === s.rep);
+    const sel = selDef ? { ...selDef, risk: riskCount[selDef.id] || 0 } : { name: '', pct: 0, risk: 0, besuche: 0 };
+    const questions = selDef ? dealDefs.filter((d) => d.rep === s.rep && d.frage && d.k !== 'ok').slice(0, 4).map((d, i) => ({ nr: String(i + 1), t: d.frage })) : [];
+    const isDone = !!(selDef && s.done[s.rep]);
+    const feed = [
+      { t: '08:41', x: 'J. Keller · Hessler · Bericht in 0:52 Min.' },
+      { t: '08:15', x: 'M. Vogt · Auftrag Heinze 240 T€ gebucht' },
+      { t: '07:58', x: 'L. Hoffmann · neuer Kontakt bei Weisser AG' },
+      { t: 'gestern', x: 'T. Lang · Rhein-Metallwaren 3× verschoben' }
+    ].map((f) => ({ ...f, cls: '', tc: '#7fd35f' }));
+    CI.slice().reverse().forEach((c) => feed.unshift({ t: c.ts || 'jetzt', x: 'J. Keller · ' + c.short + ' · erfasst' + (c.dealOk ? ' · ' + c.nr + ' → ' + c.prob + ' %' : ''), cls: c === latest ? 'l-pop' : '', tc: '#ffc85c' }));
+    const ak = [
+      { k: 'Rhein-Metallwaren', rep: 'T. Lang', tage: 132 },
+      { k: 'Schäfer Chemie', rep: 'M. Weber', tage: 118 },
+      { k: 'Brandt Kunststofftechnik', rep: 'J. Keller', tage: 104 },
+      { k: 'Nordisk Plast', rep: 'F. Braun', tage: 97 },
+      { k: 'Vehra Group', rep: 'N. Fischer', tage: 93 }
+    ].filter((a) => !(byKey.brandt && a.k.indexOf('Brandt') === 0));
+    return {
+      syncLabel: s.dbOn ? 'Live-Datenbank verbunden' : 'Live-Sync (lokal)',
+      live: L, liveTs: liveTs || 'jetzt',
+      liveChips: latest ? [latest.A.a !== false && latest.aName ? { t: '+ Kontakt ' + latest.aName } : null, latest.A.b !== false ? { t: latest.bArt + ' ' + latest.bDate } : null, latest.A.d !== false ? { t: 'Bericht in Kundenakte' } : null, CI.length > 1 ? { t: 'heute ' + CI.length + ' Erfassungen' } : null].filter(Boolean) : [],
+      liveHead: latest ? 'Jonas Keller hat ' + latest.short + ' erfasst.' + (latest.dealOk ? ' ' + latest.nr + ' → ' + latest.phase + ', ' + latest.prob + ' %.' : '') : '',
+      liveGain: belegtAdd > 0, liveGainText: '+' + belegtAdd.toFixed(2).replace('.', ',') + ' Mio € belegt',
+      fcBelegt: (16.9 + belegtAdd).toFixed(1).replace('.', ','), belegt: (2.7 + belegtAdd).toFixed(1).replace('.', ','), unbelegt: Math.max(0, 2.5 - belegtAdd).toFixed(1).replace('.', ','),
+      wBelegt: Math.round((2.7 + belegtAdd) / 18 * 100), wUnbelegt: Math.round(Math.max(0, 2.5 - belegtAdd) / 18 * 100),
+      nfCount: byKey.brandt && byKey.brandt.dealOk ? '8' : '9', nfVol: byKey.brandt && byKey.brandt.dealOk ? '2,3' : '2,7',
+      reps, deals,
+      clearRep: () => set({ rep: null, open: null }),
+      clearLabel: s.rep ? 'Ganzes Team' : '12 Leute',
+      clearBg: s.rep ? '#272d3a' : 'rgba(39,45,58,.08)', clearFg: s.rep ? '#ffffff' : '#272d3a',
+      dealScope: s.rep ? repName[s.rep] + ' · ' + total + ' Deals' : 'Ganzes Team · ' + total + ' Deals',
+      hasMore: !s.rep && total > 10,
+      moreLabel: s.all ? 'Nur Top 10' : 'Alle ' + total + ' zeigen',
+      showAll: () => set({ all: !this.state.all }),
+      noRep: !selDef, hasRep: !!selDef, sel, questions, noQuestions: !!selDef && questions.length === 0,
+      doneLabel: isDone ? '✓ Review erledigt' : 'Review abhaken',
+      doneBg: isDone ? '#cde7c4' : '#52ae32',
+      toggleDone: () => set({ done: { ...this.state.done, [this.state.rep]: !this.state.done[this.state.rep] } }),
+      feed, akunden: ak,
+      basis: [
+        { k: 'Elbe Pack', typ: 'VX 100', bj: '2007', rep: 'Krüger' },
+        { k: 'Wolfram Präzisionsguss', typ: 'SX 450', bj: '2008', rep: 'Keller' },
+        { k: 'Brandt Kunststofftechnik', typ: 'SX 450', bj: '2009', rep: 'Keller' },
+        { k: 'Alpen Kunststoff', typ: 'SX 450', bj: '2009', rep: 'Demir' },
+        { k: 'Dorn Armaturen', typ: 'SX 300', bj: '2010', rep: 'Weber' }
+      ],
+      toggleCampaign: () => set({ camp: !this.state.camp }),
+      campLabel: s.camp ? '✓ An 9 Leute im Außendienst verteilt' : 'Als Kampagne an den Außendienst →',
+      campBg: s.camp ? '#ffffff' : '#272d3a', campFg: s.camp ? '#272d3a' : '#ffffff',
+      lost: [{ g: 'Preis', p: 41 }, { g: 'Lieferzeit', p: 27 }, { g: 'Technik / Spezifikation', p: 18 }, { g: 'Kein Budget / verschoben', p: 14 }]
+    };
+  }
+}
+
+return Component; })();
+var tplA = document.getElementById('tpl-app').content.firstElementChild;
+var tplH = document.getElementById('tpl-hos').content.firstElementChild;
+DC.mount(AppComp, tplA, document.getElementById('view-app'));
+DC.mount(HosComp, tplH, document.getElementById('view-hos'));
+function show(v) {
+  var hos = v === 'head-of-sales';
+  document.getElementById('view-app').hidden = hos;
+  document.getElementById('view-hos').hidden = !hos;
+  document.body.classList.toggle('view-hos', hos);
+  try { window.scrollTo(0, 0); } catch (e) {}
+}
+function route() { show(location.hash === '#head-of-sales' ? 'head-of-sales' : 'aussendienst'); }
+document.addEventListener('click', function (e) {
+  var a = e.target.closest && e.target.closest('a[href$=".dc.html"]');
+  if (!a) return;
+  e.preventDefault();
+  var to = /Leitstand/.test(a.getAttribute('href')) ? 'head-of-sales' : 'aussendienst';
+  try { location.hash = to; } catch (x) {}
+  show(to);
+});
+window.addEventListener('hashchange', route);
+route();
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  try { navigator.serviceWorker.register('sw.js').catch(function () {}); } catch (e) {}
+}
+}
+</script>
+</body>
+</html>

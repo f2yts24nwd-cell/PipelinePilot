@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Pipeline Pilot · Leitstand (Richtung C)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#eef3ea}
+a{color:#272d3a}a:hover{color:#000000}
+button{font-family:inherit;cursor:pointer}
+@keyframes l-pop{from{opacity:0;transform:translateY(-16px) scale(.97)}}
+@keyframes l-in{from{opacity:0;transform:translateY(10px)}}
+@keyframes l-blink{50%{opacity:.3}}
+.l-pop{animation:l-pop .5s cubic-bezier(.2,.9,.3,1.3) both}
+.l-in{animation:l-in .35s ease both}
+</style>
+</helmet>
+<div style="width:100%;min-height:100vh;background:#eef3ea;color:#272d3a;font-family:'Outfit',system-ui,sans-serif;box-sizing:border-box">
+
+<div style="background:#52ae32">
+<div style="max-width:1360px;margin:0 auto;padding:22px 28px 26px;box-sizing:border-box">
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px">
+<span style="font-size:15px;font-weight:600">Leitstand Vertrieb · Q4 2026 · noch 35 Tage</span>
+<span style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+<span style="background:#272d3a;color:#cde7c4;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:#7fd35f;animation:l-blink 1.6s infinite"></span>{{syncLabel}}</span>
+<div role="group" aria-label="Ansicht wechseln" style="display:flex;background:rgba(39,45,58,.14);border-radius:999px;padding:3px;gap:2px">
+<a href="C_App.dc.html" style="text-decoration:none;height:36px;padding:0 14px;border-radius:999px;color:#272d3a;font-size:13px;font-weight:800;display:flex;align-items:center">Außendienst</a>
+<span style="height:36px;padding:0 14px;border-radius:999px;background:#272d3a;color:#ffffff;font-size:13px;font-weight:800;display:flex;align-items:center">Head of Sales</span>
+</div>
+</span>
+</div>
+<div style="font-size:clamp(36px,5vw,60px);font-weight:800;letter-spacing:-.04em;line-height:1;margin-top:18px">14,2 von 18,0 Mio €.</div>
+<div style="font-size:18px;font-weight:600;margin-top:6px;opacity:.85">79 % Auftragseingang. Vorjahr zum Stichtag: 71 %.</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:20px">
+<div style="background:#ffffff;border-radius:22px;padding:14px 18px;flex:1.4 1 300px">
+<div style="font-size:13px;font-weight:600;color:#575756">Forecast nach Belegen</div>
+<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><span style="font-size:32px;font-weight:800;letter-spacing:-.03em">{{fcBelegt}} Mio €</span><span style="background:#ffc85c;color:#2e2000;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700">Vertrieb meldet 19,4</span></div>
+<div style="display:flex;height:10px;border-radius:5px;overflow:hidden;background:#eef3ea;margin-top:8px">
+<div style="width:73%;background:#272d3a"></div><div style="width:{{wBelegt}}%;background:#52ae32;transition:width .6s"></div><div style="width:{{wUnbelegt}}%;background:#ffc85c;transition:width .6s"></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:#575756;margin-top:6px;font-weight:600"><span>■ Gebucht 14,2</span><span style="color:#2f7a17">■ Belegt {{belegt}}</span><span style="color:#8a5a00">■ Unbelegt {{unbelegt}}</span></div>
+</div>
+<div style="background:#ffffff;border-radius:22px;padding:14px 18px;flex:1 1 200px">
+<div style="font-size:13px;font-weight:600;color:#575756">Pipeline-Abdeckung H1/27</div>
+<div style="font-size:32px;font-weight:800;letter-spacing:-.03em">3,1×</div>
+<div style="font-size:12px;color:#575756;font-weight:600">Ziel ≥ 3,0× · 41,6 Mio €</div>
+</div>
+<div style="background:#272d3a;color:#ffffff;border-radius:22px;padding:14px 18px;flex:1 1 200px">
+<div style="font-size:13px;font-weight:600;color:#b8bec9">Angebote ohne Nachfass</div>
+<div style="font-size:32px;font-weight:800;letter-spacing:-.03em;color:#ff8a8d">{{nfCount}}</div>
+<div style="font-size:12px;color:#b8bec9;font-weight:600">{{nfVol}} Mio € liegen still · &gt; 21 Tage</div>
+</div>
+</div>
+</div>
+</div>
+
+<div style="max-width:1360px;margin:0 auto;padding:22px 28px 40px;display:flex;flex-direction:column;gap:20px;box-sizing:border-box">
+
+<sc-if value="{{live}}" hint-placeholder-val="{{false}}">
+<div class="l-pop" style="background:#272d3a;color:#ffffff;border-radius:26px;padding:18px 22px;display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px">
+<span style="background:#52ae32;color:#10210a;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800">NEU · {{liveTs}}</span>
+<span style="flex:1 1 360px;font-size:18px;font-weight:700;line-height:1.3">{{liveHead}}</span>
+<span style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-for list="{{liveChips}}" as="c" hint-placeholder-count="3"><span style="background:rgba(255,255,255,.1);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600">{{c.t}}</span></sc-for>
+</span>
+<sc-if value="{{liveGain}}" hint-placeholder-val="{{true}}"><span style="font-size:22px;font-weight:800;color:#7fd35f">{{liveGainText}}</span></sc-if>
+</div>
+</sc-if>
+
+<div>
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:12px">
+<div style="font-size:26px;font-weight:800;letter-spacing:-.02em">Team.</div>
+<button onClick="{{clearRep}}" style="background:{{clearBg}};color:{{clearFg}};border:0;border-radius:999px;padding:9px 14px;font-size:13px;font-weight:700;min-height:40px">{{clearLabel}}</button>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+<sc-for list="{{reps}}" as="r" hint-placeholder-count="12">
+<button onClick="{{r.pick}}" aria-pressed="{{r.pressed}}" style="text-align:left;background:{{r.bg}};color:{{r.fg}};border:0;border-radius:22px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-height:44px;box-shadow:{{r.shadow}};transition:transform .2s;transform:{{r.tf}}">
+<span style="display:flex;justify-content:space-between;align-items:center">
+<span style="background:{{r.chipBg}};color:{{r.chipFg}};border-radius:999px;padding:4px 9px;font-size:11px;font-weight:800">{{r.chip}}</span>
+<span style="font-size:24px;font-weight:800;letter-spacing:-.02em">{{r.pct}} %</span>
+</span>
+<span style="font-size:16px;font-weight:700">{{r.name}}</span>
+<span style="font-size:12px;font-weight:600;opacity:.7">{{r.gebiet}} · {{r.riskLabel}}</span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:999 1 600px;min-width:0">
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:12px">
+<div style="font-size:26px;font-weight:800;letter-spacing:-.02em">Was brennt.</div>
+<span style="font-size:13px;color:#575756;font-weight:600">{{dealScope}} · antippen für Belege</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{deals}}" as="d" hint-placeholder-count="10">
+<div class="{{d.cls}}" style="background:{{d.cardBg}};border-radius:20px;overflow:hidden;box-shadow:{{d.ring}}">
+<button onClick="{{d.toggle}}" style="width:100%;background:none;border:0;color:#272d3a;text-align:left;padding:14px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;min-height:56px">
+<span style="background:{{d.chipBg}};color:{{d.chipFg}};border-radius:999px;padding:5px 10px;font-size:12px;font-weight:800;flex:none;min-width:58px;text-align:center">{{d.chip}}</span>
+<span style="flex:2 1 220px;min-width:0"><span style="display:block;font-size:16px;font-weight:700">{{d.kunde}}</span><span style="display:block;font-size:13px;color:#575756">{{d.titel}} · {{d.phase}}</span></span>
+<span style="flex:2 1 200px;font-size:14px;font-weight:600">{{d.grund}}</span>
+<span style="flex:1 1 110px;font-size:13px;color:#575756;font-weight:600">{{d.rep}}</span>
+<span style="font-size:20px;font-weight:800;letter-spacing:-.02em;flex:none;min-width:96px;text-align:right">{{d.wert}}</span>
+</button>
+<sc-if value="{{d.isOpen}}" hint-placeholder-val="{{false}}">
+<div class="l-in" style="padding:0 18px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<sc-for list="{{d.ev}}" as="e" hint-placeholder-count="4"><span style="font-size:13px;font-weight:700;padding:7px 12px;border-radius:999px;background:{{e.bg}};color:{{e.color}}">{{e.mark}} {{e.label}}</span></sc-for>
+<span style="font-size:13px;font-weight:800;margin-left:6px;color:{{d.fcColor}}">{{d.fc}}</span>
+<span style="flex-basis:100%;font-size:14px;margin-top:2px">Nächster Schritt: <strong>{{d.next}}</strong></span>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{hasMore}}" hint-placeholder-val="{{true}}">
+<button onClick="{{showAll}}" style="margin-top:12px;background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:11px 18px;font-size:14px;font-weight:700;min-height:44px">{{moreLabel}}</button>
+</sc-if>
+</div>
+
+<div style="flex:1 1 330px;min-width:0;background:#272d3a;color:#ffffff;border-radius:28px;padding:22px;display:flex;flex-direction:column;gap:14px">
+<sc-if value="{{noRep}}" hint-placeholder-val="{{true}}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<span style="align-self:flex-start;background:#52ae32;color:#10210a;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800">WOCHEN-REVIEW</span>
+<div style="font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.1">Wen nimmst du dir diese Woche vor?</div>
+<div style="font-size:15px;color:#c9ced8;line-height:1.5">Unter 65 % Ziel: <strong style="color:#ffffff">Lang, Braun, Roth</strong>. Zusammen 8 Risiko-Deals mit 4,1 Mio €.</div>
+<div style="font-size:13px;color:#b8bec9">Tipp auf eine Person im Team. Die Fragen ergeben sich aus ihren Deals.</div>
+<div style="border-top:1px solid #3a4152;padding-top:14px;display:flex;flex-direction:column;gap:10px">
+<span style="font-size:12px;font-weight:800;letter-spacing:.1em;color:#7fd35f">LIVE VOM AUSSENDIENST</span>
+<sc-for list="{{feed}}" as="f" hint-placeholder-count="4">
+<div class="{{f.cls}}" style="display:flex;gap:12px;font-size:14px;align-items:baseline"><span style="font-weight:800;color:{{f.tc}};min-width:58px">{{f.t}}</span><span style="color:#dfe3ea">{{f.x}}</span></div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{hasRep}}" hint-placeholder-val="{{false}}">
+<div class="l-in" style="display:flex;flex-direction:column;gap:12px">
+<span style="align-self:flex-start;background:#52ae32;color:#10210a;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800">WOCHEN-REVIEW · 15 MIN</span>
+<div style="font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1">{{sel.name}}</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+<div style="background:rgba(255,255,255,.08);border-radius:18px;padding:12px;text-align:center"><div style="font-size:24px;font-weight:800">{{sel.pct}} %</div><div style="font-size:11px;color:#b8bec9;font-weight:700">ZIEL</div></div>
+<div style="background:rgba(255,255,255,.08);border-radius:18px;padding:12px;text-align:center"><div style="font-size:24px;font-weight:800">{{sel.risk}}</div><div style="font-size:11px;color:#b8bec9;font-weight:700">RISIKO</div></div>
+<div style="background:rgba(255,255,255,.08);border-radius:18px;padding:12px;text-align:center"><div style="font-size:24px;font-weight:800">{{sel.besuche}}</div><div style="font-size:11px;color:#b8bec9;font-weight:700">BESUCHE KW</div></div>
+</div>
+<span style="font-size:12px;font-weight:800;letter-spacing:.1em;color:#7fd35f;margin-top:4px">FRAGEN FÜRS GESPRÄCH</span>
+<sc-for list="{{questions}}" as="q" hint-placeholder-count="3">
+<div style="display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.07);border-radius:18px;padding:12px 14px">
+<span style="font-size:22px;font-weight:800;color:#7fd35f;line-height:1">{{q.nr}}</span>
+<span style="font-size:15px;line-height:1.4">{{q.t}}</span>
+</div>
+</sc-for>
+<sc-if value="{{noQuestions}}" hint-placeholder-val="{{false}}"><div style="font-size:15px;color:#cde7c4">Nichts brennt. Kurz halten: Was brauchst du fürs nächste Quartal?</div></sc-if>
+<button onClick="{{toggleDone}}" style="margin-top:4px;border:0;border-radius:999px;padding:15px;font-size:16px;font-weight:800;background:{{doneBg}};color:#10210a;min-height:52px">{{doneLabel}}</button>
+</div>
+</sc-if>
+</div>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:20px;align-items:stretch">
+<div style="flex:1 1 300px;background:#ffffff;border-radius:26px;padding:20px 22px">
+<div style="font-size:22px;font-weight:800;letter-spacing:-.02em">A-Kunden ohne Besuch.</div>
+<div style="font-size:13px;color:#575756;font-weight:600;margin:2px 0 12px">Seit über 90 Tagen niemand vor Ort</div>
+<sc-for list="{{akunden}}" as="a" hint-placeholder-count="5">
+<div class="l-in" style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #eef3ea;font-size:15px">
+<span style="font-weight:700">{{a.k}}</span><span style="font-size:13px;color:#575756;font-weight:600">{{a.rep}} · <span style="background:#ff6b6f;color:#2a0a0b;border-radius:999px;padding:2px 8px;font-weight:800">{{a.tage}} T</span></span>
+</div>
+</sc-for>
+</div>
+<div style="flex:1.3 1 340px;background:#cde7c4;border-radius:26px;padding:20px 22px;display:flex;flex-direction:column">
+<div style="font-size:22px;font-weight:800;letter-spacing:-.02em">21,4 Mio € schlafen in alten Anlagen.</div>
+<div style="font-size:13px;color:#2f4a26;font-weight:600;margin:2px 0 12px">62 Anlagen beim Kunden älter als 15 Jahre</div>
+<sc-for list="{{basis}}" as="m" hint-placeholder-count="5">
+<div style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid rgba(39,45,58,.12);font-size:15px">
+<span><strong>{{m.k}}</strong> · {{m.typ}}</span><span style="font-size:13px;font-weight:600">Bj. {{m.bj}} · {{m.rep}}</span>
+</div>
+</sc-for>
+<button onClick="{{toggleCampaign}}" style="margin-top:14px;align-self:flex-start;border:0;border-radius:999px;padding:13px 18px;font-size:15px;font-weight:800;background:{{campBg}};color:{{campFg}};min-height:48px">{{campLabel}}</button>
+</div>
+<div style="flex:1 1 280px;background:#ffffff;border-radius:26px;padding:20px 22px">
+<div style="font-size:22px;font-weight:800;letter-spacing:-.02em">Warum wir verlieren.</div>
+<div style="font-size:13px;color:#575756;font-weight:600;margin:2px 0 14px">2026 verloren: 22 Deals · 9,8 Mio €</div>
+<sc-for list="{{lost}}" as="l" hint-placeholder-count="4">
+<div style="margin-bottom:12px">
+<div style="display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:5px"><span>{{l.g}}</span><span style="font-weight:800">{{l.p}} %</span></div>
+<div style="height:12px;background:#eef3ea;border-radius:6px;overflow:hidden"><div style="height:100%;width:{{l.p}}%;background:#272d3a;border-radius:6px"></div></div>
+</div>
+</sc-for>
+</div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":1900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { rep: null, open: null, all: false, done: {}, camp: false, live: null, dbOn: false };
+  }
+  componentDidMount() {
+    this._alive = true;
+    try { this._bc = new BroadcastChannel('pp-live'); this._bc.onmessage = (e) => { if (e && e.data) this.setState({ live: e.data }); }; } catch (e) {}
+    try { const raw = window.localStorage.getItem('pp-live'); if (raw) this.setState({ live: JSON.parse(raw) }); } catch (e) {}
+    try {
+      const c = window.claude;
+      if (c && typeof c.use === 'function') {
+        c.use('db').then((db) => {
+          if (!db || !this._alive) return;
+          this.setState({ dbOn: true });
+          this._unsub = db.doc('pp/live').onSnapshot((snap) => { if (snap && snap.exists) this.setState({ live: snap.data() }); }, () => this.setState({ dbOn: false }));
+        }).catch(() => {});
+      }
+    } catch (e) {}
+  }
+  componentWillUnmount() {
+    this._alive = false;
+    if (this._unsub) this._unsub();
+    try { if (this._bc) this._bc.close(); } catch (e) {}
+  }
+  renderVals() {
+    const s = this.state;
+    const str = (v, d) => (typeof v === 'string' || typeof v === 'number') ? String(v).slice(0, 80) : d;
+    const fmtDate = (iso) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? m[3] + '.' + m[2] + '.' : ''; };
+    const fmtW = (v) => v >= 1000 ? (v / 1000).toFixed(2).replace('.', ',') + ' Mio €' : v + ' T€';
+    const live = s.live && typeof s.live === 'object' ? s.live : {};
+    const capsObj = live.captures && typeof live.captures === 'object' ? live.captures : {};
+    let caps = Object.keys(capsObj).filter((k) => capsObj[k] && typeof capsObj[k] === 'object').map((k) => ({ ...capsObj[k], key: k }));
+    if (!caps.length && live.erfasst) caps = [{ key: 'brandt', seq: 1, ts: live.ts, kunde: 'Brandt Kunststofftechnik', nr: 'ANG-1187', title: 'Automationszelle AZ-2', acc: live.acc, edits: live.edits }];
+    caps.sort((x, y) => (+y.seq || 0) - (+x.seq || 0));
+    const CI = caps.map((c) => {
+      const A = c.acc && typeof c.acc === 'object' ? c.acc : { a: true, b: true, c: true, d: true };
+      const E = c.edits && typeof c.edits === 'object' ? c.edits : {};
+      const g = (o, k, d) => str(o && typeof o === 'object' ? o[k] : undefined, d);
+      const dealOk = A.c !== false;
+      const prob = Math.max(0, Math.min(100, parseInt(g(E.c, 'prob', '50'), 10) || 0));
+      const wert = Math.max(0, parseInt(g(E.c, 'wert', '0'), 10) || 0);
+      const kunde = str(c.kunde, 'Kunde');
+      return { key: str(c.key, ''), kunde, short: kunde.split(' ')[0], ts: str(c.ts, '').slice(0, 5), nr: str(c.nr, ''), title: str(c.title, ''), A, dealOk,
+        phase: g(E.c, 'phase', 'Angebot'), prob, wert, bArt: g(E.b, 'art', 'Termin'), bDate: fmtDate(g(E.b, 'datum', '')), aName: g(E.a, 'name', ''),
+        add: dealOk ? wert * prob / 100 / 1000 : 0 };
+    });
+    const byKey = {}; CI.forEach((c) => { byKey[c.key] = c; });
+    const latest = CI[0] || null;
+    const L = CI.length > 0;
+    const belegtAdd = CI.reduce((acc, c) => acc + c.add, 0);
+    const liveTs = latest ? latest.ts : '';
+    const capDeal = (key, base) => {
+      const c = byKey[key]; if (!c || !c.dealOk) return base;
+      const hasB = c.A.b !== false;
+      return { ...base, wert: fmtW(c.wert), v: c.wert, phase: c.phase + ' · ' + c.prob + ' %', k: 'ok', grund: (hasB ? c.bArt + ' ' + c.bDate + ' · ' : '') + 'erfasst ' + c.ts, ev: hasB ? '1111' : '1110', next: hasB ? c.bArt + ' ' + c.bDate : 'nicht hinterlegt', fresh: true, frage: undefined };
+    };
+    const set = (o) => this.setState(o);
+    const chip = { hot: ['Brennt', '#ff6b6f', '#2a0a0b'], warn: ['Achtung', '#ffc85c', '#2e2000'], ok: ['Läuft', '#cde7c4', '#1d3315'] };
+    const repDefs = [
+      { id: 'keller', name: 'Jonas Keller', gebiet: 'Süd', pct: 74, besuche: 9 + CI.length },
+      { id: 'vogt', name: 'Miriam Vogt', gebiet: 'Nord', pct: 96, besuche: 11 },
+      { id: 'lang', name: 'Tobias Lang', gebiet: 'West', pct: 61, besuche: 5 },
+      { id: 'krueger', name: 'Sabine Krüger', gebiet: 'Ost', pct: 88, besuche: 10 },
+      { id: 'demir', name: 'Ahmet Demir', gebiet: 'Bayern', pct: 79, besuche: 8 },
+      { id: 'hoffmann', name: 'Lena Hoffmann', gebiet: 'Baden-Württ.', pct: 102, besuche: 12 },
+      { id: 'weber', name: 'Markus Weber', gebiet: 'NRW', pct: 70, besuche: 7 },
+      { id: 'schulz', name: 'Clara Schulz', gebiet: 'Export DACH', pct: 83, besuche: 6 },
+      { id: 'braun', name: 'Felix Braun', gebiet: 'Export EU', pct: 55, besuche: 4 },
+      { id: 'fischer', name: 'Nina Fischer', gebiet: 'Key Account', pct: 91, besuche: 7 },
+      { id: 'roth', name: 'David Roth', gebiet: 'Neukunden', pct: 48, besuche: 6 },
+      { id: 'wagner', name: 'Paul Wagner', gebiet: 'Service-Vertrieb', pct: 85, besuche: 13 }
+    ];
+    const dealDefs = [
+      capDeal('brandt', { id: 1, rep: 'keller', kunde: 'Brandt Kunststofftechnik', titel: 'Automationszelle AZ-2', wert: '386 T€', v: 386, phase: 'Angebot', k: 'hot', grund: 'Angebot 41 Tage ohne Nachfass', ev: '1100', next: 'Termin heute 11:00', frage: 'Brandt: Wer aus der Produktion entscheidet mit, und wann fasst du nach?' }),
+      capDeal('lindner', { id: 2, rep: 'keller', kunde: 'Lindner Medizintechnik', titel: 'Reinraumzelle SX 300 CR', wert: '690 T€', v: 690, phase: 'Lead', k: 'hot', grund: 'Kein nächster Schritt', ev: '0000', next: 'nicht hinterlegt', frage: 'Lindner: Echter Deal oder raus aus der Pipeline?' }),
+      capDeal('kessler', { id: 3, rep: 'keller', kunde: 'Kessler Food Systems', titel: 'Linienerweiterung 2× SX 300', wert: '520 T€', v: 520, phase: 'Angebot', k: 'warn', grund: 'Abschluss 2× verschoben', ev: '1101', next: 'Anruf heute 16:30', frage: 'Kessler: Warum zweimal verschoben, und was ist das neue, verbindliche Datum?' }),
+      capDeal('ostermann', { id: 4, rep: 'keller', kunde: 'Ostermann Automotive', titel: 'Neuanlage SX 800', wert: '1,12 Mio €', v: 1120, phase: 'Verhandlung', k: 'warn', grund: 'Einkauf unbekannt', ev: '1011', next: 'Angebot 02.12.' }),
+      { id: 5, rep: 'lang', kunde: 'Rhein-Metallwaren', titel: 'Pressenlinie PX 2', wert: '1,40 Mio €', v: 1400, phase: 'Verhandlung', k: 'hot', grund: 'Abschluss 3× verschoben', ev: '1101', next: 'Telefonat 28.11.', frage: 'Rhein-Metallwaren: Was blockiert wirklich, und wer beim Kunden löst es?' },
+      { id: 6, rep: 'lang', kunde: 'Hagedorn Logistik', titel: 'Palettierzelle', wert: '310 T€', v: 310, phase: 'Angebot', k: 'hot', grund: 'Kein nächster Schritt', ev: '1000', next: 'nicht hinterlegt', frage: 'Hagedorn: Welcher Termin steht bis Freitag?' },
+      { id: 7, rep: 'lang', kunde: 'Becker Bausysteme', titel: 'Ersatz SX 300', wert: '180 T€', v: 180, phase: 'Bedarf', k: 'warn', grund: 'Entscheider unbekannt', ev: '0011', next: 'Besuch 04.12.', frage: 'Becker: Wer unterschreibt am Ende?' },
+      { id: 8, rep: 'braun', kunde: 'Nordisk Plast (DK)', titel: '2× SX 450', wert: '980 T€', v: 980, phase: 'Angebot', k: 'hot', grund: 'Wettbewerber 12 % günstiger', ev: '1111', next: 'Workshop 03.12.', frage: 'Nordisk Plast: Wie begründen wir 12 % Mehrpreis über die Gesamtkosten?' },
+      { id: 9, rep: 'braun', kunde: 'Iberplast (ES)', titel: 'Automationszelle AZ-1', wert: '450 T€', v: 450, phase: 'Angebot', k: 'hot', grund: 'Angebot 58 Tage offen', ev: '1000', next: 'nicht hinterlegt', frage: 'Iberplast: 58 Tage still. Lebt der Deal noch?' },
+      { id: 10, rep: 'braun', kunde: 'Polmet (PL)', titel: 'Retrofit SX 450', wert: '210 T€', v: 210, phase: 'Bedarf', k: 'warn', grund: 'Kein Kontakt seit 47 Tagen', ev: '0101', next: 'Mail 27.11.' },
+      { id: 11, rep: 'roth', kunde: 'Voltwerk Energy', titel: 'Pilotzelle Batteriegehäuse', wert: '260 T€', v: 260, phase: 'Bedarf', k: 'hot', grund: 'Budget unbestätigt', ev: '0101', next: 'Call 01.12.', frage: 'Voltwerk: Gibt es freigegebenes Budget, ja oder nein?' },
+      { id: 12, rep: 'roth', kunde: 'Marquardt Elektro', titel: 'Montagezelle', wert: '330 T€', v: 330, phase: 'Lead', k: 'warn', grund: 'Kein Termin vereinbart', ev: '0000', next: 'nicht hinterlegt', frage: 'Marquardt: Bis wann steht der Ersttermin?' },
+      { id: 13, rep: 'weber', kunde: 'Dorn Armaturen', titel: 'Ersatz SX 300', wert: '150 T€', v: 150, phase: 'Angebot', k: 'hot', grund: 'Angebot 29 Tage ohne Nachfass', ev: '1100', next: 'nicht hinterlegt', frage: 'Dorn: Wann fasst du nach, und womit?' },
+      { id: 14, rep: 'weber', kunde: 'Schäfer Chemie', titel: 'Abfüllzelle', wert: '720 T€', v: 720, phase: 'Verhandlung', k: 'warn', grund: 'Einkauf fordert 8 % Nachlass', ev: '1111', next: 'Verhandlung 05.12.', frage: 'Schäfer: Was geben wir statt Rabatt?' },
+      { id: 15, rep: 'krueger', kunde: 'Elbe Pack', titel: 'Kartonierer VX 200', wert: '410 T€', v: 410, phase: 'Angebot', k: 'warn', grund: 'Entscheider unbekannt', ev: '1011', next: 'Besuch 02.12.', frage: 'Elbe Pack: Wer entscheidet, und kennst du die Person?' },
+      { id: 16, rep: 'demir', kunde: 'Alpen Kunststoff', titel: 'Linie SX 450 + AZ-2', wert: '560 T€', v: 560, phase: 'Verhandlung', k: 'warn', grund: 'Abschluss verschoben', ev: '1111', next: 'Termin 03.12.', frage: 'Alpen Kunststoff: Neues Abschlussdatum belastbar?' },
+      { id: 17, rep: 'schulz', kunde: 'Tiroler Formteile (AT)', titel: 'Retrofit 2× SX 300', wert: '290 T€', v: 290, phase: 'Angebot', k: 'warn', grund: 'Budget erst 2027', ev: '1101', next: 'Call 10.12.', frage: 'Tiroler Formteile: Ins Q1 schieben oder mit Finanzierung lösen?' },
+      { id: 18, rep: 'fischer', kunde: 'Vehra Group', titel: 'Rahmenvertrag 6 Zellen', wert: '2,30 Mio €', v: 2300, phase: 'Verhandlung', k: 'warn', grund: 'Vorstandsfreigabe ausstehend', ev: '1111', next: 'Vorstand 09.12.', frage: 'Vehra: Was braucht der Vorstand für die Freigabe?' }
+    ];
+    CI.filter((c) => c.dealOk && ['brandt', 'lindner', 'kessler', 'ostermann'].indexOf(c.key) < 0).forEach((c, i) => {
+      const hasB = c.A.b !== false;
+      dealDefs.push({ id: 100 + i, rep: 'keller', kunde: c.kunde, titel: c.title, wert: fmtW(c.wert), v: c.wert, phase: c.phase + ' · ' + c.prob + ' %', k: 'ok', grund: 'Neu in der Pipeline · erfasst ' + c.ts, ev: hasB ? '1111' : '1110', next: hasB ? c.bArt + ' ' + c.bDate : 'nicht hinterlegt', fresh: true });
+    });
+    const repName = {}; repDefs.forEach((r) => { repName[r.id] = r.name; });
+    const riskCount = {}; dealDefs.forEach((d) => { if (d.k !== 'ok') riskCount[d.rep] = (riskCount[d.rep] || 0) + 1; });
+    const lvl = (p) => (p < 65 ? 'hot' : p < 80 ? 'warn' : 'ok');
+    const reps = repDefs.map((r) => {
+      const sel = s.rep === r.id; const n = riskCount[r.id] || 0; const k = lvl(r.pct);
+      return { ...r, chip: k === 'hot' ? 'Unter Plan' : k === 'warn' ? 'Knapp' : 'Auf Kurs', chipBg: chip[k][1], chipFg: chip[k][2],
+        riskLabel: n === 0 ? 'keine Risiken' : n + ' Risiko-Deal' + (n > 1 ? 's' : ''),
+        bg: sel ? '#272d3a' : '#ffffff', fg: sel ? '#ffffff' : '#272d3a', shadow: sel ? '0 10px 24px rgba(39,45,58,.25)' : 'none', tf: sel ? 'translateY(-3px)' : 'none',
+        pressed: sel ? 'true' : 'false', pick: () => set({ rep: this.state.rep === r.id ? null : r.id, open: null }) };
+    });
+    const labels = ['Angebot', 'Entscheider', 'Budget', 'Nächster Schritt'];
+    const rank = { hot: 0, warn: 1, ok: 2 };
+    const list = dealDefs.filter((d) => !s.rep || d.rep === s.rep).sort((x, y) => (x.fresh ? -1 : y.fresh ? 1 : rank[x.k] !== rank[y.k] ? rank[x.k] - rank[y.k] : y.v - x.v));
+    const total = list.length;
+    const limit = s.rep || s.all ? total : 10;
+    const deals = list.slice(0, limit).map((d) => {
+      const ok = d.ev.split('').map((c) => c === '1'); const belegt = ok.every(Boolean);
+      return { ...d, rep: repName[d.rep], chip: d.fresh ? 'Neu · Läuft' : chip[d.k][0], chipBg: chip[d.k][1], chipFg: chip[d.k][2],
+        cardBg: d.fresh ? '#f1f8ee' : '#ffffff', ring: d.fresh ? '0 0 0 3px #52ae32' : 'none', cls: d.fresh ? 'l-pop' : '',
+        isOpen: s.open === d.id,
+        ev: labels.map((l, i) => ({ label: l, mark: ok[i] ? '✓' : '✗', bg: ok[i] ? '#cde7c4' : '#ffd9da', color: ok[i] ? '#1d3315' : '#7a1a1e' })),
+        fc: belegt ? 'Zählt im Forecast' : 'Zählt nicht im Forecast', fcColor: belegt ? '#2f7a17' : '#a3242a',
+        toggle: () => set({ open: this.state.open === d.id ? null : d.id }) };
+    });
+    const selDef = repDefs.find((r) => r.id === s.rep);
+    const sel = selDef ? { ...selDef, risk: riskCount[selDef.id] || 0 } : { name: '', pct: 0, risk: 0, besuche: 0 };
+    const questions = selDef ? dealDefs.filter((d) => d.rep === s.rep && d.frage && d.k !== 'ok').slice(0, 4).map((d, i) => ({ nr: String(i + 1), t: d.frage })) : [];
+    const isDone = !!(selDef && s.done[s.rep]);
+    const feed = [
+      { t: '08:41', x: 'J. Keller · Hessler · Bericht in 0:52 Min.' },
+      { t: '08:15', x: 'M. Vogt · Auftrag Heinze 240 T€ gebucht' },
+      { t: '07:58', x: 'L. Hoffmann · neuer Kontakt bei Weisser AG' },
+      { t: 'gestern', x: 'T. Lang · Rhein-Metallwaren 3× verschoben' }
+    ].map((f) => ({ ...f, cls: '', tc: '#7fd35f' }));
+    CI.slice().reverse().forEach((c) => feed.unshift({ t: c.ts || 'jetzt', x: 'J. Keller · ' + c.short + ' · erfasst' + (c.dealOk ? ' · ' + c.nr + ' → ' + c.prob + ' %' : ''), cls: c === latest ? 'l-pop' : '', tc: '#ffc85c' }));
+    const ak = [
+      { k: 'Rhein-Metallwaren', rep: 'T. Lang', tage: 132 },
+      { k: 'Schäfer Chemie', rep: 'M. Weber', tage: 118 },
+      { k: 'Brandt Kunststofftechnik', rep: 'J. Keller', tage: 104 },
+      { k: 'Nordisk Plast', rep: 'F. Braun', tage: 97 },
+      { k: 'Vehra Group', rep: 'N. Fischer', tage: 93 }
+    ].filter((a) => !(byKey.brandt && a.k.indexOf('Brandt') === 0));
+    return {
+      syncLabel: s.dbOn ? 'Live-Datenbank verbunden' : 'Live-Sync (lokal)',
+      live: L, liveTs: liveTs || 'jetzt',
+      liveChips: latest ? [latest.A.a !== false && latest.aName ? { t: '+ Kontakt ' + latest.aName } : null, latest.A.b !== false ? { t: latest.bArt + ' ' + latest.bDate } : null, latest.A.d !== false ? { t: 'Bericht in Kundenakte' } : null, CI.length > 1 ? { t: 'heute ' + CI.length + ' Erfassungen' } : null].filter(Boolean) : [],
+      liveHead: latest ? 'Jonas Keller hat ' + latest.short + ' erfasst.' + (latest.dealOk ? ' ' + latest.nr + ' → ' + latest.phase + ', ' + latest.prob + ' %.' : '') : '',
+      liveGain: belegtAdd > 0, liveGainText: '+' + belegtAdd.toFixed(2).replace('.', ',') + ' Mio € belegt',
+      fcBelegt: (16.9 + belegtAdd).toFixed(1).replace('.', ','), belegt: (2.7 + belegtAdd).toFixed(1).replace('.', ','), unbelegt: Math.max(0, 2.5 - belegtAdd).toFixed(1).replace('.', ','),
+      wBelegt: Math.round((2.7 + belegtAdd) / 18 * 100), wUnbelegt: Math.round(Math.max(0, 2.5 - belegtAdd) / 18 * 100),
+      nfCount: byKey.brandt && byKey.brandt.dealOk ? '8' : '9', nfVol: byKey.brandt && byKey.brandt.dealOk ? '2,3' : '2,7',
+      reps, deals,
+      clearRep: () => set({ rep: null, open: null }),
+      clearLabel: s.rep ? 'Ganzes Team' : '12 Leute',
+      clearBg: s.rep ? '#272d3a' : 'rgba(39,45,58,.08)', clearFg: s.rep ? '#ffffff' : '#272d3a',
+      dealScope: s.rep ? repName[s.rep] + ' · ' + total + ' Deals' : 'Ganzes Team · ' + total + ' Deals',
+      hasMore: !s.rep && total > 10,
+      moreLabel: s.all ? 'Nur Top 10' : 'Alle ' + total + ' zeigen',
+      showAll: () => set({ all: !this.state.all }),
+      noRep: !selDef, hasRep: !!selDef, sel, questions, noQuestions: !!selDef && questions.length === 0,
+      doneLabel: isDone ? '✓ Review erledigt' : 'Review abhaken',
+      doneBg: isDone ? '#cde7c4' : '#52ae32',
+      toggleDone: () => set({ done: { ...this.state.done, [this.state.rep]: !this.state.done[this.state.rep] } }),
+      feed, akunden: ak,
+      basis: [
+        { k: 'Elbe Pack', typ: 'VX 100', bj: '2007', rep: 'Krüger' },
+        { k: 'Wolfram Präzisionsguss', typ: 'SX 450', bj: '2008', rep: 'Keller' },
+        { k: 'Brandt Kunststofftechnik', typ: 'SX 450', bj: '2009', rep: 'Keller' },
+        { k: 'Alpen Kunststoff', typ: 'SX 450', bj: '2009', rep: 'Demir' },
+        { k: 'Dorn Armaturen', typ: 'SX 300', bj: '2010', rep: 'Weber' }
+      ],
+      toggleCampaign: () => set({ camp: !this.state.camp }),
+      campLabel: s.camp ? '✓ An 9 Leute im Außendienst verteilt' : 'Als Kampagne an den Außendienst →',
+      campBg: s.camp ? '#ffffff' : '#272d3a', campFg: s.camp ? '#272d3a' : '#ffffff',
+      lost: [{ g: 'Preis', p: 41 }, { g: 'Lieferzeit', p: 27 }, { g: 'Technik / Spezifikation', p: 18 }, { g: 'Kein Budget / verschoben', p: 14 }]
+    };
+  }
+}
+</script>
+</body>
+</html>
