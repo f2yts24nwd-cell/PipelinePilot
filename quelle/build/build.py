@@ -22,7 +22,7 @@ html=f'''<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pipeline Pilot</title>
-<script>window.PP_VERSION = 5;</script>
+<script>window.PP_VERSION = 6;</script>
 <meta name="theme-color" content="#52ae32">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -103,7 +103,7 @@ open('../../index.html','w').write(html)
 man={"name":"Pipeline Pilot","short_name":"Pipeline","description":"Vertriebs-App für Außendienst und Head of Sales","start_url":"./index.html#aussendienst","scope":"./","display":"standalone","orientation":"portrait","background_color":"#52ae32","theme_color":"#52ae32","lang":"de",
  "icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"},{"src":"icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}]}
 open('../../manifest.webmanifest','w').write(json.dumps(man,ensure_ascii=False,indent=2))
-open('../../sw.js','w').write('''const CACHE = 'pipeline-pilot-v5';
+open('../../sw.js','w').write('''const CACHE = 'pipeline-pilot-v6';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-180.png'];
 // Beim Installieren am Browser-Cache vorbei frisch laden, sonst landet eine alte index.html im neuen Cache
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting())); });
