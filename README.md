@@ -2,6 +2,15 @@
 
 Klickbarer Prototyp einer Vertriebs-App für den Maschinen- und Anlagenbau: Außendienst-App (Kartenstapel, Sprach-Erfassung, Anrufliste) und Leitstand für den Head of Sales, umschaltbar in einer Web-App.
 
+## Audio-Briefing
+
+Oben rechts auf „Heute“ sitzt der Knopf **Briefing**. Er bietet zwei Varianten zum Vorlesen:
+
+- **Nächster Termin**: das Rüstblatt zum Hören (Termin, Lage und Angebot, Personen, Maschinen, die drei wichtigsten Punkte).
+- **Ganzer Tag**: alle offenen Stationen des Tages kurz hintereinander, dazu Wochenziel und Anrufliste.
+
+Jedes Rüstblatt hat zusätzlich einen Knopf **Vorlesen**. Die Sprachausgabe läuft über die eingebaute Stimme des Geräts, also offline und ohne Zusatzdienst. Der Ton kommt aus dem Lautsprecher oder über Bluetooth im Auto. Die Vor- und Zurück-Tasten springen von Station zu Station, und ein Antippen eines Satzes springt direkt dorthin. Solange das Briefing läuft, bleibt der Bildschirm an. Hat ein Gerät keine Sprachausgabe, läuft der Text trotzdem mit.
+
 ## Auf dem iPhone installieren
 
 1. Die App-Adresse (GitHub Pages, siehe unten) in **Safari** öffnen.
@@ -30,6 +39,6 @@ cd quelle/build
 python3 build.py
 ```
 
-Danach in `sw.js` den Cache-Namen hochzählen (z. B. `pipeline-pilot-v10`), damit installierte Apps die neue Version laden.
+Danach in `build.py` den Cache-Namen hochzählen (aktuell `pipeline-pilot-v2`) und neu bauen, damit installierte Apps die neue Version laden.
 
 Alle Kunden, Zahlen und Personen sind erfunden. Die Daten bleiben lokal auf dem jeweiligen Gerät.
