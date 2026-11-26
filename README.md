@@ -41,6 +41,6 @@ cd quelle/build
 python3 build.py
 ```
 
-Danach in `build.py` den Cache-Namen hochzählen (aktuell `pipeline-pilot-v3`) und neu bauen, damit installierte Apps die neue Version laden.
+Danach in `build.py` den Cache-Namen hochzählen (aktuell `pipeline-pilot-v4`, dazu `PP_VERSION`) und neu bauen, damit installierte Apps die neue Version laden.
 
 Alle Kunden, Zahlen und Personen sind erfunden. Die Daten bleiben lokal auf dem jeweiligen Gerät.

@@ -22,6 +22,7 @@ html=f'''<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pipeline Pilot</title>
+<script>window.PP_VERSION = 4;</script>
 <meta name="theme-color" content="#52ae32">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -85,7 +86,11 @@ document.addEventListener('click', function (e) {{
 window.addEventListener('hashchange', route);
 route();
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {{
-  try {{ navigator.serviceWorker.register('sw.js').catch(function () {{}}); }} catch (e) {{}}
+  try {{
+    var hadCtrl = !!navigator.serviceWorker.controller, reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () {{ if (hadCtrl && !reloaded) {{ reloaded = true; location.reload(); }} }});
+    navigator.serviceWorker.register('sw.js', {{ updateViaCache: 'none' }}).then(function (r) {{ try {{ r.update(); }} catch (e) {{}} }}).catch(function () {{}});
+  }} catch (e) {{}}
 }}
 }}
 </script>
@@ -98,14 +103,24 @@ open('../../index.html','w').write(html)
 man={"name":"Pipeline Pilot","short_name":"Pipeline","description":"Vertriebs-App für Außendienst und Head of Sales","start_url":"./index.html#aussendienst","scope":"./","display":"standalone","orientation":"portrait","background_color":"#52ae32","theme_color":"#52ae32","lang":"de",
  "icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"},{"src":"icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}]}
 open('../../manifest.webmanifest','w').write(json.dumps(man,ensure_ascii=False,indent=2))
-open('../../sw.js','w').write('''const CACHE = 'pipeline-pilot-v3';
+open('../../sw.js','w').write('''const CACHE = 'pipeline-pilot-v4';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-180.png'];
-self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
+// Beim Installieren am Browser-Cache vorbei frisch laden, sonst landet eine alte index.html im neuen Cache
+self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  const page = e.request.mode === 'navigate' || (url.origin === location.origin && /\\/(index\\.html)?$/.test(url.pathname));
+  if (page) {
+    // App-Seite: zuerst Netz (immer neueste Version), offline aus dem Cache
+    e.respondWith(fetch(e.request, { cache: 'no-cache' }).then((res) => {
+      if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); }
+      return res;
+    }).catch(() => caches.match(e.request).then((hit) => hit || caches.match('./index.html'))));
+    return;
+  }
   e.respondWith(caches.match(e.request).then((hit) => hit || fetch(e.request).then((res) => {
-    const url = new URL(e.request.url);
     if (res.ok && (url.origin === location.origin || /fonts\\.(googleapis|gstatic)\\.com$/.test(url.hostname))) {
       const copy = res.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy));
     }

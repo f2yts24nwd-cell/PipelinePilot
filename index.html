@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pipeline Pilot</title>
+<script>window.PP_VERSION = 4;</script>
 <meta name="theme-color" content="#52ae32">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -512,6 +513,7 @@ button{font-family:inherit;cursor:pointer}
 <div style="font-size:14px;font-weight:600;line-height:1.45;margin-top:6px">Auf dem iPhone: <b>Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen → Deutsch</b>. Dort z. B. <b>Anna</b> oder <b>Helena</b> antippen und die Variante <b>Premium</b> (sonst <b>Erweitert</b>) laden. Danach die App einmal schließen und neu öffnen.</div>
 <div style="font-size:13px;font-weight:600;color:#575756;margin-top:8px">Kein Ton? Stummschalter am iPhone ausschalten.</div>
 </div>
+<div style="font-size:12px;font-weight:600;color:#8a8f99;margin-top:12px;text-align:center">{{au.diag}}</div>
 </div>
 </div>
 </sc-if>
@@ -1347,6 +1349,7 @@ class Component extends DCLogic {
       voices: vlist.map((v) => { const on = cv && (v.voiceURI || v.name) === (cv.voiceURI || cv.name); const tg = tagOf(this.audTier(v));
         return { name: this.audVoiceName(v), lang: v.lang + (v.localService === false ? ' · braucht Internet' : ''), tag: tg[0], tagBg: tg[1], tagFg: tg[2],
           on: on ? 'true' : 'false', check: on ? '✓' : '', bg: on ? '#eef8ea' : '#f6f8f4', border: on ? '2px solid #52ae32' : '2px solid transparent', pick: () => this.audPickVoice(v) }; }),
+      diag: (() => { let all = [], de = 0; try { all = window.speechSynthesis.getVoices() || []; de = all.filter((v) => /^de([-_]|$)/i.test(v.lang)).length; } catch (e) {} return 'App-Version ' + (window.PP_VERSION || '?') + ' · ' + de + ' deutsche von ' + all.length + ' Stimmen sichtbar · beste: ' + (best ? best.name : 'keine'); })(),
       tipTitle: weak ? 'Natürlichere Stimme laden' : 'Noch mehr Stimmen', tipBg: weak ? '#ffe58f' : '#eef3ea',
       openVoice: () => this.setState({ audVoiceSheet: true }),
       closeVoice: () => { this._audTok++; try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {} this.setState({ audVoiceSheet: false }); },
@@ -1995,7 +1998,11 @@ document.addEventListener('click', function (e) {
 window.addEventListener('hashchange', route);
 route();
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-  try { navigator.serviceWorker.register('sw.js').catch(function () {}); } catch (e) {}
+  try {
+    var hadCtrl = !!navigator.serviceWorker.controller, reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function () { if (hadCtrl && !reloaded) { reloaded = true; location.reload(); } });
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function (r) { try { r.update(); } catch (e) {} }).catch(function () {});
+  } catch (e) {}
 }
 }
 </script>
