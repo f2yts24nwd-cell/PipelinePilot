@@ -1,4 +1,4 @@
-const CACHE = 'pipeline-pilot-v4';
+const CACHE = 'pipeline-pilot-v5';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-180.png'];
 // Beim Installieren am Browser-Cache vorbei frisch laden, sonst landet eine alte index.html im neuen Cache
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting())); });

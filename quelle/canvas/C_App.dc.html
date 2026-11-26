@@ -427,7 +427,6 @@ button{font-family:inherit;cursor:pointer}
 </sc-if>
 
 <div style="margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:18px">
-<sc-if value="{{au.voiceWeak}}" hint-placeholder-val="{{false}}"><button onClick="{{au.openVoice}}" style="background:none;border:0;padding:4px 0;color:#ffc85c;font-size:13px;font-weight:700;text-decoration:underline;min-height:32px">Klingt roboterhaft? Natürlichere Stimme laden →</button></sc-if>
 <sc-if value="{{au.silent}}" hint-placeholder-val="{{false}}"><span style="font-size:13px;font-weight:700;color:#ffc85c;text-align:center">Keine Sprachausgabe auf diesem Gerät. Der Text läuft trotzdem mit.</span></sc-if>
 <sc-if value="{{au.notDone}}" hint-placeholder-val="{{true}}">
 <div aria-hidden="true" style="display:flex;align-items:center;justify-content:center;gap:4px;height:34px">
@@ -476,12 +475,7 @@ button{font-family:inherit;cursor:pointer}
 </sc-for>
 <sc-if value="{{au.noVoices}}" hint-placeholder-val="{{false}}"><div style="background:#eef3ea;border-radius:18px;padding:14px;font-size:14px;font-weight:600">Auf diesem Gerät ist keine deutsche Stimme verfügbar.</div></sc-if>
 </div>
-<div style="background:{{au.tipBg}};border-radius:22px;padding:16px;margin-top:16px">
-<div style="font-size:16px;font-weight:800">{{au.tipTitle}}</div>
-<div style="font-size:14px;font-weight:600;line-height:1.45;margin-top:6px">Auf dem iPhone: <b>Einstellungen → Bedienungshilfen → Gesprochene Inhalte → Stimmen → Deutsch</b>. Dort z. B. <b>Anna</b> oder <b>Helena</b> antippen und die Variante <b>Premium</b> (sonst <b>Erweitert</b>) laden. Danach die App einmal schließen und neu öffnen.</div>
-<div style="font-size:13px;font-weight:600;color:#575756;margin-top:8px">Kein Ton? Stummschalter am iPhone ausschalten.</div>
-</div>
-<div style="font-size:12px;font-weight:600;color:#8a8f99;margin-top:12px;text-align:center">{{au.diag}}</div>
+<div style="font-size:13px;font-weight:600;color:#575756;margin-top:14px">Kein Ton? Stummschalter am iPhone ausschalten.</div>
 </div>
 </div>
 </sc-if>
@@ -1044,15 +1038,11 @@ class Component extends DCLogic {
     }
     const cv = this.audVoice(), vlist = s.audVoiceSheet ? this.audVoices() : [];
     const tagOf = (t) => t >= 4 ? ['Premium', '#52ae32', '#10210a'] : t === 3 ? ['Erweitert', '#cde7c4', '#1d3315'] : ['Standard', '#ffe58f', '#2e2000'];
-    const best = this.audVoices()[0];
-    const weak = !best || this.audTier(best) < 3;
     const base = { sheet: !!s.audSheet, options,
-      voiceLabel: this.audVoiceName(cv), voiceWeak: !!A && !A.done && weak && !A.silent, voiceSheet: !!s.audVoiceSheet, noVoices: !!s.audVoiceSheet && !vlist.length,
+      voiceLabel: this.audVoiceName(cv), voiceSheet: !!s.audVoiceSheet, noVoices: !!s.audVoiceSheet && !vlist.length,
       voices: vlist.map((v) => { const on = cv && (v.voiceURI || v.name) === (cv.voiceURI || cv.name); const tg = tagOf(this.audTier(v));
         return { name: this.audVoiceName(v), lang: v.lang + (v.localService === false ? ' · braucht Internet' : ''), tag: tg[0], tagBg: tg[1], tagFg: tg[2],
           on: on ? 'true' : 'false', check: on ? '✓' : '', bg: on ? '#eef8ea' : '#f6f8f4', border: on ? '2px solid #52ae32' : '2px solid transparent', pick: () => this.audPickVoice(v) }; }),
-      diag: (() => { let all = [], de = 0; try { all = window.speechSynthesis.getVoices() || []; de = all.filter((v) => /^de([-_]|$)/i.test(v.lang)).length; } catch (e) {} return 'App-Version ' + (window.PP_VERSION || '?') + ' · ' + de + ' deutsche von ' + all.length + ' Stimmen sichtbar · beste: ' + (best ? best.name : 'keine'); })(),
-      tipTitle: weak ? 'Natürlichere Stimme laden' : 'Noch mehr Stimmen', tipBg: weak ? '#ffe58f' : '#eef3ea',
       openVoice: () => this.setState({ audVoiceSheet: true }),
       closeVoice: () => { this._audTok++; try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {} this.setState({ audVoiceSheet: false }); },
       voiceBackdrop: (e) => { if (e && e.target === e.currentTarget) { this._audTok++; try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (x) {} this.setState({ audVoiceSheet: false }); } },
