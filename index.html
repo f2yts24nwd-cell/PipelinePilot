@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pipeline Pilot</title>
-<script>window.PP_VERSION = 7;</script>
+<script>window.PP_VERSION = 8;</script>
 <meta name="theme-color" content="#52ae32">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -66,6 +66,12 @@ button{font-family:inherit;cursor:pointer}
 @keyframes c-liftB{0%{transform:translateY(var(--fy,-120px)) scale(.9);opacity:.35}60%{transform:translateY(8px) scale(1.01);opacity:1}100%{transform:none}}
 @keyframes c-land{30%{transform:scale(1.2)}60%{transform:scale(.94)}100%{transform:none}}
 @keyframes c-hero{from{opacity:0;transform:translateY(-60px) scale(.94)}}
+@keyframes c-flow{to{stroke-dashoffset:-28}}
+@keyframes c-ping{from{transform:scale(.6);opacity:.7}to{transform:scale(2.4);opacity:0}}
+@keyframes c-breathe{50%{opacity:.45}}
+.c-flow{animation:c-flow 1.1s linear infinite}
+.c-ping{transform-box:fill-box;transform-origin:center;animation:c-ping 1.8s ease-out infinite}
+.c-breathe{animation:c-breathe 2.4s ease-in-out infinite}
 .c-scroll{scrollbar-width:none}.c-scroll::-webkit-scrollbar{display:none}
 
 
@@ -101,7 +107,12 @@ button{font-family:inherit;cursor:pointer}
 <button onClick="{{au.openSheet}}" aria-label="Audio-Briefing hören" style="position:absolute;right:0;top:-3px;height:44px;border:0;border-radius:999px;background:#272d3a;color:#ffffff;padding:0 15px 0 11px;display:flex;align-items:center;gap:7px;font-size:14px;font-weight:800;box-shadow:0 6px 14px rgba(0,0,0,.18)"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:#7fd35f;stroke-width:2.4px;stroke-linecap:round;stroke-linejoin:round"><path d="M4 17v-5a8 8 0 0 1 16 0v5"></path><path d="M20 18a2 2 0 0 1-2 2h-1v-6h3zM4 18a2 2 0 0 0 2 2h1v-6H4z"></path></svg>Briefing</button>
 </div>
 
-<div class="c-scroll" style="display:flex;gap:8px;margin:16px -20px 0;padding:4px 20px;overflow-x:auto;flex:none">
+<div style="display:flex;align-items:center;gap:8px;margin:16px -20px 0 0;flex:none">
+<div role="group" aria-label="Darstellung" style="flex:none;display:flex;background:rgba(39,45,58,.14);border-radius:999px;padding:3px;gap:2px">
+<button onClick="{{vm.stack}}" aria-label="Stapel" aria-pressed="{{vm.sOn}}" style="width:42px;height:40px;border-radius:999px;border:0;background:{{vm.sBg}};padding:0;display:flex;align-items:center;justify-content:center;transition:background .25s"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:{{vm.sFg}};stroke-width:2.4px;stroke-linecap:round;stroke-linejoin:round"><rect x="4" y="11" width="16" height="9" rx="2.5"></rect><path d="M6 7.5h12M8.5 4h7"></path></svg></button>
+<button onClick="{{vm.route}}" aria-label="Route" aria-pressed="{{vm.rOn}}" style="width:42px;height:40px;border-radius:999px;border:0;background:{{vm.rBg}};padding:0;display:flex;align-items:center;justify-content:center;transition:background .25s"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:{{vm.rFg}};stroke-width:2.4px;stroke-linecap:round;stroke-linejoin:round"><circle cx="6" cy="18" r="2.6"></circle><circle cx="18" cy="6" r="2.6"></circle><path d="M8.6 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.4"></path></svg></button>
+</div>
+<div class="c-scroll" style="display:flex;gap:8px;padding:4px 20px 4px 0;overflow-x:auto;flex:1;min-width:0">
 <sc-for list="{{days}}" as="d" hint-placeholder-count="4">
 <button onClick="{{d.pick}}" aria-pressed="{{d.pressed}}" style="flex:none;display:flex;align-items:center;gap:9px;border-radius:999px;padding:8px 14px 8px 10px;border:{{d.border}};background:{{d.bg}};color:{{d.fg}};font-size:14px;font-weight:700;min-height:44px;animation:{{d.anim}};transition:background .25s,color .25s">
 <span aria-hidden="true" style="position:relative;width:20px;height:18px;flex:none">
@@ -112,6 +123,7 @@ button{font-family:inherit;cursor:pointer}
 {{d.label}}<span style="background:{{d.cntBg}};color:{{d.cntFg}};border-radius:999px;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">{{d.count}}</span>
 </button>
 </sc-for>
+</div>
 </div>
 
 <sc-if value="{{hasBand}}" hint-placeholder-val="{{true}}">
@@ -132,6 +144,7 @@ button{font-family:inherit;cursor:pointer}
 <div style="margin-top:14px;font-size:14px;font-weight:600;opacity:.85;flex:none">{{bandText}}</div>
 </sc-if>
 
+<sc-if value="{{showStack}}" hint-placeholder-val="{{true}}">
 <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;min-height:36px;flex:none">
 <span style="display:flex;align-items:center;gap:10px;min-width:0">
 <span style="font-size:14px;font-weight:800;white-space:nowrap">{{posLabel}}</span>
@@ -200,6 +213,15 @@ button{font-family:inherit;cursor:pointer}
 <button onClick="{{openDock}}" style="background:rgba(39,45,58,.1);color:#272d3a;border:0;border-radius:999px;padding:12px 16px;font-size:15px;font-weight:700;min-height:44px">↓ Schieben</button>
 <button onClick="{{showLegend}}" aria-label="Steuerkreuz anzeigen" style="margin-left:auto;width:44px;height:44px;flex:none;border-radius:50%;border:0;background:rgba(39,45,58,.1);padding:0;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:#272d3a;stroke-width:2.2px;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3"></path></svg></button>
 </sc-if>
+<sc-if value="{{isGapCard}}" hint-placeholder-val="{{false}}">
+<button onClick="{{gapToMap}}" style="background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:12px 16px;font-size:15px;font-weight:800;min-height:44px">Auf der Karte →</button>
+<button onClick="{{gapCalls}}" style="background:rgba(39,45,58,.1);color:#272d3a;border:0;border-radius:999px;padding:12px 16px;font-size:15px;font-weight:700;min-height:44px">Anrufliste</button>
+</sc-if>
+<sc-if value="{{isTaskCard}}" hint-placeholder-val="{{false}}">
+<button onClick="{{doTask}}" style="background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:12px 16px;font-size:15px;font-weight:800;min-height:44px">✓ Erledigt</button>
+<sc-if value="{{frontHasTel}}" hint-placeholder-val="{{false}}"><a href="tel:{{front.telRaw}}" style="text-decoration:none;background:rgba(39,45,58,.1);color:#272d3a;border-radius:999px;padding:12px 16px;font-size:15px;font-weight:700;min-height:44px;box-sizing:border-box;display:inline-flex;align-items:center">Anrufen</a></sc-if>
+<button onClick="{{openDock}}" style="background:rgba(39,45,58,.1);color:#272d3a;border:0;border-radius:999px;padding:12px 16px;font-size:15px;font-weight:700;min-height:44px">↓ Schieben</button>
+</sc-if>
 <sc-if value="{{isCallIdle}}" hint-placeholder-val="{{false}}">
 <button onClick="{{startCall}}" style="background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:12px 18px;font-size:15px;font-weight:800;min-height:44px;display:flex;align-items:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:#ffffff;stroke-width:2.4px;stroke-linecap:round;stroke-linejoin:round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"></path></svg>Anrufen</button>
 <button onClick="{{laterCall}}" style="background:rgba(39,45,58,.1);color:#272d3a;border:0;border-radius:999px;padding:12px 16px;font-size:15px;font-weight:700;min-height:44px">Später →</button>
@@ -241,6 +263,68 @@ button{font-family:inherit;cursor:pointer}
 </div>
 </sc-if>
 </div>
+</sc-if>
+<sc-if value="{{showRoute}}" hint-placeholder-val="{{false}}">
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<sc-for list="{{rt.sum}}" as="x" hint-placeholder-count="3"><button onClick="{{x.go}}" class="c-pop" style="background:{{x.bg}};color:{{x.fg}};border:{{x.bd}};border-radius:999px;padding:7px 13px;font-size:13px;font-weight:800;min-height:36px">{{x.t}}</button></sc-for>
+</div>
+<div style="position:relative;height:300px;border-radius:28px;overflow:hidden;background:radial-gradient(130% 100% at 25% 10%,#323a4d 0%,#1d222d 55%,#161a22 100%);box-shadow:0 16px 34px rgba(0,0,0,.28)">
+<svg viewBox="0 0 350 300" width="100%" height="100%" aria-label="Tagesroute" style="display:block">
+<defs><pattern id="pp-dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,.07)"></circle></pattern></defs>
+<rect width="350" height="300" fill="url(#pp-dots)"></rect>
+<g style="transform:{{rt.cam}};transition:transform .75s cubic-bezier(.2,.9,.3,1.05)">
+<sc-for list="{{rt.rivers}}" as="v" hint-placeholder-count="3"><path d="{{v.d}}" fill="none" stroke="#3d7bb0" stroke-opacity=".38" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></sc-for>
+<sc-for list="{{rt.roads}}" as="v" hint-placeholder-count="4"><path d="{{v.d}}" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></sc-for>
+<sc-for list="{{rt.roads}}" as="v" hint-placeholder-count="4"><sc-if value="{{v.show}}" hint-placeholder-val="{{true}}"><rect x="{{v.x}}" y="{{v.y}}" width="22" height="12" rx="3" transform="translate(-11,-6)" fill="#2b3242" stroke="rgba(255,255,255,.22)" stroke-width="1"></rect><text x="{{v.x}}" y="{{v.y}}" dy="3.2" text-anchor="middle" font-size="7.5" font-weight="800" fill="rgba(255,255,255,.55)" font-family="Outfit,system-ui">{{v.n}}</text></sc-if></sc-for>
+<sc-for list="{{rt.cities}}" as="c" hint-placeholder-count="4"><circle cx="{{c.dx}}" cy="{{c.dy}}" r="1.8" fill="rgba(255,255,255,.3)"></circle><text x="{{c.x}}" y="{{c.y}}" font-size="7.5" font-weight="700" letter-spacing="1" fill="rgba(255,255,255,.32)" font-family="Outfit,system-ui">{{c.n}}</text></sc-for>
+<sc-for list="{{rt.ghosts}}" as="g" hint-placeholder-count="2"><path d="{{g.link}}" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="1.2" stroke-dasharray="2 3"></path></sc-for>
+<sc-for list="{{rt.legs}}" as="l" hint-placeholder-count="3"><path d="{{l.d}}" fill="none" stroke="{{l.c}}" stroke-opacity=".22" stroke-width="13" stroke-linecap="round"></path><path d="{{l.d}}" fill="none" stroke="{{l.c}}" stroke-width="5" stroke-linecap="round"></path><path class="c-flow" d="{{l.d}}" fill="none" stroke="#ffffff" stroke-opacity=".75" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 13"></path></sc-for>
+<sc-for list="{{rt.legs}}" as="l" hint-placeholder-count="3"><circle cx="{{l.lx}}" cy="{{l.ly}}" r="11" fill="#1b1f29" stroke="{{l.c}}" stroke-width="2"></circle><text x="{{l.ltx}}" y="{{l.lty}}" text-anchor="middle" font-size="8.5" font-weight="800" fill="#ffffff" font-family="Outfit,system-ui">{{l.lt}}</text></sc-for>
+<sc-for list="{{rt.ghosts}}" as="g" hint-placeholder-count="2"><g onClick="{{g.go}}" style="cursor:pointer;opacity:{{g.op}}"><circle cx="{{g.x}}" cy="{{g.y}}" r="22" fill="transparent"></circle><circle class="c-breathe" cx="{{g.x}}" cy="{{g.y}}" r="{{g.r}}" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.8)" stroke-width="1.6" stroke-dasharray="3 3"></circle><circle cx="{{g.x}}" cy="{{g.y}}" r="3.5" fill="#ffffff"></circle><text x="{{g.lx}}" y="{{g.ly}}" text-anchor="{{g.anchor}}" font-size="10" font-weight="700" fill="rgba(255,255,255,.85)" stroke="#1d222d" stroke-width="3.5" paint-order="stroke" font-family="Outfit,system-ui">{{g.label}}</text></g></sc-for>
+<sc-for list="{{rt.stops}}" as="p" hint-placeholder-count="4"><g onClick="{{p.go}}" style="cursor:pointer"><circle cx="{{p.x}}" cy="{{p.y}}" r="{{p.ring}}" fill="{{p.color}}" fill-opacity=".16"></circle><sc-if value="{{p.red}}" hint-placeholder-val="{{false}}"><circle class="c-ping" cx="{{p.x}}" cy="{{p.y}}" r="12" fill="none" stroke="#ff6b6f" stroke-width="3"></circle></sc-if><circle cx="{{p.x}}" cy="{{p.y}}" r="{{p.r}}" fill="{{p.color}}" stroke="{{p.stroke}}" stroke-width="{{p.sw}}"></circle><text x="{{p.x}}" y="{{p.y}}" dy="4" text-anchor="middle" font-size="11" font-weight="800" fill="#272d3a" font-family="Outfit,system-ui">{{p.n}}</text><text x="{{p.lx}}" y="{{p.ly}}" text-anchor="{{p.anchor}}" font-size="11.5" font-weight="800" fill="#ffffff" stroke="#1d222d" stroke-width="4" paint-order="stroke" font-family="Outfit,system-ui">{{p.label}}</text></g></sc-for>
+<circle cx="{{rt.start.x}}" cy="{{rt.start.y}}" r="5" fill="none" stroke="#7fd35f" stroke-width="2"></circle>
+<text x="{{rt.start.lx}}" y="{{rt.start.ly}}" text-anchor="middle" font-size="9" font-weight="800" fill="#7fd35f" stroke="#1d222d" stroke-width="3" paint-order="stroke" font-family="Outfit,system-ui">{{rt.start.label}}</text>
+<circle class="c-ping" cx="{{rt.car.x}}" cy="{{rt.car.y}}" r="9" fill="#52ae32" fill-opacity=".5"></circle>
+<circle cx="{{rt.car.x}}" cy="{{rt.car.y}}" r="7" fill="#52ae32" stroke="#ffffff" stroke-width="2.5"></circle>
+</g>
+</svg>
+<div style="position:absolute;left:16px;right:16px;top:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;pointer-events:none">
+<span style="font-size:12px;font-weight:700;color:rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{rt.head}}</span>
+<sc-if value="{{rt.zoom}}" hint-placeholder-val="{{false}}"><button onClick="{{rt.overview}}" style="pointer-events:auto;flex:none;background:rgba(255,255,255,.14);color:#ffffff;border:0;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;min-height:32px">⤢ Ganzer Tag</button></sc-if>
+</div>
+<div style="position:absolute;left:12px;right:12px;bottom:12px;background:rgba(18,21,28,.82);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-radius:18px;padding:8px 14px 4px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;color:#ffffff"><span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums">{{rt.clock}}</span><span style="font-size:12px;font-weight:600;color:#b8bec9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{rt.status}}</span></div>
+<input type="range" min="{{rt.t0}}" max="{{rt.t1}}" step="5" value="{{rt.T}}" onChange="{{rt.scrub}}" aria-label="Tagesverlauf abspielen" style="width:100%;height:28px;margin:0;accent-color:#52ae32">
+</div>
+</div>
+<sc-if value="{{rt.noStops}}" hint-placeholder-val="{{false}}"><div style="background:#272d3a;color:#ffffff;border-radius:24px;padding:16px 18px;font-size:15px;font-weight:600">Keine Besuche an diesem Tag. Zeit für die Anrufliste.</div></sc-if>
+<sc-if value="{{rt.rc.title}}" hint-placeholder-val="{{true}}">
+<div class="c-up" style="background:{{rt.rc.color}};color:#272d3a;border-radius:26px;padding:16px 18px;box-shadow:0 10px 24px rgba(0,0,0,.16)">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+<span style="background:#272d3a;color:#ffffff;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800">{{rt.rc.kicker}}</span>
+<span style="background:{{rt.rc.stBg}};color:#272d3a;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800">{{rt.rc.status}}</span>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:10px">
+<span style="font-size:21px;font-weight:800;letter-spacing:-.02em;line-height:1.1">{{rt.rc.title}}</span>
+<span style="font-size:20px;font-weight:800;white-space:nowrap">{{rt.rc.wert}}</span>
+</div>
+<div style="font-size:13px;font-weight:600;color:rgba(39,45,58,.75);margin-top:4px">{{rt.rc.sub}}</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"><sc-for list="{{rt.rc.chips}}" as="c" hint-placeholder-count="2"><span style="background:{{c.bg}};color:{{c.fg}};border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700">{{c.t}}</span></sc-for></div>
+<sc-if value="{{rt.rc.hasAlert}}" hint-placeholder-val="{{false}}"><button onClick="{{rt.rc.brief}}" style="margin-top:8px;background:#272d3a;color:#ffffff;border:0;border-radius:14px;padding:9px 12px;font-size:13px;font-weight:800;min-height:40px;text-align:left">{{rt.rc.alertText}} →</button></sc-if>
+<sc-if value="{{rt.rc.hasNear}}" hint-placeholder-val="{{false}}"><div style="display:flex;flex-direction:column;gap:6px;margin-top:8px"><sc-for list="{{rt.rc.near}}" as="n" hint-placeholder-count="2"><button onClick="{{n.go}}" style="display:flex;justify-content:space-between;gap:8px;background:#eef3ea;color:#272d3a;border:2px dashed rgba(39,45,58,.3);border-radius:16px;padding:10px 12px;font-size:14px;font-weight:800;min-height:44px;text-align:left"><span>{{n.t}}</span><span style="font-size:12px;font-weight:600;opacity:.7">{{n.sub}}</span></button></sc-for></div></sc-if>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+<sc-if value="{{rt.rc.hasFix}}" hint-placeholder-val="{{false}}"><button onClick="{{rt.rc.fix}}" style="background:#ff6b6f;color:#2a0a0b;border:0;border-radius:999px;padding:11px 15px;font-size:14px;font-weight:800;min-height:44px">{{rt.rc.fixLabel}}</button></sc-if>
+<sc-if value="{{rt.rc.hasPlan}}" hint-placeholder-val="{{false}}"><button onClick="{{rt.rc.plan}}" style="background:#52ae32;color:#10210a;border:0;border-radius:999px;padding:11px 15px;font-size:14px;font-weight:800;min-height:44px">＋ {{rt.rc.planLabel}}</button></sc-if>
+<sc-if value="{{rt.rc.hasTel}}" hint-placeholder-val="{{false}}"><a href="{{rt.rc.tel}}" style="text-decoration:none;background:#272d3a;color:#ffffff;border-radius:999px;padding:11px 15px;font-size:14px;font-weight:800;min-height:44px;box-sizing:border-box;display:inline-flex;align-items:center">Anrufen</a></sc-if>
+<sc-if value="{{rt.rc.hasNav}}" hint-placeholder-val="{{true}}"><a href="{{rt.rc.nav}}" target="_blank" rel="noopener" style="text-decoration:none;background:#272d3a;color:#ffffff;border-radius:999px;padding:11px 15px;font-size:14px;font-weight:800;min-height:44px;box-sizing:border-box;display:inline-flex;align-items:center;gap:6px">Losfahren ↗</a></sc-if>
+<sc-if value="{{rt.rc.hasBrief}}" hint-placeholder-val="{{true}}"><button onClick="{{rt.rc.brief}}" style="background:rgba(39,45,58,.1);color:#272d3a;border:0;border-radius:999px;padding:11px 15px;font-size:14px;font-weight:700;min-height:44px">Rüstblatt</button></sc-if>
+<sc-if value="{{rt.rc.hasCalls}}" hint-placeholder-val="{{false}}"><button onClick="{{rt.rc.calls}}" style="background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:11px 15px;font-size:14px;font-weight:800;min-height:44px">Anrufliste →</button></sc-if>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
 <div style="height:96px;flex:none"></div>
 </div>
 </sc-if>
@@ -296,6 +380,12 @@ button{font-family:inherit;cursor:pointer}
 <button onClick="{{brief.listen}}" style="margin-top:14px;background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:7px 16px 7px 7px;min-height:44px;display:inline-flex;align-items:center;gap:10px;font-size:14px;font-weight:800"><span style="width:32px;height:32px;border-radius:50%;background:#52ae32;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="fill:#10210a;margin-left:2px"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"></path></svg></span>Vorlesen · {{brief.listenDur}}</button>
 </div>
 
+<sc-if value="{{brief.hasAlerts}}" hint-placeholder-val="{{false}}">
+<div class="c-up" style="background:#272d3a;color:#ffffff;border-radius:26px;padding:16px 18px;animation-delay:.08s">
+<span style="display:inline-block;background:#ff6b6f;color:#2a0a0b;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:800;letter-spacing:.03em">BEVOR DU REINGEHST</span>
+<sc-for list="{{brief.alerts}}" as="al" hint-placeholder-count="2"><div style="display:flex;gap:12px;align-items:flex-start;margin-top:12px"><span style="width:32px;height:32px;flex:none;border-radius:50%;background:{{al.bg}};color:#1b1f29;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800">{{al.icon}}</span><span style="min-width:0"><span style="display:block;font-size:11px;font-weight:800;letter-spacing:.05em;color:{{al.c}}">{{al.kind}}</span><span style="display:block;font-size:15px;font-weight:600;line-height:1.35;margin-top:1px">{{al.t}}</span></span></div></sc-for>
+</div>
+</sc-if>
 <div class="c-up" style="font-size:28px;font-weight:800;letter-spacing:-.03em;margin-top:10px;animation-delay:.12s">Darauf kommt's an.</div>
 <sc-for list="{{brief.points}}" as="pt" hint-placeholder-count="3">
 <div class="c-up" style="background:#ffffff;border-radius:24px;padding:14px 16px;display:flex;gap:14px;align-items:center;animation-delay:{{pt.delay}}">
@@ -421,7 +511,20 @@ button{font-family:inherit;cursor:pointer}
 <div style="font-size:34px;font-weight:800;letter-spacing:-.03em;color:#7fd35f">{{pipeDelta}}</div>
 <div style="font-size:13px;color:#b8bec9;margin-top:2px">{{sentNote}}</div>
 </div>
-<button onClick="{{goHeute}}" style="margin-top:auto;background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:18px;font-size:17px;font-weight:800;min-height:60px">{{nextLabel2}}</button>
+<div class="c-up" style="background:#ffffff;border-radius:24px;padding:16px 18px;margin-top:14px;animation-delay:.35s">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-size:12px;font-weight:800;letter-spacing:.05em;color:#575756">MAIL AN DEN KUNDEN · ENTWURF</span></div>
+<div style="font-size:15px;font-weight:800;margin-top:6px">An {{mail.to}}</div>
+<div style="font-size:13px;font-weight:700;color:#575756;margin-top:2px">{{mail.subject}}</div>
+<div style="position:relative;font-size:14px;line-height:1.45;white-space:pre-line;max-height:118px;overflow:hidden;margin-top:8px;color:#272d3a">{{mail.body}}<span style="position:absolute;left:0;right:0;bottom:0;height:46px;background:linear-gradient(rgba(255,255,255,0),#ffffff)"></span></div>
+<a href="{{mail.href}}" style="margin-top:10px;text-decoration:none;background:#52ae32;color:#10210a;border-radius:999px;padding:12px 16px;font-size:15px;font-weight:800;min-height:46px;box-sizing:border-box;display:flex;align-items:center;justify-content:center">Mail öffnen und senden ↗</a>
+</div>
+<sc-if value="{{hasCapTasks}}" hint-placeholder-val="{{true}}">
+<div class="c-up" style="background:#ffe58f;border-radius:24px;padding:16px 18px;margin-top:12px;animation-delay:.45s">
+<div style="font-size:12px;font-weight:800;letter-spacing:.05em;color:#6b5200">AUFGABEN ANGELEGT · LANDEN IM STAPEL</div>
+<sc-for list="{{capTasks}}" as="t" hint-placeholder-count="2"><div style="display:flex;justify-content:space-between;gap:10px;margin-top:8px;font-size:15px;font-weight:700;line-height:1.3"><span>☐ {{t.t}}</span><span style="flex:none;font-size:12px;font-weight:800;background:#272d3a;color:#ffffff;border-radius:999px;padding:3px 9px;height:fit-content">{{t.day}}</span></div></sc-for>
+</div>
+</sc-if>
+<button onClick="{{goHeute}}" style="margin-top:20px;background:#272d3a;color:#ffffff;border:0;border-radius:999px;padding:18px;font-size:17px;font-weight:800;min-height:60px">{{nextLabel2}}</button>
 <button onClick="{{reset}}" style="margin-top:10px;background:none;border:0;color:#272d3a;font-size:14px;font-weight:600;text-decoration:underline;min-height:44px">Demo zurücksetzen</button>
 </div>
 </sc-if>
@@ -849,7 +952,7 @@ class Component extends DCLogic {
     this.state = this.initial();
   }
   initial() {
-    return { screen: 'heute', back: 'heute', brief: null, front: null, rec: 'idle', n: 0, acc: { a: true, b: true, c: true, d: true }, sent: false, filter: 'alle', open: null, swap: 0, ghost: null, cnt: null, dragX: 0, dragY: 0, dragging: false, celebrated: false, day: 'heute', moves: {}, dock: false, hover: -1, toast: null, landed: null, gone: {}, calling: null, enter: 'stack', end: false, legend: false, coach: true, edits: this.defaultEdits(), edited: {}, editing: null, draft: null, pressing: null, capSent: false, capFor: 'brandt', doneIds: {}, captures: {}, seq: 0, aud: null, audSheet: false, audRate: 0, };
+    return { screen: 'heute', back: 'heute', brief: null, front: null, rec: 'idle', n: 0, acc: { a: true, b: true, c: true, d: true }, sent: false, filter: 'alle', open: null, swap: 0, ghost: null, cnt: null, dragX: 0, dragY: 0, dragging: false, celebrated: false, day: 'heute', moves: {}, dock: false, hover: -1, toast: null, landed: null, gone: {}, calling: null, enter: 'stack', end: false, legend: false, coach: true, edits: this.defaultEdits(), edited: {}, editing: null, draft: null, pressing: null, capSent: false, capFor: 'brandt', doneIds: {}, captures: {}, seq: 0, aud: null, audSheet: false, audRate: 0, mode: 'stack', rsel: null, routeT: null, routeZoom: false, tasks: [], capTasks: [] };
   }
   componentDidMount() {
     this._alive = true; this._audTok = 0;
@@ -901,16 +1004,18 @@ class Component extends DCLogic {
   apTime(id) { const m = this.state.moves[id]; if (m) return m.time; const a = this.data().ap.find((x) => x.id === id); return a ? a.time : ''; }
   isDone(id) { return id === 'hessler' || (id === 'brandt' && this.state.sent) || !!this.state.gone[id] || !!(this.state.doneIds || {})[id]; }
   colorOf(id) {
+    const kd = this.kindOf(id); if (kd) return { gap: '#ffffff', task: '#ffe58f', nach: '#ffd3a8' }[kd];
     const pal = ['#bfdcff', '#ffd3a8', '#ffc7d6', '#d9ccff', '#ffe58f', '#b8eef0', '#ffbfb3', '#c9d4ff'];
     const i = this.data().ap.findIndex((a) => a.id === id);
     return pal[(i < 0 ? 0 : i) % pal.length];
   }
   deepOf(id) {
+    const kd = this.kindOf(id); if (kd) return { gap: '#272d3a', task: '#8a6700', nach: '#b85f0f' }[kd];
     const pal = ['#2f6fbf', '#b85f0f', '#b8325a', '#6247c2', '#8a6700', '#127a7f', '#b33c26', '#3f55c0'];
     const i = this.data().ap.findIndex((a) => a.id === id);
     return pal[(i < 0 ? 0 : i) % pal.length];
   }
-  weekCount() { return this.data().ap.filter((a) => { const d = this.apDay(a.id); return (d === 'heute' || d === 'fr') && !this.state.gone[a.id]; }).length; }
+  weekCount() { const D = this.data(); return D.ap.filter((a) => { const d = this.apDay(a.id), x = D.st[a.id]; return (d === 'heute' || d === 'fr') && x && !x.kind && !this.state.gone[a.id]; }).length; }
   dayList(day, withDone) {
     return this.data().ap.map((a) => a.id).filter((id) => this.apDay(id) === day && (withDone || !this.isDone(id)))
       .sort((x, y) => { const a = this.apTime(x) || '99', b = this.apTime(y) || '99'; return a < b ? -1 : a > b ? 1 : 0; });
@@ -919,10 +1024,11 @@ class Component extends DCLogic {
   frontId() { const o = this.openList(); const f = this.state.front; return f && o.indexOf(f) >= 0 ? f : o[0]; }
   setDay(d) {
     if (d === this.state.day) return;
-    this.setState({ day: d, front: null, end: false, legend: false, enter: 'stack', calling: null, swap: 1 - this.state.swap, dock: false });
+    this.setState({ day: d, front: null, end: false, legend: false, enter: 'stack', calling: null, swap: 1 - this.state.swap, dock: false, rsel: null, routeT: null, routeZoom: false, mode: d === 'anrufe' || d === 'offen' ? 'stack' : this.state.mode });
     const first = this.openList(d)[0]; if (first) this.countTo(first);
   }
   moveTo(id, day, idx) {
+    if (this.kindOf(id) === 'gap') { this.setState({ dock: false, hover: -1, dragX: 0, dragY: 0, dragging: false }); this.toastFor({ kind: 'info', id, text: 'Eine Lücke lässt sich nicht verschieben. Füll sie lieber.' }); return; }
     const from = this.apDay(id), fromTime = this.apTime(id);
     const orig = (this.data().ap.find((x) => x.id === id) || {}).time || '';
     const def = { heute: '17:45', fr: '11:30', mo: '15:30' };
@@ -942,6 +1048,7 @@ class Component extends DCLogic {
     if (t.kind === 'gone') { const g = { ...this.state.gone }; delete g[t.id]; this.setState({ gone: g, toast: null, front: t.id, enter: 'unpile', swap: 1 - this.state.swap }); return; }
     if (t.kind === 'info') { this.setState({ toast: null }); return; }
     const moves = { ...this.state.moves, [t.id]: { day: t.from, time: t.fromTime } };
+    if (t.keepDay) { this.setState({ moves, toast: null, front: null, rsel: null, swap: 1 - this.state.swap }); return; }
     this.setState({ moves, toast: null, day: t.from, front: t.id, swap: 1 - this.state.swap, landed: t.from });
     this.countTo(t.id);
   }
@@ -997,7 +1104,7 @@ class Component extends DCLogic {
   capTarget() {
     const st = this.state, D = this.data();
     let f = st.screen === 'brief' ? st.brief : (st.screen === 'heute' && st.day === 'heute' && !st.end ? this.frontId() : null);
-    if (!f || !D.st[f] || D.st[f].call || this.isDone(f)) f = this.openList('heute').find((id) => !D.st[id].call);
+    if (!f || !D.st[f] || D.st[f].call || D.st[f].kind || this.isDone(f)) f = this.openList('heute').find((id) => !D.st[id].call && !D.st[id].kind);
     return f || 'brandt';
   }
   toCapture() {
@@ -1078,7 +1185,12 @@ class Component extends DCLogic {
     const seq = (this.state.seq || 0) + 1;
     const cap = { id, seq, ts, by: 'Jonas Keller', kunde: (D.st[id] || D.st.brandt).name2.replace('\n', ' '), nr: st.c.nr, title: st.c.title, prev: st.c.prev, acc: this.state.acc, edits: this.state.edits };
     const captures = { ...this.state.captures, [id]: cap };
-    const upd = { capSent: true, screen: 'capture', captures, seq };
+    const E = this.state.edits, acc = this.state.acc, cs = (D.st[id] || D.st.brandt).short.split(' ')[0];
+    const nt = [];
+    if (acc.b) nt.push({ text: 'Agenda für den ' + E.b.art + ' an ' + E.a.name + ' schicken', day: 'fr' });
+    nt.push({ text: id === 'brandt' ? 'Stillstandskosten der SX 450 für ' + cs + ' beziffern' : 'Angebot ' + (st.c.nr || '') + ' für ' + cs + ' nachschärfen', day: 'mo' });
+    const tasks = (this.state.tasks || []).filter((t) => t.for !== id).concat(nt.map((x, i) => ({ id: 't' + seq + '-' + i, for: id, ...x })));
+    const upd = { capSent: true, screen: 'capture', captures, seq, tasks, capTasks: nt };
     if (id === 'brandt') upd.sent = true; else upd.doneIds = { ...this.state.doneIds, [id]: true };
     this.setState(upd);
     this.pushLive({ erfasst: id === 'brandt' || !!this.state.sent, ts, acc: this.state.acc, edits: this.state.edits, captures, seq });
@@ -1123,11 +1235,15 @@ class Component extends DCLogic {
     if (call) add(lead + (when || 'Noch ohne Uhrzeit: ') + 'Telefonat mit ' + name + '.');
     else if (when) add(lead + when + 'bei ' + name + ' in ' + st.ort + (/km/.test(st.km) ? ', ' + st.km + ' Fahrt' : '') + '.');
     else add(lead + name + ' in ' + st.ort + ', noch ohne festen Termin.');
+    const so = this.isVisit(id) ? this.stopOf(id) : null;
+    if (so && so.status === 'red') add('Achtung, das wird knapp: Ankunft gegen ' + this.hhmm(so.arr) + '. Gib kurz Bescheid.');
     if (b && b.klasse) {
       const l = b.last || '';
       const last = /^zuletzt vor /.test(l) ? 'letzter Besuch ' + l.replace(/^zuletzt /, '') : /^Telefonat /.test(l) ? 'zuletzt telefoniert am ' + l.replace(/^Telefonat /, '') : l;
       add(short + ' ist ' + b.klasse + (last ? ', ' + last : '') + '.');
     }
+    const al = this.alertsOf(id);
+    if (al.length) { ch('Vorsicht'); add('Bevor du reingehst.'); al.forEach((a) => add(a.t)); }
     ch('Lage');
     if (b) {
       if (/^Noch kein Angebot/.test(b.offer.title)) add('Noch kein Angebot. ' + b.offer.info + ': ' + b.offer.wert + '.');
@@ -1156,7 +1272,7 @@ class Component extends DCLogic {
       doneTitle: call ? 'Viel Erfolg.' : 'Gute Fahrt.', doneText: 'Briefing für ' + short + ' durch. Nach dem Termin einfach erzählen.' };
   }
   audDayScript(day) {
-    const D = this.data(), ids = this.openList(day);
+    const D = this.data(), ids = this.openList(day).filter((id) => this.isReal(id));
     const done = this.dayList(day, true).filter((id) => this.isDone(id));
     const date = { heute: 'Donnerstag, 26. November', fr: 'Freitag, 27. November', mo: 'Montag, 30. November' }[day];
     const word = { heute: 'heute', fr: 'morgen', mo: 'Montag' }[day];
@@ -1171,6 +1287,8 @@ class Component extends DCLogic {
     else add('Für ' + word + ' steht noch kein offener Termin.');
     if (done.length) add(this.audJoin(done.map((id) => D.st[id].short.split(' ')[0])) + (done.length === 1 ? ' ist' : ' sind') + ' schon erledigt.');
     if (day === 'heute') add('Wochenziel: ' + this.weekCount() + ' von 12 Terminen stehen.');
+    const rr = this.routeOf(day);
+    rr.stops.filter((x) => x.status === 'red').forEach((x) => add('Achtung: ' + D.st[x.id].short.split(' ')[0] + ' um ' + this.apTime(x.id) + ' ist nicht zu schaffen. Ankunft gegen ' + this.hhmm(x.arr) + '.'));
     ids.forEach((id, k) => {
       const st = D.st[id], b = D.briefs[id], t = this.apTime(id), call = this.audIsCall(id);
       const name = st.name2.replace('\n', ' ');
@@ -1178,9 +1296,15 @@ class Component extends DCLogic {
       const lead = ids.length === 1 ? 'Einziger Termin' : k === 0 ? 'Zuerst' : k === ids.length - 1 ? 'Zum Schluss' : 'Dann';
       add(lead + (t ? ', um ' + t : '') + ': ' + (call ? 'Telefonat mit ' + name : name + ' in ' + st.ort) + ', ' + st.wert + '.');
       if (st.chips.length) add('Auf dem Radar: ' + this.audJoin(st.chips.map((c) => c.t)) + '.');
+      const al = this.alertsOf(id); if (al.length) add('Vorsicht: ' + al[0].t);
       add(b ? 'Wichtigster Punkt: ' + b.points[0].t + '.' : 'Ziel: den nächsten Schritt mit Datum vereinbaren.');
     });
     ch('Abschluss');
+    rr.gaps.forEach((g) => add('Lücke von ' + this.hhmm(g.from) + ' bis ' + this.hhmm(g.to) + ' in ' + g.ort + (g.near.length ? '. In der Nähe: ' + this.audJoin(g.near.slice(0, 2).map((n) => D.st[n.id].short)) : '') + '.'));
+    if (rr.ghosts.length) add('Am Weg liegen ' + this.audJoin(rr.ghosts.map((g) => D.st[g.id].short)) + '.');
+    this.openList(day).filter((id) => this.kindOf(id) === 'nach').forEach((id) => add('Nachfassen: ' + D.st[id].short + ', ' + D.st[id].chips[0].t + '.'));
+    const tk = this.openList(day).filter((id) => this.kindOf(id) === 'task');
+    if (tk.length) add(tk.length === 1 ? 'Eine Aufgabe: ' + D.st[tk[0]].name2 + '.' : tk.length + ' Aufgaben, die erste: ' + D.st[tk[0]].name2 + '.');
     const calls = this.openList('anrufe');
     if (day === 'heute' && calls.length) add('Wenn Luft ist: ' + calls.length + ' Kontakte in deiner Anrufliste, ' + this.audT(this.audPot(calls)) + ' Potenzial.');
     const f = ids[0];
@@ -1288,7 +1412,7 @@ class Component extends DCLogic {
   audVals() {
     const s = this.state, A = s.aud, D = this.data();
     const rates = this.audRates(), rt = rates[s.audRate || 0];
-    const nextId = this.openList('heute')[0];
+    const nextId = this.openList('heute').find((id) => this.isReal(id));
     const dayKey = s.day === 'fr' || s.day === 'mo' ? s.day : 'heute';
     let options = [];
     if (s.audSheet) {
@@ -1349,38 +1473,49 @@ class Component extends DCLogic {
     this.setState(this.initial());
     this.pushLive({ erfasst: false, captures: {}, seq: 0 });
   }
-  data() {
+  baseData() {
     const R = '#ff6b6f', A = '#ffc85c', G = '#cde7c4';
     return {
       st: {
-        hessler: { time: '08:30', ort: 'Fulda', km: '—', short: 'Hessler', name2: 'Hessler\nVerpackungstechnik', wert: '64 T€', chips: [{ t: 'Zusage mündlich', bg: G, fg: '#1d3315' }] },
-        brandt: { time: '11:00', ort: 'Augsburg', km: '42 km', short: 'Brandt Kunststoff', name2: 'Brandt\nKunststofftechnik', wert: '386 T€', chips: [{ t: '41 Tage still', bg: R, fg: '#2a0a0b' }, { t: 'SX 450 · 17 J.', bg: A, fg: '#2e2000' }, { t: 'Produktion fehlt', bg: A, fg: '#2e2000' }] },
-        wolfram: { time: '14:30', ort: 'Ulm', km: '78 km', short: 'Wolfram Präzisionsguss', name2: 'Wolfram\nPräzisionsguss', wert: '145 T€', chips: [{ t: 'SX 450 · 18 J.', bg: A, fg: '#2e2000' }, { t: 'Steuerung abgekündigt', bg: A, fg: '#2e2000' }, { t: 'Einkauf fehlt', bg: R, fg: '#2a0a0b' }] },
+        hessler: { geo: [9.68, 50.55], dur: 45, time: '08:30', ort: 'Fulda', km: '—', short: 'Hessler', name2: 'Hessler\nVerpackungstechnik', wert: '64 T€', chips: [{ t: 'Zusage mündlich', bg: G, fg: '#1d3315' }] },
+        brandt: { geo: [10.898, 48.371], dur: 60, time: '11:00', ort: 'Augsburg', km: '42 km', short: 'Brandt Kunststoff', name2: 'Brandt\nKunststofftechnik', wert: '386 T€', chips: [{ t: '41 Tage still', bg: R, fg: '#2a0a0b' }, { t: 'SX 450 · 17 J.', bg: A, fg: '#2e2000' }, { t: 'Produktion fehlt', bg: A, fg: '#2e2000' }] },
+        wolfram: { geo: [9.95, 48.36], dur: 45, time: '15:30', ort: 'Ulm', km: '78 km', short: 'Wolfram Präzisionsguss', name2: 'Wolfram\nPräzisionsguss', wert: '145 T€', chips: [{ t: 'SX 450 · 18 J.', bg: A, fg: '#2e2000' }, { t: 'Steuerung abgekündigt', bg: A, fg: '#2e2000' }, { t: 'Einkauf fehlt', bg: R, fg: '#2a0a0b' }] },
         kessler: { time: '16:30', ort: 'Anruf', km: 'Telefon', short: 'Kessler Food', name2: 'Kessler\nFood Systems', wert: '520 T€', chips: [{ t: '2× verschoben', bg: A, fg: '#2e2000' }, { t: 'Einkauf kritisch', bg: R, fg: '#2a0a0b' }] },
-        lindner: { ort: 'Ulm', km: '74 km', short: 'Lindner Medizintechnik', name2: 'Lindner\nMedizintechnik', wert: '690 T€', chips: [{ t: 'Kein nächster Schritt', bg: R, fg: '#2a0a0b' }, { t: 'Reinraum', bg: G, fg: '#1d3315' }] },
-        ostermann: { ort: 'Neu-Ulm', km: '6 km', short: 'Ostermann Automotive', name2: 'Ostermann\nAutomotive', wert: '1.120 T€', chips: [{ t: 'Einkauf unbekannt', bg: A, fg: '#2e2000' }, { t: 'Verhandlung', bg: G, fg: '#1d3315' }] },
+        lindner: { geo: [9.95, 48.43], dur: 60, ort: 'Ulm', km: '74 km', short: 'Lindner Medizintechnik', name2: 'Lindner\nMedizintechnik', wert: '690 T€', chips: [{ t: 'Kein nächster Schritt', bg: R, fg: '#2a0a0b' }, { t: 'Reinraum', bg: G, fg: '#1d3315' }] },
+        ostermann: { geo: [10.05, 48.40], dur: 30, ort: 'Neu-Ulm', km: '6 km', short: 'Ostermann Automotive', name2: 'Ostermann\nAutomotive', wert: '1.120 T€', chips: [{ t: 'Einkauf unbekannt', bg: A, fg: '#2e2000' }, { t: 'Verhandlung', bg: G, fg: '#1d3315' }] },
         seitz: { ort: 'Anruf', km: 'Telefon', short: 'Seitz Maschinenbau', name2: 'Seitz\nMaschinenbau', wert: '80 T€', chips: [{ t: 'Messe-Lead', bg: G, fg: '#1d3315' }, { t: 'Bedarf offen', bg: A, fg: '#2e2000' }] },
-        mayer: { ort: 'Kempten', km: '128 km', short: 'Mayer Folientechnik', name2: 'Mayer\nFolientechnik', wert: '240 T€', chips: [{ t: 'Angebot raus', bg: G, fg: '#1d3315' }, { t: 'Budget 2027', bg: A, fg: '#2e2000' }] },
-        rothd: { ort: 'Memmingen', km: '96 km', short: 'Roth Dosiertechnik', name2: 'Roth\nDosiertechnik', wert: '175 T€', chips: [{ t: 'Retrofit SX 300', bg: G, fg: '#1d3315' }] },
+        mayer: { geo: [10.315, 47.726], ort: 'Kempten', km: '128 km', short: 'Mayer Folientechnik', name2: 'Mayer\nFolientechnik', wert: '240 T€', chips: [{ t: 'Angebot raus', bg: G, fg: '#1d3315' }, { t: 'Budget 2027', bg: A, fg: '#2e2000' }] },
+        rothd: { geo: [10.18, 47.99], ort: 'Memmingen', km: '96 km', short: 'Roth Dosiertechnik', name2: 'Roth\nDosiertechnik', wert: '175 T€', chips: [{ t: 'Retrofit SX 300', bg: G, fg: '#1d3315' }] },
         hagen: { ort: 'Anruf', km: 'Telefon', short: 'Hagen Pumpen', name2: 'Hagen\nPumpen', wert: '95 T€', chips: [{ t: 'Rückruf zugesagt', bg: A, fg: '#2e2000' }] },
-        vogel: { ort: 'Ingolstadt', km: '84 km', short: 'Vogel Spritzguss', name2: 'Vogel\nSpritzguss', wert: '410 T€', chips: [{ t: 'Zweite Linie', bg: G, fg: '#1d3315' }, { t: 'Wettbewerb', bg: A, fg: '#2e2000' }] },
-        kuhn: { ort: 'Landsberg', km: '58 km', short: 'Kuhn Elektronik', name2: 'Kuhn\nElektronik', wert: '130 T€', chips: [{ t: 'Erstbesuch', bg: G, fg: '#1d3315' }] },
-        baur: { ort: 'Biberach', km: '112 km', short: 'Baur Kunststoffwerk', name2: 'Baur\nKunststoffwerk', wert: '60 T€', chips: [{ t: 'Erstgespräch', bg: G, fg: '#1d3315' }, { t: 'Termin offen', bg: A, fg: '#2e2000' }] },
-        schmid: { ort: 'Kaufbeuren', km: '64 km', short: 'Schmid Antriebe', name2: 'Schmid\nAntriebe', wert: '120 T€', chips: [{ t: 'Retrofit-Anfrage', bg: G, fg: '#1d3315' }] },
-        c1: { call: true, ort: 'Kaufbeuren', km: 'A-Kunde', short: 'Weiss Extrusion', name2: 'Weiss\nExtrusion', wert: '280 T€', person: 'R. Weiss · Geschäftsführung', tel: '+49 8341 552010', chips: [{ t: '112 Tage ohne Besuch', bg: R, fg: '#2a0a0b' }] },
-        c2: { call: true, ort: 'Memmingen', km: 'Bestand', short: 'Huber Kunststoffteile', name2: 'Huber\nKunststoffteile', wert: '310 T€', person: 'K. Huber · Technik', tel: '+49 8331 92410', chips: [{ t: 'SX 450 · Bj. 2008', bg: A, fg: '#2e2000' }, { t: 'Ersatz fällig', bg: A, fg: '#2e2000' }] },
-        c3: { call: true, ort: 'Augsburg', km: 'Messe-Lead', short: 'Lechner Pack', name2: 'Lechner\nPack', wert: '90 T€', person: 'S. Lechner · Einkauf', tel: '+49 821 457730', chips: [{ t: 'Fakuma-Kontakt', bg: G, fg: '#1d3315' }, { t: 'Noch nicht angerufen', bg: A, fg: '#2e2000' }] },
-        c4: { call: true, ort: 'Ulm', km: 'Angebot offen', short: 'Pfeiffer Medizin', name2: 'Pfeiffer\nMedizin', wert: '220 T€', person: 'Dr. A. Pfeiffer · Werkleitung', tel: '+49 731 180640', chips: [{ t: 'Angebot 33 Tage still', bg: R, fg: '#2a0a0b' }] },
-        c5: { call: true, ort: 'Ingolstadt', km: 'Service', short: 'Gruber Automotive', name2: 'Gruber\nAutomotive', wert: '60 T€', person: 'T. Gruber · Instandhaltung', tel: '+49 841 30129', chips: [{ t: 'Wartung endet 01/27', bg: A, fg: '#2e2000' }] }
+        vogel: { geo: [11.42, 48.76], ort: 'Ingolstadt', km: '84 km', short: 'Vogel Spritzguss', name2: 'Vogel\nSpritzguss', wert: '410 T€', chips: [{ t: 'Zweite Linie', bg: G, fg: '#1d3315' }, { t: 'Wettbewerb', bg: A, fg: '#2e2000' }] },
+        kuhn: { geo: [10.87, 48.05], ort: 'Landsberg', km: '58 km', short: 'Kuhn Elektronik', name2: 'Kuhn\nElektronik', wert: '130 T€', chips: [{ t: 'Erstbesuch', bg: G, fg: '#1d3315' }] },
+        baur: { geo: [9.79, 48.10], ort: 'Biberach', km: '112 km', short: 'Baur Kunststoffwerk', name2: 'Baur\nKunststoffwerk', wert: '60 T€', chips: [{ t: 'Erstgespräch', bg: G, fg: '#1d3315' }, { t: 'Termin offen', bg: A, fg: '#2e2000' }] },
+        schmid: { geo: [10.62, 47.88], ort: 'Kaufbeuren', km: '64 km', short: 'Schmid Antriebe', name2: 'Schmid\nAntriebe', wert: '120 T€', chips: [{ t: 'Retrofit-Anfrage', bg: G, fg: '#1d3315' }] },
+        c1: { geo: [10.60, 47.89], dur: 30, call: true, ort: 'Kaufbeuren', km: 'A-Kunde', short: 'Weiss Extrusion', name2: 'Weiss\nExtrusion', wert: '280 T€', person: 'R. Weiss · Geschäftsführung', tel: '+49 8341 552010', chips: [{ t: '112 Tage ohne Besuch', bg: R, fg: '#2a0a0b' }] },
+        c2: { geo: [10.16, 47.97], dur: 30, call: true, ort: 'Memmingen', km: 'Bestand', short: 'Huber Kunststoffteile', name2: 'Huber\nKunststoffteile', wert: '310 T€', person: 'K. Huber · Technik', tel: '+49 8331 92410', chips: [{ t: 'SX 450 · Bj. 2008', bg: A, fg: '#2e2000' }, { t: 'Ersatz fällig', bg: A, fg: '#2e2000' }] },
+        c3: { geo: [10.93, 48.345], dur: 30, call: true, ort: 'Augsburg', km: 'Messe-Lead', short: 'Lechner Pack', name2: 'Lechner\nPack', wert: '90 T€', person: 'S. Lechner · Einkauf', tel: '+49 821 457730', chips: [{ t: 'Fakuma-Kontakt', bg: G, fg: '#1d3315' }, { t: 'Noch nicht angerufen', bg: A, fg: '#2e2000' }] },
+        c4: { geo: [9.985, 48.405], dur: 30, call: true, ort: 'Ulm', km: 'Angebot offen', short: 'Pfeiffer Medizin', name2: 'Pfeiffer\nMedizin', wert: '220 T€', person: 'Dr. A. Pfeiffer · Werkleitung', tel: '+49 731 180640', chips: [{ t: 'Angebot 33 Tage still', bg: R, fg: '#2a0a0b' }] },
+        g1: { pool: true, geo: [10.27, 48.455], dur: 30, ort: 'Günzburg', km: 'A-Kunde', short: 'Kraus Formenbau', name2: 'Kraus\nFormenbau', wert: '340 T€', person: 'M. Kraus · Geschäftsführung', tel: '+49 8221 36290', chips: [{ t: '140 Tage ohne Besuch', bg: R, fg: '#2a0a0b' }, { t: 'SX 450 · Bj. 2009', bg: A, fg: '#2e2000' }] },
+        g2: { pool: true, geo: [10.43, 48.43], dur: 30, ort: 'Burgau', km: 'Bestand', short: 'Neher Kunststoff', name2: 'Neher\nKunststoff', wert: '150 T€', person: 'J. Neher · Technik', tel: '+49 8222 41180', chips: [{ t: 'SX 300 · Bj. 2007', bg: A, fg: '#2e2000' }, { t: 'Retrofit-Kandidat', bg: G, fg: '#1d3315' }] },
+        n1: { kind: 'nach', tag: 'Nachfassen', ort: 'Telefon', km: 'Angebot still', short: 'Seidl Verpackung', name2: 'Nachfassen:\nSeidl Verpackung', wert: '210 T€', person: 'R. Seidl · Einkauf', tel: '+49 8261 73350', chips: [{ t: 'ANG-1162 · 19 Tage still', bg: R, fg: '#2a0a0b' }, { t: 'Entscheidung im Dezember', bg: A, fg: '#2e2000' }] },
+        c5: { geo: [11.40, 48.75], dur: 30, call: true, ort: 'Ingolstadt', km: 'Service', short: 'Gruber Automotive', name2: 'Gruber\nAutomotive', wert: '60 T€', person: 'T. Gruber · Instandhaltung', tel: '+49 841 30129', chips: [{ t: 'Wartung endet 01/27', bg: A, fg: '#2e2000' }] }
       },
       ap: [
         { id: 'hessler', day: 'heute', time: '08:30' }, { id: 'brandt', day: 'heute', time: '11:00' }, { id: 'lindner', day: 'heute', time: '12:30' },
-        { id: 'wolfram', day: 'heute', time: '14:30' }, { id: 'ostermann', day: 'heute', time: '15:45' }, { id: 'kessler', day: 'heute', time: '16:30' },
+        { id: 'wolfram', day: 'heute', time: '15:30' }, { id: 'ostermann', day: 'heute', time: '16:40' }, { id: 'kessler', day: 'heute', time: '16:30' },
         { id: 'seitz', day: 'heute', time: '17:15' }, { id: 'mayer', day: 'fr', time: '09:00' }, { id: 'rothd', day: 'fr', time: '13:30' },
         { id: 'hagen', day: 'fr', time: '16:00' }, { id: 'vogel', day: 'mo', time: '10:00' }, { id: 'kuhn', day: 'mo', time: '14:00' },
         { id: 'baur', day: 'offen', time: '' }, { id: 'schmid', day: 'offen', time: '' },
+        { id: 'n1', day: 'heute', time: '' }, { id: 'g1', day: 'pool', time: '' }, { id: 'g2', day: 'pool', time: '' },
         { id: 'c1', day: 'anrufe', time: '' }, { id: 'c2', day: 'anrufe', time: '' }, { id: 'c3', day: 'anrufe', time: '' }, { id: 'c4', day: 'anrufe', time: '' }, { id: 'c5', day: 'anrufe', time: '' }
       ],
+      alerts: {
+        brandt: [{ k: 'service', t: 'Techniker Huber war am 18.11. da: Wartung SX 300. Kunde ärgert sich über 3 Wochen Lieferzeit für Ersatzteile.' }, { k: 'zusage', t: 'Deine Zusage vom 13.08.: Referenzliste Automationszellen schicken. Noch offen.' }],
+        lindner: [{ k: 'rekl', t: 'Reklamation: Dichtung Reinraumtür SX 300 CR, seit 12 Tagen offen. Ersatz kommt Montag.' }],
+        wolfram: [{ k: 'rechnung', t: 'Rechnung RE-5521 über 18 T€ ist 21 Tage überfällig. Buchhaltung ist dran, nicht du.' }],
+        ostermann: [{ k: 'liefer', t: 'Ersatzteilpaket für die SX 800 verspätet sich um eine Woche. Kunde ist informiert.' }],
+        kessler: [{ k: 'rekl', t: 'Reklamation: Greifer an Zelle 2 fällt sporadisch aus, Ticket seit 9 Tagen offen.' }]
+      },
       briefs: {
         hessler: { time: '08:30', name: 'Hessler Verpackungstechnik', ort: 'Fulda', klasse: 'B-Kunde', last: 'heute besucht',
           machines: [{ typ: 'VX 120 Kartonierer', sn: 'SN 18-2210', bj: '2018', note: 'Vertrag endet 12/26', bg: A, fg: '#2e2000' }],
@@ -1392,7 +1527,7 @@ class Component extends DCLogic {
           offer: { title: 'ANG-1187 · Zelle AZ-2', info: '41 Tage offen · noch kein Nachfass', wert: '386 T€', bg: R, fg: '#2a0a0b' },
           contacts: [{ ini: 'KM', n: 'Dr. Meier', r: 'Geschäftsführung', s: 'Dafür', ring: '#7fd35f' }, { ini: 'SY', n: 'S. Yilmaz', r: 'Einkauf', s: 'Neutral', ring: '#ffc85c' }, { ini: '?', n: 'Produktion', r: 'unbekannt', s: 'Lücke', ring: '#ff6b6f' }],
           points: [{ nr: '1', t: 'Ausfälle der SX 450 ansprechen und Stillstandskosten beziffern' }, { nr: '2', t: 'ANG-1187: Was fehlt noch zur Entscheidung?' }, { nr: '3', t: 'Produktionsleitung kennenlernen' }] },
-        wolfram: { time: '14:30', name: 'Wolfram Präzisionsguss', ort: 'Ulm', klasse: 'A-Kunde', last: 'zuletzt vor 55 Tagen',
+        wolfram: { time: '15:30', name: 'Wolfram Präzisionsguss', ort: 'Ulm', klasse: 'A-Kunde', last: 'zuletzt vor 55 Tagen',
           machines: [{ typ: 'SX 450 Zelle', sn: 'SN 08-3307', bj: '2008', note: '18 J. · Retrofit', bg: A, fg: '#2e2000' }, { typ: 'SX 300 Zelle', sn: 'SN 20-1145', bj: '2020', note: 'Läuft', bg: G, fg: '#1d3315' }],
           offer: { title: 'Noch kein Angebot', info: 'Retrofit-Potenzial geschätzt', wert: '145 T€', bg: G, fg: '#1d3315' },
           contacts: [{ ini: 'PW', n: 'P. Wolfram', r: 'Geschäftsführung', s: 'Dafür', ring: '#7fd35f' }, { ini: 'TH', n: 'T. Haas', r: 'Instandhaltung', s: 'Dafür', ring: '#7fd35f' }, { ini: '?', n: 'Einkauf', r: 'unbekannt', s: 'Lücke', ring: '#ff6b6f' }],
@@ -1404,6 +1539,272 @@ class Component extends DCLogic {
           points: [{ nr: '1', t: 'Grund für die Verschiebung klären' }, { nr: '2', t: 'Einkauf mit Referenz Hessler überzeugen' }, { nr: '3', t: 'Verbindliches Entscheidungsdatum vereinbaren' }] }
       }
     };
+  }
+  /* ---------- Dynamische Karten: Lücken, Aufgaben ---------- */
+  data() {
+    const B = this.baseData();
+    if (this._dynBusy) return B;
+    if (this._dynFor !== this.state) {
+      this._dynBusy = true;
+      try { this._dyn = this.buildDyn(B); } catch (e) { console.error(e); this._dyn = { st: {}, ap: [] }; } finally { this._dynBusy = false; }
+      this._dynFor = this.state;
+    }
+    const d = this._dyn;
+    return { ...B, st: { ...B.st, ...d.st }, ap: B.ap.concat(d.ap) };
+  }
+  buildDyn(B) {
+    const st = {}, ap = [], A = '#ffc85c', G = '#cde7c4';
+    (this.state.tasks || []).forEach((t) => {
+      const cs = B.st[t.for] ? B.st[t.for].short.split(' ')[0] : '';
+      st[t.id] = { kind: 'task', tag: 'Aufgabe', short: 'Aufgabe · ' + cs, name2: t.text, ort: 'Aufgabe', km: cs, wert: '', tel: B.st[t.for] && B.st[t.for].tel,
+        chips: [{ t: 'Fällig ' + ({ heute: 'heute', fr: 'morgen', mo: 'Montag' }[t.day] || 'bald'), bg: A, fg: '#2e2000' }, { t: 'aus dem Termin bei ' + cs, bg: G, fg: '#1d3315' }] };
+      ap.push({ id: t.id, day: t.day, time: '' });
+    });
+    ['heute', 'fr', 'mo'].forEach((day) => {
+      const r = this.routeOf(day);
+      r.gaps.forEach((g) => {
+        st[g.key] = { kind: 'gap', tag: 'Lücke', short: 'Lücke · ' + g.ort, name2: 'Lücke in\n' + g.ort, ort: g.ort, km: g.free + ' Min frei', wert: this.hhmm(g.from) + '–' + this.hhmm(g.to), gap: g,
+          chips: g.near.length ? g.near.slice(0, 2).map((n) => ({ t: B.st[n.id].short + ' · ' + n.km + ' km', bg: G, fg: '#1d3315' })) : [{ t: 'Anrufliste nutzen', bg: A, fg: '#2e2000' }] };
+        ap.push({ id: g.key, day, time: this.hhmm(g.from) });
+      });
+    });
+    return { st, ap };
+  }
+  kindOf(id) { const x = this.data().st[id]; return x ? x.kind || null : null; }
+  isReal(id) { const x = this.data().st[id]; return !!x && !x.kind && !x.pool; }
+
+  /* ---------- Route: Fahrzeiten, Puffer, Lücken, Am Weg ---------- */
+  mins(t) { const p = String(t || '').split(':'); return p.length === 2 ? (+p[0]) * 60 + (+p[1]) : null; }
+  hhmm(m) { m = Math.round(m); return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(((m % 60) + 60) % 60).padStart(2, '0'); }
+  up15(m) { return Math.ceil(m / 15) * 15; }
+  km(a, b) { const R = 6371, r = Math.PI / 180, dLa = (b[1] - a[1]) * r, dLo = (b[0] - a[0]) * r; const h = Math.sin(dLa / 2) ** 2 + Math.cos(a[1] * r) * Math.cos(b[1] * r) * Math.sin(dLo / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h)); }
+  drive(a, b) { const k = this.km(a, b) * 1.25; return { km: Math.round(k), min: Math.round(k / 80 * 60 + 5) }; }
+  nowMin() { return 10 * 60 + 12; }
+  isVisit(id) { const x = this.data().st[id]; return !!(x && x.geo && !x.kind && x.ort !== 'Anruf'); }
+  routeOf(day) {
+    const key = day;
+    if (this._rcFor !== this.state) { this._rcFor = this.state; this._rc = {}; }
+    if (this._rc[key]) return this._rc[key];
+    const D = this.data(), NOW = this.nowMin();
+    let ids = this.dayList(day, true).filter((id) => this.isVisit(id) && this.apTime(id));
+    if (day === 'heute') ids = ids.filter((id) => this.mins(this.apTime(id)) >= NOW);
+    const stops = ids.map((id) => ({ id, geo: D.st[id].geo, t: this.mins(this.apTime(id)), dur: D.st[id].dur || 60, done: this.isDone(id) }));
+    let start;
+    if (day === 'heute') start = { id: 'start', label: 'Jetzt', geo: [10.60, 48.40], t: NOW, end: NOW };
+    else { const g = [10.01, 48.39], f = stops[0]; const t0 = f ? f.t - this.drive(g, f.geo).min - 10 : 8 * 60; start = { id: 'start', label: 'Start', geo: g, t: t0, end: t0 }; }
+    const legs = []; let prev = start;
+    stops.forEach((x, i) => {
+      const d = this.drive(prev.geo, x.geo), dep = prev.end, arr = dep + d.min, buf = x.t - arr;
+      x.arr = arr; x.buf = buf; x.end = Math.max(x.t, arr) + x.dur;
+      x.status = x.done ? 'done' : buf < 0 ? 'red' : buf < 15 ? 'amber' : 'green';
+      legs.push({ i, from: prev, to: x, dep, arr, min: d.min, km: d.km, buf, status: x.status });
+      prev = x;
+    });
+    const cand = D.ap.map((a) => a.id).filter((id) => { const x = D.st[id]; if (!x || !x.geo || x.kind || this.isDone(id)) return false; const dd = this.apDay(id); return (x.pool && dd === 'pool') || dd === 'anrufe'; });
+    const ghosts = [];
+    cand.forEach((id) => {
+      const g = D.st[id].geo; let best = null;
+      legs.forEach((l) => { const det = (this.km(l.from.geo, g) + this.km(g, l.to.geo) - this.km(l.from.geo, l.to.geo)) * 1.25; if (!best || det < best.det) best = { det, l }; });
+      if (!best) return;
+      const min = Math.max(2, Math.round(best.det / 70 * 60));
+      if (min > 15) return;
+      ghosts.push({ id, geo: g, min, at: this.slotFor(g, legs, stops, D.st[id].dur || 30), leg: best.l.i });
+    });
+    ghosts.sort((a, b) => a.min - b.min);
+    const gaps = [];
+    legs.forEach((l, i) => {
+      if (i === 0 || l.to.done) return;
+      const from = l.from.end, to = l.to.t - l.min, free = to - from;
+      if (free < 60) return;
+      const loc = l.from.geo, ort = (D.st[l.from.id] || {}).ort || 'unterwegs';
+      const near = cand.map((id) => ({ id, km: Math.round(this.km(loc, D.st[id].geo) * 1.25) })).filter((n) => n.km <= 15).sort((a, b) => a.km - b.km);
+      gaps.push({ key: 'gap-' + day + '-' + i, leg: i, from, to, free, geo: loc, ort, near });
+    });
+    const last = stops.length ? stops[stops.length - 1].end : start.t + 60;
+    const r = { day, start, stops, legs, ghosts: ghosts.slice(0, 4), gaps, t0: start.t, t1: last,
+      kmSum: legs.reduce((a, l) => a + l.km, 0), minSum: legs.reduce((a, l) => a + l.min, 0) };
+    this._rc[key] = r;
+    return r;
+  }
+  slotFor(g, legs, stops, dur) {
+    let best = null;
+    legs.forEach((l) => {
+      if (l.to.done) return;
+      const at = this.up15(l.from.end + this.drive(l.from.geo, g).min);
+      if (at + dur + this.drive(g, l.to.geo).min > l.to.t) return;
+      const det = this.km(l.from.geo, g) + this.km(g, l.to.geo) - this.km(l.from.geo, l.to.geo);
+      if (!best || det < best.det) best = { det, at };
+    });
+    if (best) return best.at;
+    const last = stops[stops.length - 1];
+    return last ? this.up15(last.end + this.drive(last.geo, g).min) : this.up15(this.nowMin() + 30);
+  }
+  stopOf(id) { const r = this.routeOf(this.apDay(id)); return r.stops.find((x) => x.id === id) || null; }
+  navUrl(g) {
+    const ios = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent || '') && 'ontouchend' in document;
+    return ios ? 'https://maps.apple.com/?daddr=' + g[1] + ',' + g[0] + '&dirflg=d' : 'https://www.google.com/maps/dir/?api=1&destination=' + g[1] + ',' + g[0] + '&travelmode=driving';
+  }
+  alertsOf(id) {
+    const D = this.data(), out = [];
+    const L = { rekl: ['!', 'REKLAMATION', '#ff6b6f', '#ff9c9f'], service: ['⚙', 'SERVICE ZULETZT', '#ffc85c', '#ffd98f'], zusage: ['✓', 'DEINE ZUSAGE', '#7fd35f', '#a9e48f'], rechnung: ['€', 'OFFENE RECHNUNG', '#ff6b6f', '#ff9c9f'], liefer: ['⏱', 'LIEFERUNG', '#ffc85c', '#ffd98f'] };
+    (D.alerts[id] || []).forEach((a) => { const l = L[a.k]; out.push({ k: a.k, icon: l[0], kind: l[1], bg: l[2], c: l[3], t: a.t }); });
+    (this.state.tasks || []).filter((t) => t.for === id && !this.isDone(t.id)).forEach((t) => { const l = L.zusage; out.push({ k: 'zusage', icon: l[0], kind: l[1], bg: l[2], c: l[3], t: t.text + '.' }); });
+    return out;
+  }
+  planGhost(id, at) {
+    const day = this.state.day === 'fr' || this.state.day === 'mo' ? this.state.day : 'heute';
+    const t = this.hhmm(at), from = this.apDay(id), fromTime = this.apTime(id);
+    this.setState({ moves: { ...this.state.moves, [id]: { day, time: t } }, rsel: { type: 'stop', id }, front: id, routeZoom: true });
+    this.toastFor({ kind: 'won', id, from, fromTime, day, time: t, keepDay: true }, 5000);
+  }
+  fixLate(id) {
+    const x = this.stopOf(id); if (!x) return;
+    const t = this.hhmm(this.up15(x.arr));
+    this.setState({ moves: { ...this.state.moves, [id]: { day: this.apDay(id), time: t } } });
+    this.toastFor({ kind: 'info', id, text: this.data().st[id].short.split(' ')[0] + ' → ' + t + '. Kurz anrufen und Bescheid geben.' }, 5000);
+  }
+  taskDone(id) {
+    const nm = this.kindOf(id) === 'nach' ? 'Nachgefasst' : 'Erledigt';
+    this.setState({ doneIds: { ...this.state.doneIds, [id]: true }, front: null, enter: 'stack', swap: 1 - this.state.swap, ghost: { id, kind: 'out', dir: 1, stamp: false } });
+    this.ghostOut(null, 650);
+    this.toastFor({ kind: 'info', id, text: nm + '. Weiter geht\'s.' });
+    setTimeout(() => { const f = this.frontId(); if (f && this._alive) this.countTo(f); }, 0);
+  }
+  mailFor(id) {
+    const D = this.data(), st = D.st[id] || D.st.brandt, b = D.briefs[id], E = this.state.edits, acc = this.state.acc;
+    const who = b && b.contacts.length ? b.contacts[0].n : (st.person ? st.person.split(' · ')[0] : E.a.name);
+    const herr = /^Dr\./.test(who) ? 'Guten Tag ' + who : 'Guten Tag ' + who.replace(/^[A-Z]\. /, '');
+    const lines = [herr + ',', '', 'vielen Dank für das Gespräch heute.'];
+    if (acc.d) lines.push('', 'Kurz zusammengefasst:', E.d.text);
+    if (acc.b) lines.push('', 'Nächster Schritt: ' + E.b.art + ' am ' + this.fmtD(E.b.datum) + (E.b.zeit ? ' um ' + E.b.zeit + ' Uhr' : '') + ', ' + E.b.ort + '.' + (E.b.mit ? ' Dabei: ' + E.b.mit + '.' : ''));
+    lines.push('', 'Melden Sie sich gern, wenn noch etwas fehlt.', '', 'Viele Grüße', 'Jonas Keller');
+    const subject = (acc.b ? E.b.art + ' am ' + this.fmtD(E.b.datum) + ' · ' : '') + 'Zusammenfassung unseres Gesprächs';
+    const body = lines.join('\n');
+    return { to: who + ' · ' + st.short, subject, body, href: 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body) };
+  }
+  routeVals() {
+    const s = this.state, D = this.data();
+    const day = s.day === 'fr' || s.day === 'mo' ? s.day : 'heute';
+    const r = this.routeOf(day);
+    const W = 350, H = 300, padX = 40, padT = 54, padB = 84;
+    const pts = [r.start.geo].concat(r.stops.map((x) => x.geo), r.ghosts.map((g) => g.geo));
+    let a0 = Infinity, a1 = -Infinity, b0 = Infinity, b1 = -Infinity;
+    pts.forEach((g) => { a0 = Math.min(a0, g[0]); a1 = Math.max(a1, g[0]); b0 = Math.min(b0, g[1]); b1 = Math.max(b1, g[1]); });
+    const cy = (b0 + b1) / 2, cx = (a0 + a1) / 2, k = Math.cos(cy * Math.PI / 180);
+    const sx = (W - 2 * padX) / Math.max((a1 - a0) * k, 0.2), sy0 = (H - padT - padB) / Math.max(b1 - b0, 0.12);
+    const sc = Math.min(sx, sy0), sy = Math.min(sy0, sc * 2.4);
+    const midY = padT + (H - padT - padB) / 2;
+    const P = (g) => ({ x: W / 2 + (g[0] - cx) * k * sc, y: midY - (g[1] - cy) * sy });
+    const f1 = (n) => n.toFixed(1);
+    const nodes = [{ k: 'start', g: r.start.geo, m: 26 }].concat(r.stops.map((x) => ({ k: x.id, g: x.geo, m: 40 })), r.ghosts.map((g) => ({ k: 'g:' + g.id, g: g.geo, m: 32 })));
+    nodes.forEach((n) => { const q = P(n.g); n.x = q.x; n.y = q.y; n.ox = q.x; n.oy = q.y; });
+    for (let it = 0; it < 80; it++) {
+      for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
+        const A = nodes[i], B = nodes[j]; let dx = B.x - A.x, dy = B.y - A.y; let d = Math.hypot(dx, dy); const need = Math.min(A.m, B.m);
+        if (d < need) { if (d < 0.01) { dx = 0.3 * (j - i); dy = 1; d = Math.hypot(dx, dy); } const push = (need - d) / 2; dx /= d; dy /= d; A.x -= dx * push; A.y -= dy * push; B.x += dx * push; B.y += dy * push; }
+      }
+      nodes.forEach((n) => { n.x += (n.ox - n.x) * 0.04; n.y += (n.oy - n.y) * 0.04; n.x = Math.max(24, Math.min(W - 24, n.x)); n.y = Math.max(padT - 6, Math.min(H - padB - 6, n.y)); });
+    }
+    const NP = {}; nodes.forEach((n) => { NP[n.k] = { x: n.x, y: n.y }; });
+    const PN = (k, g) => NP[k] || P(g);
+    const line = (arr) => arr.map((g, i) => { const q = P(g); return (i ? 'L' : 'M') + f1(q.x) + ' ' + f1(q.y); }).join(' ');
+    const inView = (q) => q.x > 8 && q.x < W - 8 && q.y > 14 && q.y < H - 10;
+    const rivers = [
+      [[9.4, 48.2], [9.72, 48.28], [9.85, 48.36], [9.99, 48.395], [10.15, 48.43], [10.28, 48.46], [10.49, 48.575], [10.65, 48.66], [10.78, 48.715], [11.0, 48.73], [11.18, 48.735], [11.42, 48.755], [11.8, 48.85]],
+      [[10.31, 47.5], [10.31, 47.73], [10.2, 47.88], [10.11, 47.99], [10.1, 48.12], [10.1, 48.22], [10.04, 48.33], [10.0, 48.39]],
+      [[10.7, 47.5], [10.9, 47.81], [10.87, 48.05], [10.89, 48.2], [10.92, 48.37], [10.92, 48.55], [10.88, 48.69]]
+    ].map((rv) => ({ d: line(rv) }));
+    const roadDefs = [['A8', [[9.4, 48.48], [9.98, 48.44], [10.27, 48.43], [10.6, 48.40], [10.93, 48.40], [11.2, 48.33], [11.55, 48.17], [11.9, 48.0]]],
+      ['A7', [[10.07, 48.9], [10.05, 48.38], [10.12, 48.2], [10.18, 47.98], [10.33, 47.72], [10.45, 47.5]]],
+      ['A96', [[9.7, 47.75], [10.18, 47.98], [10.48, 48.04], [10.87, 48.05], [11.2, 48.1], [11.5, 48.13]]],
+      ['A9', [[11.42, 49.0], [11.42, 48.76], [11.5, 48.5], [11.6, 48.2]]]];
+    const roads = roadDefs.map(([n, arr]) => {
+      const vis = arr.map(P).filter(inView); const m = vis[Math.floor(vis.length / 2)];
+      return { d: line(arr), n, show: !!m, x: m ? f1(m.x) : '0', y: m ? f1(m.y) : '0' };
+    });
+    const cityDefs = [['ULM', [9.99, 48.40]], ['AUGSBURG', [10.90, 48.37]], ['MÜNCHEN', [11.58, 48.14]], ['MEMMINGEN', [10.18, 47.99]], ['KEMPTEN', [10.31, 47.73]], ['GÜNZBURG', [10.27, 48.455]], ['LANDSBERG', [10.87, 48.05]], ['INGOLSTADT', [11.42, 48.76]], ['KAUFBEUREN', [10.62, 47.88]], ['DONAUWÖRTH', [10.78, 48.72]], ['BIBERACH', [9.79, 48.10]]];
+    const cities = cityDefs.map(([n, g]) => { const q = P(g); return { n, x: f1(q.x + 6), y: f1(q.y - 6), dx: f1(q.x), dy: f1(q.y), show: inView(q) }; }).filter((c) => c.show);
+    const colOf = { red: '#ff6b6f', amber: '#ffc85c', green: '#7fd35f', done: '#6f7787' };
+    const geom = r.legs.map((l, i) => {
+      const a = PN(l.from.id, l.from.geo), b = PN(l.to.id, l.to.geo), dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1;
+      const bend = (i % 2 ? 1 : -1) * Math.min(36, len * 0.2);
+      const c = { x: (a.x + b.x) / 2 - dy / len * bend, y: (a.y + b.y) / 2 + dx / len * bend };
+      const q = (t) => ({ x: (1 - t) * (1 - t) * a.x + 2 * (1 - t) * t * c.x + t * t * b.x, y: (1 - t) * (1 - t) * a.y + 2 * (1 - t) * t * c.y + t * t * b.y });
+      return { a, b, c, q, l };
+    });
+    const legs = geom.map((G) => { const m = G.q(0.5), col = colOf[G.l.status];
+      return { d: 'M' + f1(G.a.x) + ' ' + f1(G.a.y) + ' Q' + f1(G.c.x) + ' ' + f1(G.c.y) + ' ' + f1(G.b.x) + ' ' + f1(G.b.y), c: col, lx: f1(m.x), ly: f1(m.y), lt: G.l.min + '′', ltx: f1(m.x), lty: f1(m.y + 3.5) }; });
+    // Gewählt
+    let sel = s.rsel;
+    if (!sel) { const f = this.frontId(); const hit = r.stops.find((x) => x.id === f) || r.stops.find((x) => !x.done) || r.stops[0]; sel = hit ? { type: 'stop', id: hit.id } : null; }
+    if (sel && sel.type === 'stop' && !r.stops.find((x) => x.id === sel.id)) sel = r.stops[0] ? { type: 'stop', id: r.stops[0].id } : null;
+    const T = Math.max(r.t0, Math.min(r.t1, s.routeT == null ? r.t0 : s.routeT));
+    // Auto an Zeitpunkt T
+    let car = PN('start', r.start.geo), cStat = r.stops.length ? 'Start · ' + r.start.label : 'Keine Besuche';
+    geom.forEach((G, i) => {
+      const l = G.l, gap = r.gaps.find((g) => g.leg === i), dep = gap ? l.to.t - l.min : l.dep, arr = gap ? l.to.t : l.arr;
+      const nm = D.st[l.to.id].short.split(' ')[0];
+      if (T >= l.from.end - 0.01 && T < dep && gap) { car = G.a; cStat = 'Lücke · ' + gap.free + ' Min frei'; }
+      else if (T >= dep && T < arr) { car = G.q((T - dep) / Math.max(1, arr - dep)); cStat = 'unterwegs nach ' + nm + ' · an ' + this.hhmm(arr); }
+      else if (T >= arr && T < l.to.end) { car = G.b; cStat = T < l.to.t ? 'wartet bei ' + nm + ' bis ' + this.hhmm(l.to.t) : 'bei ' + nm; }
+    });
+    if (r.stops.length && T >= r.t1) { const ls = r.stops[r.stops.length - 1]; car = PN(ls.id, ls.geo); cStat = 'Tour geschafft'; }
+    const selP = sel ? (sel.type === 'stop' ? PN(sel.id, D.st[sel.id].geo) : sel.type === 'gap' ? P((r.gaps.find((g) => g.key === sel.key) || { geo: r.start.geo }).geo) : PN('g:' + sel.id, D.st[sel.id].geo)) : null;
+    const zoom = !!(s.routeZoom && selP), Z = 1.5;
+    const cam = zoom ? 'translate(' + f1(W / 2 - selP.x * Z) + 'px,' + f1(midY - selP.y * Z) + 'px) scale(' + Z + ')' : 'translate(0px,0px) scale(1)';
+    const stops = r.stops.map((x, i) => {
+      const q = PN(x.id, x.geo), st = D.st[x.id], v = parseInt((st.wert || '').replace(/\./g, ''), 10) || 0, on = !!(sel && sel.type === 'stop' && sel.id === x.id), left = q.x > W - 120;
+      return { x: f1(q.x), y: f1(q.y), n: String(i + 1), color: x.done ? '#6f7787' : this.colorOf(x.id), deep: x.done ? '#6f7787' : this.deepOf(x.id), ring: f1(12 + Math.sqrt(v) * 0.6),
+        red: x.status === 'red', label: this.apTime(x.id) + ' ' + st.short.split(' ')[0], lx: f1(left ? q.x - 17 : q.x + 17), ly: f1(q.y + 4), anchor: left ? 'end' : 'start',
+        r: on ? 14 : 11, sw: on ? 4 : 3, stroke: on ? '#ffffff' : '#1b1f29', go: () => this.setState({ rsel: { type: 'stop', id: x.id }, front: x.id, routeZoom: true }) };
+    });
+    const ghosts = r.ghosts.map((g) => {
+      const q = PN('g:' + g.id, g.geo), G = geom[g.leg]; let best = null;
+      for (let t = 0; t <= 1.0001; t += 0.05) { const m = G.q(t), dd = Math.hypot(m.x - q.x, m.y - q.y); if (!best || dd < best.dd) best = { dd, m }; }
+      const on = !!(sel && sel.type === 'ghost' && sel.id === g.id), left = q.x > W - 120;
+      return { x: f1(q.x), y: f1(q.y), link: 'M' + f1(q.x) + ' ' + f1(q.y) + ' L' + f1(best.m.x) + ' ' + f1(best.m.y), label: D.st[g.id].short.split(' ')[0] + ' +' + g.min + '′',
+        lx: f1(left ? q.x - 14 : q.x + 14), ly: f1(q.y + 4), anchor: left ? 'end' : 'start', op: on ? '1' : '.75', r: on ? 13 : 10,
+        go: () => this.setState({ rsel: { type: 'ghost', id: g.id }, routeZoom: true }) };
+    });
+    const sq = PN('start', r.start.geo);
+    // Zusammenfassung
+    const nRed = r.stops.filter((x) => x.status === 'red').length, nAmb = r.stops.filter((x) => x.status === 'amber').length;
+    const sum = [];
+    if (nRed) sum.push({ t: nRed + ' Konflikt', bg: '#ff6b6f', fg: '#2a0a0b', bd: '0', go: () => { const x = r.stops.find((y) => y.status === 'red'); this.setState({ rsel: { type: 'stop', id: x.id }, front: x.id, routeZoom: true }); } });
+    if (nAmb) sum.push({ t: nAmb + ' knapp', bg: '#ffc85c', fg: '#2e2000', bd: '0', go: () => { const x = r.stops.find((y) => y.status === 'amber'); this.setState({ rsel: { type: 'stop', id: x.id }, front: x.id, routeZoom: true }); } });
+    if (r.gaps.length) sum.push({ t: r.gaps.length + ' Lücke', bg: '#ffffff', fg: '#272d3a', bd: '0', go: () => this.setState({ rsel: { type: 'gap', key: r.gaps[0].key }, routeZoom: false }) });
+    if (r.ghosts.length) sum.push({ t: r.ghosts.length + ' am Weg', bg: 'transparent', fg: '#272d3a', bd: '2px dashed rgba(39,45,58,.5)', go: () => this.setState({ rsel: { type: 'ghost', id: r.ghosts[0].id }, routeZoom: true }) });
+    if (!sum.length && r.stops.length) sum.push({ t: '✓ Tag geht auf', bg: '#cde7c4', fg: '#1d3315', bd: '0', go: () => {} });
+    // Karte unten
+    const rc = { kicker: '', status: '', stBg: '#cde7c4', title: '', sub: '', wert: '', chips: [], hasAlert: false, alertText: '', nav: '', hasNav: false, hasFix: false, fixLabel: '', fix: () => {}, hasBrief: false, brief: () => {},
+      hasTel: false, tel: '', hasPlan: false, planLabel: '', plan: () => {}, near: [], hasNear: false, hasCalls: false, calls: () => {}, color: '#ffffff', empty: !sel };
+    if (sel && sel.type === 'stop') {
+      const x = r.stops.find((y) => y.id === sel.id), st = D.st[x.id], l = r.legs.find((y) => y.to.id === x.id), al = this.alertsOf(x.id);
+      const stx = { red: ['Ankunft ~' + this.hhmm(x.arr) + ' · ' + (-x.buf) + ' Min zu spät', '#ff6b6f'], amber: ['knapp · ' + x.buf + ' Min Puffer', '#ffc85c'], green: ['Ankunft ' + this.hhmm(x.arr) + ' · ' + x.buf + ' Min Puffer', '#cde7c4'], done: ['erledigt', '#e4ecdf'] }[x.status];
+      Object.assign(rc, { color: this.colorOf(x.id), kicker: this.apTime(x.id) + ' · ' + st.ort, status: stx[0], stBg: stx[1], title: st.name2.replace('\n', ' '), wert: st.wert,
+        sub: l.km + ' km · ' + l.min + ' Min Fahrt ab ' + (l.from.id === 'start' ? r.start.label : D.st[l.from.id].short.split(' ')[0]),
+        hasAlert: al.length > 0, alertText: '⚠ ' + al.length + (al.length === 1 ? ' Sache' : ' Sachen') + ' vor Ort klären',
+        nav: this.navUrl(x.geo), hasNav: !x.done, hasFix: x.status === 'red', fixLabel: 'Auf ' + this.hhmm(this.up15(x.arr)) + ' schieben', fix: () => this.fixLate(x.id),
+        hasBrief: true, brief: () => this.setState({ brief: x.id, screen: 'brief', back: 'heute' }) });
+    } else if (sel && sel.type === 'ghost') {
+      const st = D.st[sel.id], g = r.ghosts.find((y) => y.id === sel.id) || { min: sel.min || 5, at: sel.at || r.t0 };
+      Object.assign(rc, { color: 'rgba(255,255,255,.92)', kicker: 'AM WEG · +' + g.min + ' Min Umweg', status: 'passt um ' + this.hhmm(g.at), stBg: '#cde7c4', title: st.name2.replace('\n', ' '), wert: st.wert,
+        sub: (st.person || '') + (st.ort ? ' · ' + st.ort : ''), chips: st.chips, hasTel: !!st.tel, tel: 'tel:' + (st.tel || '').replace(/\s/g, ''),
+        hasPlan: true, planLabel: 'Einplanen ' + this.hhmm(g.at), plan: () => this.planGhost(sel.id, g.at), nav: this.navUrl(st.geo), hasNav: false });
+    } else if (sel && sel.type === 'gap') {
+      const g = r.gaps.find((y) => y.key === sel.key);
+      if (g) Object.assign(rc, { color: '#ffffff', kicker: 'LÜCKE · ' + this.hhmm(g.from) + '–' + this.hhmm(g.to), status: g.free + ' Min frei', stBg: '#cde7c4', title: 'Lücke in ' + g.ort,
+        sub: g.near.length ? 'In der Nähe, antippen zum Einplanen:' : 'Niemand in der Nähe. Zeit für die Anrufliste.', hasNear: g.near.length > 0,
+        near: g.near.slice(0, 3).map((n) => { const st = D.st[n.id], at = this.slotFor(st.geo, r.legs, r.stops, st.dur || 30); return { t: st.short + ' · ' + n.km + ' km', sub: st.chips[0] ? st.chips[0].t : '', go: () => this.setState({ rsel: { type: 'ghost', id: n.id, min: Math.max(2, Math.round(n.km * 2 / 70 * 60)), at }, routeZoom: true }) }; }),
+        hasCalls: true, calls: () => this.setDay('anrufe') });
+    }
+    const dayName = { heute: 'Heute', fr: 'Freitag', mo: 'Montag' }[day];
+    const h = Math.floor(r.minSum / 60), m = r.minSum % 60;
+    return { legs, stops, ghosts, rivers, roads, cities, sum, rc, cam, zoom, start: { x: f1(sq.x), y: f1(sq.y), label: r.start.label, lx: f1(sq.x), ly: f1(sq.y + 17) },
+      car: { x: f1(car.x), y: f1(car.y) }, clock: this.hhmm(T), status: cStat, t0: r.t0, t1: r.t1, T, noStops: !r.stops.length,
+      head: dayName + ' · ' + r.stops.length + (r.stops.length === 1 ? ' Besuch · ' : ' Besuche · ') + r.kmSum + ' km · ' + h + ':' + String(m).padStart(2, '0') + ' h Fahrt',
+      scrub: (e) => { const v = +(e && e.target ? e.target.value : e); if (!isNaN(v)) this.setState({ routeT: v }); },
+      overview: () => this.setState({ routeZoom: false }) };
   }
   renderVals() {
     const s = this.state, sent = s.sent;
@@ -1439,11 +1840,19 @@ class Component extends DCLogic {
     else if (!ftime) flabel = 'ZEIT OFFEN';
     else if (s.day === 'heute') { flabel = (idx0 === 0 ? 'JETZT · ' : idx0 === 1 ? 'DANACH · ' : 'SPÄTER · ') + ftime; if (idx0 === 0) fchip = '#52ae32'; }
     else flabel = dayDef.label.toUpperCase() + ' · ' + ftime;
+    const fk = hasFront ? fs.kind || null : null;
+    if (fk === 'gap') { flabel = 'LÜCKE · ' + ftime; fchip = '#cde7c4'; } else if (fk === 'task') { flabel = 'AUFGABE'; fchip = '#ffffff'; } else if (fk === 'nach') { flabel = 'NACHFASSEN'; fchip = '#ffffff'; }
     const unit = fs.wert.replace(/^[0-9.]+/, '');
     const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     const front = { ...fs, color: hasFront ? this.colorOf(frontId) : '#272d3a', label: flabel, chipBg: fchip, telRaw: (fs.tel || '').replace(/\s/g, ''),
       wertAnim: s.cnt != null && /T€$/.test(fs.wert) ? fmt(s.cnt) + unit : fs.wert,
       chips: fs.chips.map((c, i) => ({ ...c, anim: 'c-chip' + AB + ' .45s ' + (0.25 + i * 0.08).toFixed(2) + 's cubic-bezier(.2,.9,.3,1.5) backwards' })) };
+    if (hasFront && !fk) {
+      const al = this.alertsOf(frontId), so = this.isVisit(frontId) ? this.stopOf(frontId) : null, extra = [];
+      if (so && so.status === 'red') extra.push({ t: '⚠ Ankunft ~' + this.hhmm(so.arr), bg: '#ff6b6f', fg: '#2a0a0b' });
+      if (al.length) extra.push({ t: '⚠ ' + al.length + '× vor Ort klären', bg: '#272d3a', fg: '#ffffff' });
+      if (extra.length) front.chips = extra.map((c, i) => ({ ...c, anim: 'c-chip' + AB + ' .45s ' + (0.2 + i * 0.08).toFixed(2) + 's cubic-bezier(.2,.9,.3,1.5) backwards' })).concat(front.chips).slice(0, 3);
+    }
     const days = DD.map((d) => {
       const on = s.day === d.key; const n = this.openList(d.key).length; const off = d.key === 'offen' || d.key === 'anrufe';
       return { ...d, count: String(n), pressed: on ? 'true' : 'false',
@@ -1463,13 +1872,14 @@ class Component extends DCLogic {
         pick: () => { if (!done) this.pick(id); } };
     });
     const dayLong = (DD.find((d) => d.key === s.day) || DD[0]).long;
-    const potSum = open.reduce((acc, id) => acc + (parseInt((D.st[id].wert || '').replace(/\./g, ''), 10) || 0), 0);
+    const openReal = open.filter((id) => this.isReal(id));
+    const potSum = openReal.reduce((acc, id) => acc + (parseInt((D.st[id].wert || '').replace(/\./g, ''), 10) || 0), 0);
     const fmtT = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' T€';
     let headA, headB;
     if (s.day === 'anrufe') { headA = open.length ? open.length + ' Anrufe.' : 'Liste durch.'; headB = open.length ? fmtT(potSum) + ' Potenzial.' : 'Stark gemacht.'; }
     else if (!hasFront && !isEnd) { headA = (s.day === 'heute' ? 'Heute' : dayLong) + ' leer?'; headB = 'Ran ans Telefon.'; }
-    else if (s.day === 'heute') { headA = open.length + ' Stationen.'; headB = fmtT(potSum) + ' im Feuer.'; }
-    else { headA = dayLong + '.'; headB = s.day === 'offen' ? open.length + ' ohne Termin.' : open.length + ' Stationen.'; }
+    else if (s.day === 'heute') { headA = openReal.length + ' Stationen.'; headB = fmtT(potSum) + ' im Feuer.'; }
+    else { headA = dayLong + '.'; headB = s.day === 'offen' ? open.length + ' ohne Termin.' : openReal.length + ' Stationen.'; }
     const wk = this.weekCount();
     const callsLeft = this.openList('anrufe');
     const callPot = callsLeft.reduce((acc, id) => acc + (parseInt((D.st[id].wert || '').replace(/\./g, ''), 10) || 0), 0);
@@ -1503,7 +1913,7 @@ class Component extends DCLogic {
     const tgt = this.targetDefs()[s.hover];
     const tgtName = tgt ? (tgt.key === 'heute' ? 'Heute' : tgt.key === 'fr' ? 'Morgen' : tgt.key === 'mo' ? 'Montag' : 'Irgendwann') : '';
     const armDefs = [
-      { k: 'up', pos: 'left:50%;top:12px;margin-left:-60px;width:120px', text: '↑ Rüstblatt', sub: 'Details öffnen', ok: true, go: () => set({ legend: false, coach: false, brief: frontId, screen: 'brief', back: 'heute' }) },
+      { k: 'up', pos: 'left:50%;top:12px;margin-left:-60px;width:120px', text: '↑ Rüstblatt', sub: 'Details öffnen', ok: true, go: () => { set({ legend: false, coach: false }); if (this.isReal(frontId)) set({ brief: frontId, screen: 'brief', back: 'heute' }); } },
       { k: 'down', pos: 'left:50%;bottom:12px;margin-left:-66px;width:132px', text: isCallNow ? '↓ Termin legen' : '↓ Verschieben', sub: dragDir === 'down' && tgt ? '→ ' + tgtName : 'auf einen Tag', ok: true, go: () => set({ legend: false, coach: false, dock: true, hover: -1 }) },
       { k: 'left', pos: 'left:10px;top:50%;margin-top:-24px;width:118px', text: '← Weiter', sub: nextId ? nm(nextId) : 'zum Stapel-Ende', ok: true, go: () => { set({ legend: false, coach: false }); this.swipe(-1); } },
       { k: 'right', pos: 'right:10px;top:50%;margin-top:-24px;width:118px', text: 'Zurück →', sub: prevId ? nm(prevId) : 'erste Karte', ok: !!prevId, go: () => { set({ legend: false, coach: false }); if (prevId) this.swipe(1); } }
@@ -1552,7 +1962,7 @@ class Component extends DCLogic {
       { id: 'd3', b: null, kunde: 'Lindner Medizintechnik', titel: 'Reinraumzelle SX 300 CR', wert: '690 T€', ph: 0, k: 'hot', grund: 'Kein nächster Schritt. Letzter Kontakt vor 38 Tagen.', next: 'Kein Schritt' },
       { id: 'd2', b: 'kessler', kunde: 'Kessler Food Systems', titel: 'Linienerweiterung 2× SX 300', wert: '520 T€', ph: 2, k: 'warn', grund: 'Abschlussdatum 2× verschoben, Einkauf kritisch.', next: 'Heute 16:30' },
       { id: 'd4', b: null, kunde: 'Ostermann Automotive', titel: 'Neuanlage SX 800', wert: '1,12 Mio €', ph: 3, k: 'warn', grund: 'Ansprechpartner im Einkauf unbekannt.', next: 'Angebot 02.12.' },
-      { id: 'd5', b: 'wolfram', kunde: 'Wolfram Präzisionsguss', titel: 'Retrofit SX 450', wert: '145 T€', ph: 1, k: 'ok', grund: 'Bedarf bestätigt, Termin heute.', next: 'Heute 14:30' },
+      { id: 'd5', b: 'wolfram', kunde: 'Wolfram Präzisionsguss', titel: 'Retrofit SX 450', wert: '145 T€', ph: 1, k: 'ok', grund: 'Bedarf bestätigt, Termin heute.', next: 'Heute 15:30' },
       { id: 'd6', b: 'hessler', kunde: 'Hessler Verpackung', titel: 'Ersatzteile + Wartung', wert: '64 T€', ph: 4, k: 'ok', grund: 'Mündliche Zusage, Auftrag KW 49.', next: 'KW 49' }
     ];
     const rank = { hot: 0, warn: 1, ok: 2 };
@@ -1625,8 +2035,9 @@ class Component extends DCLogic {
     const showSent = scr === 'capture' && s.capSent;
     const showCapture = scr === 'capture' && !s.capSent;
     const capName = (D.st[s.capFor] || D.st.brandt).short.split(' ')[0];
-    const nextAfter = this.openList('heute').filter((id) => id !== s.capFor && !D.st[id].call)[0];
+    const nextAfter = this.openList('heute').filter((id) => id !== s.capFor && !D.st[id].call && !D.st[id].kind)[0];
     const showAudio = scr === 'audio' && !!s.aud;
+    const showRoute = scr === 'heute' && s.mode === 'route' && s.day !== 'offen' && s.day !== 'anrufe';
     const bg = showCapture || showAudio ? '#272d3a' : '#52ae32';
     const fg = showCapture || showAudio ? '#ffffff' : '#272d3a';
     const briefId = s.brief || 'brandt';
@@ -1634,7 +2045,12 @@ class Component extends DCLogic {
       bg, fg,
       showHeute: scr === 'heute', showDeals: scr === 'deals', showBrief: scr === 'brief', showCapture, showSent, showAudio, au: this.audVals(),
       showNav: (scr === 'heute' || scr === 'deals') && !s.dock,
-      headA, headB, days, band, hasBand: s.day !== 'offen' && s.day !== 'anrufe' && (hasFront || isEnd), noBand: s.day === 'offen' || s.day === 'anrufe',
+      showRoute, showStack: !showRoute, rt: showRoute ? this.routeVals() : null,
+      vm: { stack: () => this.setState({ mode: 'stack', legend: false, coach: false }), route: () => { if (s.day === 'anrufe' || s.day === 'offen') this.setDay('heute'); this.setState({ mode: 'route', legend: false, coach: false, dock: false, rsel: null, routeT: null, routeZoom: false }); },
+        sBg: showRoute ? 'transparent' : '#272d3a', sFg: showRoute ? '#272d3a' : '#7fd35f', rBg: showRoute ? '#272d3a' : 'transparent', rFg: showRoute ? '#7fd35f' : '#272d3a', sOn: showRoute ? 'false' : 'true', rOn: showRoute ? 'true' : 'false' },
+      mail: s.capSent ? this.mailFor(s.capFor) : { to: '', subject: '', body: '', href: '' },
+      capTasks: (s.capTasks || []).map((t, i) => ({ t: t.text, day: t.day === 'fr' ? 'morgen' : 'Montag', delay: (0.5 + i * 0.1) + 's' })), hasCapTasks: !!(s.capTasks || []).length,
+      headA, headB, days, band, hasBand: !showRoute && s.day !== 'offen' && s.day !== 'anrufe' && (hasFront || isEnd), noBand: s.day === 'offen' || s.day === 'anrufe',
       showNow: s.day === 'heute', nowX: toX('10:12').toFixed(1),
       backs, front, ghost, hasGhost: !!s.ghost, hasFront, noFront: !hasFront && !isEnd,
       showDock: s.dock && scr === 'heute', dockTitle: isCallCard ? 'Termin mit ' + fs.short.split(' ')[0] + ', wann?' : (hasFront ? fs.short.split(' ')[0] : '') + ' schieben', targets,
@@ -1653,8 +2069,9 @@ class Component extends DCLogic {
       backToStartLabel: s.day === 'heute' ? 'Jetzt: ' + D.st[open[0]].short.split(' ')[0] + ' ' + (this.apTime(open[0]) || '') : 'Zum Anfang',
       backToStart: () => this.jumpBack(open[0]),
       showLast: hasFront && idx0 === 0 && open.length === 1,
-      isCall: isCallCard, isAppt: hasFront && !isCallCard, isCalling: isCallCard && s.calling === frontId, isCallIdle: isCallCard && s.calling !== frontId,
-      showWert: !(isCallCard && s.calling === frontId),
+      isCall: isCallCard, isAppt: hasFront && !isCallCard && !fk, isGapCard: fk === 'gap', isTaskCard: fk === 'task' || fk === 'nach', frontHasTel: !!(hasFront && fs.tel),
+      gapToMap: () => this.setState({ mode: 'route', rsel: { type: 'gap', key: frontId }, routeZoom: false, legend: false, coach: false }), gapCalls: () => this.setDay('anrufe'), doTask: () => this.taskDone(frontId), isCalling: isCallCard && s.calling === frontId, isCallIdle: isCallCard && s.calling !== frontId,
+      showWert: !(isCallCard && s.calling === frontId) && fk !== 'task',
       startCall: () => set({ calling: frontId }),
       laterCall: () => this.swipe(-1),
       callWon: () => set({ dock: true, hover: -1 }),
@@ -1699,22 +2116,23 @@ class Component extends DCLogic {
           if (Math.abs(dx) > 90) this.swipe(dx > 0 ? 1 : -1); else this.setState({ dragging: false, dragAxis: null, dragX: 0 });
           return;
         }
-        if (this.state.dragY < -55) { const f = this.frontId(); this.setState({ dragging: false, dragAxis: null, dragX: 0, dragY: 0, brief: f, screen: 'brief', back: 'heute' }); return; }
+        if (this.state.dragY < -55 && this.isReal(this.frontId())) { const f = this.frontId(); this.setState({ dragging: false, dragAxis: null, dragX: 0, dragY: 0, brief: f, screen: 'brief', back: 'heute' }); return; }
         const h = this.state.hover, f = this.frontId(), t = this.targetDefs()[h];
         if (this.state.dragY > 110 && h >= 0 && f && t) this.moveTo(f, t.key, h);
         else this.setState({ dragging: false, dragAxis: null, dragX: 0, dragY: 0, hover: -1 });
       },
-      openFront: () => set({ brief: frontId, screen: 'brief', back: 'heute' }), frontZ: s.dragging ? 10 : 2,
+      openFront: () => { if (this.isReal(frontId)) set({ brief: frontId, screen: 'brief', back: 'heute' }); }, frontZ: s.dragging ? 10 : 2,
       brief: (() => {
         const st = D.st[briefId] || D.st.brandt;
         const b = D.briefs[briefId] || { name: st.name2.replace('\n', ' '), ort: st.ort, klasse: 'B-Kunde', last: 'Historie wird aus dem ERP geladen',
           machines: [], contacts: [], offer: { title: 'Potenzial', info: st.chips[0].t, wert: st.wert, bg: st.chips[0].bg, fg: st.chips[0].fg },
           points: [{ nr: '1', t: 'Bedarf und Zeitplan klären' }, { nr: '2', t: 'Entscheider identifizieren' }, { nr: '3', t: 'Nächsten Schritt mit Datum vereinbaren' }] };
-        return { ...b, color: this.colorOf(briefId), time: this.apTime(briefId) || 'Zeit offen', hasContacts: b.contacts.length > 0, hasMachines: b.machines.length > 0,
+        const alerts = this.alertsOf(briefId);
+      return { ...b, alerts, hasAlerts: alerts.length > 0, color: this.colorOf(briefId), time: this.apTime(briefId) || 'Zeit offen', hasContacts: b.contacts.length > 0, hasMachines: b.machines.length > 0,
           points: b.points.map((x, i) => ({ ...x, delay: (0.16 + i * 0.06).toFixed(2) + 's' })),
           contacts: b.contacts.map((x, i) => ({ ...x, delay: (0.44 + i * 0.07).toFixed(2) + 's' })),
           machines: b.machines.map((x, i) => ({ ...x, delay: (0.54 + i * 0.07).toFixed(2) + 's' })),
-          listen: () => this.audOpen(briefId === this.openList('heute')[0] ? 'next' : 'one', briefId),
+          listen: () => this.audOpen(briefId === this.openList('heute').find((id) => this.isReal(id)) ? 'next' : 'one', briefId),
           listenDur: s.screen === 'brief' && D.st[briefId] ? this.audDur(this.audApScript(briefId, 'one').segs) : '' }; })(),
       closeBrief: () => { const bk = this.state.back || 'heute'; set({ screen: bk, swap: 1 - this.state.swap }); if (bk === 'heute') { const f = this.frontId(); if (f) this.countTo(f); } },
       toCapture: () => this.toCapture(), capName, nextLabel2: nextAfter ? 'Nächste Station: ' + D.st[nextAfter].short.split(' ')[0] + ' →' : 'Zurück zum Stapel →', sentNote: s.capFor === 'brandt' ? 'Ist schon im Leitstand zu sehen.' : 'Landet im Leitstand bei der nächsten Synchronisierung.',

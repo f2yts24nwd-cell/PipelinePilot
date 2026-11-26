@@ -13,6 +13,15 @@ Jedes Rüstblatt hat zusätzlich einen Knopf **Vorlesen**. Die Sprachausgabe lä
 
 **Stimme:** Die App nimmt automatisch die deutsche Stimme des Geräts. Auf dem iPhone ist das die einfache Standard-Stimme, weil iOS Web-Apps keine Premium-Stimmen freigibt.
 
+## Route, Lücken, Nachfassen
+
+- **Route** (Umschalter neben den Tagen): Die Tagesroute erscheint als eigener Liniennetzplan, nicht als Straßenkarte. Der Puffer zwischen den Terminen ist farbig markiert: grün = Zeit reicht, gelb = knapp, rot = nicht zu schaffen, dazu ein Knopf zum Verschieben. Die Größe der Ringe zeigt das Potenzial. Kunden **am Weg** (A-Kunden ohne Besuch, alte Anlagen, Anrufliste) lassen sich mit einem Tipp und freier Uhrzeit einplanen. Mit dem Zeitregler fährt man den Tag ab. **Losfahren** übergibt die Adresse an Apple Karten oder Google Maps.
+- **Lücken** ab 60 Minuten erscheinen als eigene Karte im Stapel, zusammen mit Kunden in der Nähe.
+- **Bevor du reingehst**: Reklamationen, letzter Service-Besuch, offene Rechnungen, Lieferverzug und eigene Zusagen stehen oben im Rüstblatt und im Briefing.
+- **Nach dem Termin**: Nach dem Erzählen folgt ein Mail-Entwurf an den Kunden. Aufgaben mit Fälligkeit landen am richtigen Tag im Stapel. Stille Angebote erscheinen als Nachfass-Karte.
+
+Fahrzeiten sind im Prototyp aus der Luftlinie geschätzt.
+
 ## Auf dem iPhone installieren
 
 1. Die App-Adresse (GitHub Pages, siehe unten) in **Safari** öffnen.
@@ -41,6 +50,6 @@ cd quelle/build
 python3 build.py
 ```
 
-Danach in `build.py` den Cache-Namen hochzählen (aktuell `pipeline-pilot-v7`, dazu `PP_VERSION`) und neu bauen, damit installierte Apps die neue Version laden.
+Danach in `build.py` den Cache-Namen hochzählen (aktuell `pipeline-pilot-v8`, dazu `PP_VERSION`) und neu bauen, damit installierte Apps die neue Version laden.
 
 Alle Kunden, Zahlen und Personen sind erfunden. Die Daten bleiben lokal auf dem jeweiligen Gerät.
