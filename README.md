@@ -11,7 +11,7 @@ Klickbarer Prototyp einer Vertriebs-App für den Maschinen- und Anlagenbau: Auß
 ## GitHub Pages einschalten (einmalig)
 
 Repository → **Settings** → **Pages** → *Build and deployment*: Source **Deploy from a branch**, Branch **main**, Ordner **/ (root)** → **Save**.
-Nach ein bis zwei Minuten läuft die App unter `https://f2yts24nwd-cell.github.io/pipelinepilot/`.
+Nach ein bis zwei Minuten läuft die App unter `https://f2yts24nwd-cell.github.io/PipelinePilot/`.
 
 ## Aufbau
 
